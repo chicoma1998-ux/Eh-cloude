@@ -1,9 +1,14 @@
 # Cotización y modelo financiero – Proyecto inmobiliario
 
-Paquete para que una **persona natural** (consultor independiente) cotice a una
-**persona jurídica** (empresa desarrolladora inmobiliaria) la elaboración del
-**flujo de caja**, el **cronograma valorizado** y el **estado de resultados**
-de un proyecto, con el fin de sustentar una **línea de financiamiento** ante un banco.
+Paquete para que **Enrique Huidobro** (economista, consultor independiente) cotice a
+**Inversiones Estratégicas Integrales S.A.C.** la elaboración del **flujo de caja**,
+el **cronograma valorizado** y el **estado de resultados** del proyecto de vivienda
+**Villa El Milagro** (modalidad AVN – Programa Techo Propio), como sustento
+técnico-financiero para obtener una **carta fianza ante empresas aseguradoras**.
+
+> Honorarios: **S/ 15,000** (Recibo por Honorarios, con suspensión de 4.ª categoría →
+> sin IGV ni retención), pagaderos por etapas **20 % / 30 % / 50 %**.
+> El único dato pendiente en la cotización es el **RUC de la empresa** (en rojo).
 
 ## Entregables (`entregables/`)
 
@@ -47,15 +52,11 @@ línea del banco 60 % de la construcción.
 
 > Cifras referenciales; sustituya los supuestos por los del proyecto real.
 
-## Nota tributaria (importante)
+## Nota tributaria
 
-El impuesto en la cotización depende del régimen del consultor:
-
-- **Recibo por Honorarios** (renta 4.ª categoría): **sin IGV**; la empresa puede
-  **retener 8 %** de renta.
-- **Factura** (persona natural con negocio, 3.ª categoría): **IGV 18 %**.
-
-La plantilla muestra el escenario con IGV; ajuste la línea que corresponda a su caso.
+El consultor emite **Recibo por Honorarios** (renta de 4.ª categoría) con
+**suspensión de retenciones** vigente: el servicio **no está afecto a IGV ni a
+retención de renta**, por lo que el importe cotizado es el monto neto a transferir.
 
 ## Regenerar los documentos (`scripts/`)
 

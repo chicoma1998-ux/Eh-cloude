@@ -95,7 +95,7 @@ def put(row, label, value, fmt=None, blue=False, note=None, bold=False, section=
 
 r = 3
 put(r, "1. DATOS GENERALES", None, section=True); r += 1
-put(r, "Nombre del proyecto", "[NOMBRE DEL PROYECTO]", blue=True, note="Completar"); S['proy']=r; r += 1
+put(r, "Nombre del proyecto", "VILLA EL MILAGRO (AVN – Techo Propio)", blue=True, note="Editable"); S['proy']=r; r += 1
 put(r, "Ubicación", "[Distrito, Provincia]", blue=True, note="Completar"); r += 1
 put(r, "Horizonte de evaluación (meses)", N, NUM, blue=True); S['meses']=r; r += 1
 put(r, "Área techada vendible (m²)", 3500, NUM, blue=True); S['area']=r; r += 1
@@ -122,9 +122,9 @@ put(r, "Gastos administrativos / gerencia (% de ventas)", 0.04, PCT, blue=True);
 put(r, "Monto administrativos (S/)", f"=B{S['ventas']}*B{S['padm']}", MONEY); S['adm']=r; r += 1
 
 r += 1
-put(r, "4. FINANCIAMIENTO BANCARIO", None, section=True); r += 1
+put(r, "4. FINANCIAMIENTO / GARANTÍA (CARTA FIANZA)", None, section=True); r += 1
 put(r, "Línea de financiamiento (% de la construcción)", 0.60, PCT, blue=True,
-    note="Porcentaje de la obra financiado por el banco"); S['pfin']=r; r += 1
+    note="Porcentaje de la obra respaldado por financiamiento / carta fianza"); S['pfin']=r; r += 1
 put(r, "Monto máximo de la línea (S/)", f"=B{S['constr']}*B{S['pfin']}", MONEY); S['linea']=r; r += 1
 put(r, "Tasa de interés anual (TEA)", 0.12, PCT2, blue=True); S['tea']=r; r += 1
 put(r, "Tasa de interés mensual (TEM)", f"=(1+B{S['tea']})^(1/12)-1", PCT2); S['tem']=r; r += 1
@@ -154,7 +154,7 @@ for c in range(COL0, LAST + 1):
     wc.column_dimensions[get_column_letter(c)].width = 11
 
 wc.merge_cells(f"A1:{get_column_letter(LAST)}1")
-t = wc["A1"]; t.value = "CRONOGRAMA VALORIZADO DE OBRA Y DESEMBOLSOS BANCARIOS"
+t = wc["A1"]; t.value = "CRONOGRAMA VALORIZADO DE OBRA Y CALENDARIO DE DESEMBOLSOS"
 t.font = FONT_TITLE; t.fill = FILL_TITLE; t.alignment = CENTER
 wc.row_dimensions[1].height = 26
 
@@ -229,7 +229,7 @@ CR['pctac'] = rr; rr += 1
 
 rr += 1
 # desembolso bancario del mes
-wc.cell(row=rr, column=1, value="Desembolso bancario del mes (S/)").font = FONT_BOLD
+wc.cell(row=rr, column=1, value="Desembolso de financiamiento del mes (S/)").font = FONT_BOLD
 wc.cell(row=rr, column=1).fill = FILL_TOTAL
 wc.cell(row=rr, column=TOTAL_COL, value=f"=SUM(C{rr}:{get_column_letter(LAST)}{rr})").font = FONT_BOLD
 wc.cell(row=rr, column=TOTAL_COL).number_format = MONEY
@@ -241,7 +241,7 @@ for i in range(1, N + 1):
 CR['des'] = rr; rr += 1
 
 # desembolso acumulado
-wc.cell(row=rr, column=1, value="Desembolso bancario acumulado (S/)").font = FONT
+wc.cell(row=rr, column=1, value="Desembolso de financiamiento acumulado (S/)").font = FONT
 for i in range(1, N + 1):
     col = cl(i)
     if i == 1:
@@ -253,8 +253,8 @@ for i in range(1, N + 1):
 CR['desac'] = rr; rr += 1
 
 wc.cell(row=CR['des'], column=COL0).comment = Comment(
-    "Desembolso del banco = % financiamiento de la obra × valorización del mes. "
-    "Es el sustento de los desembolsos que solicitará la empresa al banco.", "Modelo")
+    "Desembolso = % de la obra respaldado por financiamiento/carta fianza × valorización del mes. "
+    "Sustenta el calendario de desembolsos y el dimensionamiento de la carta fianza.", "Modelo")
 
 nota_r = rr + 1
 ncell = wc.cell(row=nota_r, column=1,
@@ -356,7 +356,7 @@ def f_saldo(i):
 fillrow(rr, f_saldo)
 F['saldo'] = rr; rr += 1
 
-frow(rr, "Desembolsos de la línea bancaria")
+frow(rr, "Desembolsos de financiamiento")
 fillrow(rr, lambda i: f"={CRO('des', i)}", font=FONT_GREEN)
 F['des'] = rr; rr += 1
 
@@ -394,7 +394,7 @@ F['teg'] = rr; rr += 1
 
 rr += 1
 # --- FINANCIAMIENTO / DEUDA ---
-frow(rr, "C. SERVICIO DE LA DEUDA (línea bancaria)", section=True); rr += 1
+frow(rr, "C. SERVICIO DE LA DEUDA / FINANCIAMIENTO", section=True); rr += 1
 
 frow(rr, "Saldo inicial de la línea")
 F['sini'] = rr
@@ -574,8 +574,8 @@ r = 3
 rrow(r, "INVERSIÓN Y ESTRUCTURA", section=True); r += 1
 rrow(r, "Ventas totales (S/)", f"={SUP('ventas')}"); r += 1
 rrow(r, "Inversión total del proyecto (S/)", f"={SUP('terreno')}+{SUP('constr')}+{SUP('lic')}+{SUP('com')}+{SUP('adm')}"); Rinv=r; r += 1
-rrow(r, "Monto máximo de la línea bancaria (S/)", f"={SUP('linea')}"); r += 1
-rrow(r, "Apalancamiento (línea / inversión)", f"={SUP('linea')}/B{Rinv}", pct=True); r += 1
+rrow(r, "Monto máximo de financiamiento / carta fianza (S/)", f"={SUP('linea')}"); r += 1
+rrow(r, "Apalancamiento (financiamiento / inversión)", f"={SUP('linea')}/B{Rinv}", pct=True); r += 1
 rrow(r, "Aporte propio del desarrollador (S/)", f"=B{Rinv}-{SUP('linea')}"); r += 1
 r += 1
 rrow(r, "RENTABILIDAD", section=True); r += 1
@@ -615,12 +615,12 @@ c = wp["B3"]; c.value = "Flujo de caja · Cronograma valorizado · Estado de res
 c.font = Font(name=ARIAL, size=11, italic=True, color="808080")
 
 info = [
-    ("Proyecto:", "[NOMBRE DEL PROYECTO]"),
-    ("Empresa desarrolladora:", "[RAZÓN SOCIAL – RUC]"),
-    ("Elaborado por:", "[TU NOMBRE – DNI/RUC]"),
-    ("Fecha:", "[dd/mm/aaaa]"),
+    ("Proyecto:", "VILLA EL MILAGRO – AVN, Programa Techo Propio"),
+    ("Empresa desarrolladora:", "INVERSIONES ESTRATÉGICAS INTEGRALES S.A.C."),
+    ("Elaborado por:", "Enrique Huidobro – Economista (RUC 10723712039)"),
+    ("Fecha:", "31/07/2026"),
     ("Moneda:", "Soles (S/)"),
-    ("Destino:", "Sustento de línea de financiamiento bancario"),
+    ("Destino:", "Sustento para carta fianza ante empresas aseguradoras"),
 ]
 rr = 5
 for lab, val in info:
