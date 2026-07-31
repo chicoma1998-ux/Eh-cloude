@@ -153,7 +153,7 @@ children.push(new Table({
 children.push(p([t("")]));
 
 children.push(H1("6.  Plazo de ejecución"));
-children.push(p([t("El plazo total estimado es de "), t("15 días calendario", { bold: true }),
+children.push(p([t("El plazo total estimado es de "), t("21 días calendario", { bold: true }),
   t(", contados desde la firma de la propuesta y la entrega completa de la información base por parte de la empresa, según el siguiente cronograma:")]));
 children.push(new Table({
   width: { size: 9360, type: WidthType.DXA }, columnWidths: [5760, 3600], borders,
@@ -163,7 +163,7 @@ children.push(new Table({
       cell("Plazo", { bold: true, shade: NAVY, color: "FFFFFF", align: AlignmentType.CENTER, width: 3600 }),
     ]}),
     new TableRow({ children: [cell("Levantamiento de información y supuestos", { width: 5760 }), cell("3 días", { align: AlignmentType.CENTER, width: 3600 })] }),
-    new TableRow({ children: [cell("Construcción del modelo y borrador", { width: 5760 }), cell("10 días", { align: AlignmentType.CENTER, width: 3600 })] }),
+    new TableRow({ children: [cell("Construcción del modelo y borrador", { width: 5760 }), cell("13 días", { align: AlignmentType.CENTER, width: 3600 })] }),
     new TableRow({ children: [cell("Revisión, ajustes y entrega final", { width: 5760 }), cell("5 días", { align: AlignmentType.CENTER, width: 3600 })] }),
   ],
 }));
