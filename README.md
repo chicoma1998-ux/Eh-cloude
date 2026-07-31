@@ -6,9 +6,14 @@ el **cronograma valorizado** y el **estado de resultados** del proyecto de vivie
 **Villa El Milagro** (modalidad AVN – Programa Techo Propio), como sustento
 técnico-financiero para obtener una **carta fianza ante empresas aseguradoras**.
 
-> Honorarios: **S/ 15,000** (Recibo por Honorarios, con suspensión de 4.ª categoría →
-> sin IGV ni retención), pagaderos por etapas **20 % / 30 % / 50 %**.
-> El único dato pendiente en la cotización es el **RUC de la empresa** (en rojo).
+> Honorarios: **S/ 10,000** (Recibo por Honorarios, con suspensión de 4.ª categoría →
+> sin IGV ni retención), pagaderos por etapas **20 % / 30 % / 50 %**
+> (S/ 2,000 / 3,000 / 5,000). Honorario dimensionado sobre la obra real
+> (~S/ 3.3/m² ≈ 0.25 % del costo de obra). **La cotización está completa.**
+>
+> Datos reales cargados en el modelo: área techada **3,009.395 m²**, costo total de
+> obra **S/ 3,998,621.74**. Pendiente para afinar el modelo: N° de unidades, precio
+> de venta, costo del terreno y % de obra respaldado por la carta fianza.
 
 ## Entregables (`entregables/`)
 

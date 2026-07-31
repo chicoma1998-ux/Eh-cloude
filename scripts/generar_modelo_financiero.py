@@ -98,7 +98,7 @@ put(r, "1. DATOS GENERALES", None, section=True); r += 1
 put(r, "Nombre del proyecto", "VILLA EL MILAGRO (AVN – Techo Propio)", blue=True, note="Editable"); S['proy']=r; r += 1
 put(r, "Ubicación", "[Distrito, Provincia]", blue=True, note="Completar"); r += 1
 put(r, "Horizonte de evaluación (meses)", N, NUM, blue=True); S['meses']=r; r += 1
-put(r, "Área techada vendible (m²)", 3500, NUM, blue=True); S['area']=r; r += 1
+put(r, "Área techada vendible (m²)", 3009.395, '#,##0.00', blue=True); S['area']=r; r += 1
 put(r, "N° de unidades inmobiliarias", 20, NUM, blue=True); S['unid']=r; r += 1
 
 r += 1
@@ -112,8 +112,8 @@ put(r, "Saldo financiado por crédito hipotecario (%)", f"=1-B{S['ini']}", PCT);
 r += 1
 put(r, "3. COSTOS DEL PROYECTO", None, section=True); r += 1
 put(r, "Costo del terreno (S/)", 2500000, MONEY, blue=True); S['terreno']=r; r += 1
-put(r, "Costo de construcción por m² (S/)", 1650, MONEY, blue=True); S['cm2']=r; r += 1
-put(r, "Costo total de construcción (S/)", f"=B{S['area']}*B{S['cm2']}", MONEY); S['constr']=r; r += 1
+put(r, "Costo total de construcción (S/)", 3998621.74, MONEY, blue=True); S['constr']=r; r += 1
+put(r, "Costo de construcción por m² (S/)", f"=B{S['constr']}/B{S['area']}", MONEY); S['cm2']=r; r += 1
 put(r, "Licencias, proyectos y estudios (% de construcción)", 0.06, PCT, blue=True); S['plic']=r; r += 1
 put(r, "Monto licencias/proyectos (S/)", f"=B{S['constr']}*B{S['plic']}", MONEY); S['lic']=r; r += 1
 put(r, "Gastos de comercialización (% de ventas)", 0.03, PCT, blue=True); S['pcom']=r; r += 1

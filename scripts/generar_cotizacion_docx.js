@@ -75,7 +75,7 @@ children.push(new Table({
   width: { size: 9360, type: WidthType.DXA }, columnWidths: [2600, 6760], borders,
   rows: [
     new TableRow({ children: [cell("Razón social", { bold: true, shade: "D9E1F2", width: 2600 }), cell("INVERSIONES ESTRATÉGICAS INTEGRALES S.A.C.", { width: 6760 })] }),
-    new TableRow({ children: [cell("RUC", { bold: true, shade: "D9E1F2", width: 2600 }), cell([ph("[N° RUC de la empresa]")], { width: 6760 })] }),
+    new TableRow({ children: [cell("RUC", { bold: true, shade: "D9E1F2", width: 2600 }), cell("20503680174", { width: 6760 })] }),
     new TableRow({ children: [cell("Atención", { bold: true, shade: "D9E1F2", width: 2600 }), cell("Sr. José Antonio Navarro Merea – Gerente General (Tel. 998 107 048)", { width: 6760 })] }),
     new TableRow({ children: [cell("Proyecto", { bold: true, shade: "D9E1F2", width: 2600 }), cell("VILLA EL MILAGRO – Adquisición de Vivienda Nueva (AVN), Programa Techo Propio", { width: 6760 })] }),
   ],
@@ -172,7 +172,7 @@ children.push(p([t("")]));
 children.push(H1("7.  Honorarios profesionales"));
 children.push(p([
   t("Los honorarios profesionales por el servicio integral ascienden a "),
-  t("S/ 15,000.00", { bold: true }), t(" (quince mil y 00/100 soles), pagaderos "),
+  t("S/ 10,000.00", { bold: true }), t(" (diez mil y 00/100 soles), pagaderos "),
   t("por etapas", { bold: true }), t(" conforme al siguiente detalle:"),
 ]));
 children.push(new Table({
@@ -183,13 +183,13 @@ children.push(new Table({
       cell("%", { bold: true, shade: NAVY, color: "FFFFFF", align: AlignmentType.CENTER, width: 1300 }),
       cell("Importe (S/)", { bold: true, shade: NAVY, color: "FFFFFF", align: AlignmentType.RIGHT, width: 2600 }),
     ]}),
-    new TableRow({ children: [cell("Adelanto (a la firma de la propuesta)", { width: 5460 }), cell("20%", { align: AlignmentType.CENTER, width: 1300 }), cell("3,000.00", { align: AlignmentType.RIGHT, width: 2600 })] }),
-    new TableRow({ children: [cell("Entrega del borrador para revisión", { width: 5460 }), cell("30%", { align: AlignmentType.CENTER, width: 1300 }), cell("4,500.00", { align: AlignmentType.RIGHT, width: 2600 })] }),
-    new TableRow({ children: [cell("Entrega final aprobada", { width: 5460 }), cell("50%", { align: AlignmentType.CENTER, width: 1300 }), cell("7,500.00", { align: AlignmentType.RIGHT, width: 2600 })] }),
+    new TableRow({ children: [cell("Adelanto (a la firma de la propuesta)", { width: 5460 }), cell("20%", { align: AlignmentType.CENTER, width: 1300 }), cell("2,000.00", { align: AlignmentType.RIGHT, width: 2600 })] }),
+    new TableRow({ children: [cell("Entrega del borrador para revisión", { width: 5460 }), cell("30%", { align: AlignmentType.CENTER, width: 1300 }), cell("3,000.00", { align: AlignmentType.RIGHT, width: 2600 })] }),
+    new TableRow({ children: [cell("Entrega final aprobada", { width: 5460 }), cell("50%", { align: AlignmentType.CENTER, width: 1300 }), cell("5,000.00", { align: AlignmentType.RIGHT, width: 2600 })] }),
     new TableRow({ children: [
       cell("TOTAL", { bold: true, shade: NAVY, color: "FFFFFF", width: 5460 }),
       cell("100%", { bold: true, shade: NAVY, color: "FFFFFF", align: AlignmentType.CENTER, width: 1300 }),
-      cell([new TextRun({ text: "S/ 15,000.00", bold: true, color: "FFFFFF", font: FONT })], { shade: NAVY, align: AlignmentType.RIGHT, width: 2600 }),
+      cell([new TextRun({ text: "S/ 10,000.00", bold: true, color: "FFFFFF", font: FONT })], { shade: NAVY, align: AlignmentType.RIGHT, width: 2600 }),
     ]}),
   ],
 }));
