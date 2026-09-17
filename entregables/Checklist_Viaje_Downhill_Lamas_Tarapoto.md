@@ -137,6 +137,48 @@ La deshidratación es el error #1 de los corredores de costa/sierra que llegan a
 - [ ] **Bolsa o caja de bici** + espuma para protección, y pedal wrench para desarmar
 - [ ] Candado para la bici
 
+### Llantas recomendadas – Maxxis
+
+| Condición | Delantera | Trasera |
+|---|---|---|
+| Barro profundo / lluvia fuerte | **Wetscream 2.5 DH** (42a, spike puro) | Wetscream 2.5 DH |
+| **Mojado / barro medio (lo más probable)** | **Shorty 2.4WT 3C MaxxGrip DH** | Shorty 2.4WT o DHR II 2.4WT MaxxGrip |
+| **Mixto húmedo-seco** | **Assegai 2.5WT 3C MaxxGrip DH** | **DHR II 2.4WT 3C MaxxTerra DH** |
+| Seco / polvoso | Assegai o Minion DHF 2.5WT MaxxGrip | Dissector o DHR II MaxxTerra |
+
+### Llantas recomendadas – Schwalbe
+
+| Condición | Delantera | Trasera |
+|---|---|---|
+| Barro profundo / lluvia fuerte | **Dirty Dan Ultra Soft** (Super Gravity o DH) | Dirty Dan Ultra Soft |
+| **Mojado / barro medio (lo más probable)** | **Magic Mary Addix Ultra Soft** (SG o DH) | Magic Mary Addix Soft |
+| **Mixto húmedo-seco** | Magic Mary Ultra Soft o **Albert Gravity Radial** | **Big Betty Addix Soft** |
+| Seco / polvoso | Tacky Chan Addix Soft | Big Betty Addix Soft |
+
+**Compuestos y casing:** adelante siempre el más blando (Maxxis **3C MaxxGrip**,
+Schwalbe **Addix Ultra Soft**); atrás MaxxTerra o Addix Soft si quieres que dure,
+MaxxGrip/Ultra Soft si el día está mojado. Casing de carrera: Maxxis **DH** (2 telas)
+o DoubleDown; Schwalbe **Super Gravity** o **Downhill**.
+
+> **Si solo llevas un juego:** Assegai / Magic Mary Ultra Soft adelante + DHR II /
+> Big Betty atrás, ambas en casing DH, **más una delantera de barro de repuesto**
+> (Shorty o Magic Mary US) en la maleta. Los spikes puros (Wetscream, Dirty Dan)
+> se destrozan en piedra y hardpack: móntalos solo si el track amaneció hecho barro.
+>
+> Maxxis se consigue mucho más fácil en Perú que Schwalbe; si vas por Schwalbe,
+> cómprala con anticipación.
+
+### Presiones de referencia
+
+Corredor de 70–80 kg, casing DH con inserto. Sin inserto, suma ~0.15 bar (2 psi).
+
+| Condición | Delantera | Trasera |
+|---|---|---|
+| Barro / mojado | 1.50–1.65 bar (22–24 psi) | 1.70–1.90 bar (25–27 psi) |
+| Mixto | 1.65–1.75 bar (24–25 psi) | 1.90–2.00 bar (27–29 psi) |
+| Seco / duro | 1.75–1.85 bar (25–27 psi) | 2.00–2.10 bar (29–30 psi) |
+| Mud spikes | 0.1 bar menos | 0.1 bar menos (el spike necesita clavar) |
+
 ### Setup específico para Lamas
 - [ ] Presiones **algo más bajas** de lo habitual por la humedad y el agarre en arcilla
 - [ ] Suspensión con **rebote un punto más lento** y compresión más abierta para raíces mojadas
