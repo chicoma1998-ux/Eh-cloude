@@ -215,7 +215,7 @@ name(S, "B41", "PubPrev")
 # 4. Ventas y cobranza ---------------------------------------------------------
 section(S, 43, "4. FORMA DE PAGO DE LOS COMPRADORES", 7)
 S.cell(row=44, column=1, value="Cuota inicial (al firmar la compraventa)").font = F
-inp(S["B44"], 0.10, PCT)
+inp(S["B44"], 0.20, PCT, "Recomendado 20 %: con 10 % el préstamo puente sube a ~US$ 1.6 M y dura hasta el mes 19; con 20 % se paga en el mes 4 con la preventa.")
 name(S, "B44", "PctIni")
 S.cell(row=45, column=1, value="Cuotas durante la obra (repartidas hasta la entrega)").font = F
 inp(S["B45"], 0.10, PCT)
@@ -284,13 +284,13 @@ fin = [
     ("Aporte de capital de la desarrolladora", 0, USD, "Aporte", "Sin aporte propio: todo lo previo al crédito promotor (incluida la cuota inicial del terreno) lo cubre el préstamo puente."),
     ("Mes del aporte", 0, INT, "MesAporte", None),
     ("Caja mínima operativa", 20000, USD, "CajaMin", None),
-    ("Crédito promotor – línea máxima", 4300000, USD, "Linea", "Banco local. Se usa solo lo necesario (no revolvente). Incluye refinanciar el préstamo puente al activarse: negociarlo así con el banco."),
+    ("Crédito promotor – línea máxima (= % x costo de construcción, ver fila 82)", 0, USD, "Linea", "Se usa solo lo necesario (no revolvente). El banco financia obra, no terreno ni el repago de otras deudas."),
     ("Crédito promotor – mes de activación", 4, INT, "MesAct", "Requiere: terreno inscrito a nombre de la desarrolladora (o fideicomiso), licencia y meta de preventa."),
     ("Crédito promotor – TEA", 0.11, PCT, "TEABanco", "Referencial en US$; confirmar con cotización del banco."),
     ("Crédito promotor – comisión de estructuración (% línea)", 0.01, PCT, "ComBanco", None),
     ("Supervisión bancaria / fideicomiso (US$ por mes de obra)", 1500, USD, "SupBanco", None),
-    ("Préstamo puente / inversionista – monto máximo", 1200000, USD, "PuenteMax", "Cubre los meses previos al crédito promotor. Fondo privado, socio o financiamiento participativo."),
-    ("Préstamo puente – TEA (intereses capitalizados)", 0.18, PCT, "TEAPuente", "Referencial para deuda privada en US$."),
+    ("Préstamo puente / inversionista – monto máximo", 2500000, USD, "PuenteMax", "Cubre los meses previos al crédito promotor. Fondo privado, socio o financiamiento participativo."),
+    ("Préstamo puente – TEA (intereses capitalizados)", 0.18, PCT, "TEAPuente", "Referencial para deuda privada subordinada en US$. Intereses capitalizados: se pagan juntos al final."),
     ("Retener cobranzas en escrow hasta activar el crédito (1 = sí, 0 = no)", 1, INT, "Escrow", "Práctica usual: las cuotas de preventa quedan en cuenta recaudadora hasta alcanzar el punto de equilibrio."),
     ("Tasa de descuento para VAN (TEA)", 0.15, PCT, "TDesc", None),
     ("Impuesto a la renta", 0.295, PCT, "TasaIR", None),
@@ -310,6 +310,15 @@ name(S, "B79", "TMBanco")
 S.cell(row=80, column=1, value="Tasa mensual préstamo puente").font = F
 calc(S["B80"], "=(1+TEAPuente)^(1/12)-1", PCT2)
 name(S, "B80", "TMPuente")
+S.cell(row=82, column=1, value="Crédito promotor – % del costo de construcción que financia el banco").font = F
+inp(S["B82"], 0.60, PCT, "Rango usual en bancos peruanos: 50 % a 70 % del costo de obra. 60 % es de aprobación holgada si hay preventa y terreno inscrito.")
+name(S, "B82", "PctLinea")
+calc(S["B69"], "=PctLinea*Construccion")
+S.cell(row=83, column=1, value="Pago del préstamo puente: 1 = al activar el crédito · 0 = al final, después del banco").font = F
+inp(S["B83"], 0, INT, "0 recomendado: el banco no deja que su crédito pague otras deudas; exige que el puente quede subordinado hasta cancelar el crédito promotor.")
+name(S, "B83", "PagoPuente")
+S["G82"] = "Supuesto conservador recomendado: 60 %."
+S["G82"].font = F_NOTE
 S.cell(row=81, column=1, value="Tasa mensual de descuento").font = F
 calc(S["B81"], "=(1+TDesc)^(1/12)-1", PCT2)
 name(S, "B81", "TMDesc")
@@ -426,9 +435,9 @@ row_formula(46, "Caja inicial", lambda c, p: f"={p}72", first=lambda c: "=0", to
 row_formula(47, "Aporte de capital de la desarrolladora", lambda c, p: f"=IF({c}3=MesAporte,Aporte,0)")
 FM.cell(row=49, column=1, value="Crédito promotor (banco)").font = F_B
 row_formula(50, "  Saldo inicial", lambda c, p: f"={p}53", first=lambda c: "=0", total=False)
-row_formula(51, "  (+) Desembolso (al activar incluye el pago total del puente)",
-            lambda c, p: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68+IF({c}3=MesAct,MAX(0,{c}60+{c}61-MAX(0,{c}67-CajaMin)),0),Linea-{p}57),0)",
-            first=lambda c: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68+IF({c}3=MesAct,MAX(0,{c}60+{c}61-MAX(0,{c}67-CajaMin)),0),Linea),0)")
+row_formula(51, "  (+) Desembolso",
+            lambda c, p: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68+IF(AND(PagoPuente=1,{c}3=MesAct),MAX(0,{c}60+{c}61-MAX(0,{c}67-CajaMin)),0),Linea-{p}57),0)",
+            first=lambda c: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68+IF(AND(PagoPuente=1,{c}3=MesAct),MAX(0,{c}60+{c}61-MAX(0,{c}67-CajaMin)),0),Linea),0)")
 row_formula(52, "  (–) Amortización (con cobranzas)", lambda c, p: f"=MIN({c}69,{c}50)")
 row_formula(53, "  Saldo final", lambda c, p: f"={c}50+{c}51-{c}52", total=False)
 row_formula(54, "  Intereses pagados", lambda c, p: f"={c}50*TMBanco")
@@ -441,7 +450,7 @@ row_formula(60, "  Saldo inicial", lambda c, p: f"={p}64", first=lambda c: "=0",
 row_formula(61, "  Intereses capitalizados", lambda c, p: f"={c}60*TMPuente")
 row_formula(62, "  (+) Desembolso", lambda c, p: f"=MAX(0,MIN({c}68-{c}51,PuenteMax-{p}65))",
             first=lambda c: f"=MAX(0,MIN({c}68-{c}51,PuenteMax))")
-row_formula(63, "  (–) Repago (se cancela con el 1.er desembolso del banco)", lambda c, p: f"=MIN({c}69-{c}52,{c}60+{c}61)")
+row_formula(63, "  (–) Repago (subordinado: después de cancelar el banco)", lambda c, p: f"=MIN({c}69-{c}52,{c}60+{c}61)")
 row_formula(64, "  Saldo final", lambda c, p: f"={c}60+{c}61+{c}62-{c}63", total=False)
 row_formula(65, "  Desembolsos acumulados", lambda c, p: f"=SUM($C$62:{c}62)", total=False)
 FM.cell(row=66, column=1, value="Cascada de caja").font = F_B
@@ -506,12 +515,15 @@ items = [
     (31, "Mes en que se cancela el préstamo puente",
      f"=IFERROR(INDEX({FMn}!C3:{LC}3,MATCH(1,INDEX(({FMn}!C64:{LC}64<1)*({FMn}!C3:{LC}3>0)*({FMn}!C65:{LC}65>0),0),0)),\"-\")", INT, None),
     (32, "Déficit no cubierto (debe ser cero)", f"={FMn}!B70", USD, None),
+    (33, "Intereses totales pagados al inversionista puente", f"={FMn}!B61", USD, None),
     (34, "sec", "INDICADORES"),
     (35, "TIR económica (anual)", f"=(1+IRR({FMn}!C41:{LC}41,0.02))^12-1", PCT, "Flujo del proyecto antes de financiamiento e IR."),
     (36, "VAN económico @ tasa de descuento", f"=NPV(TMDesc,{FMn}!D41:{LC}41)+{FMn}!C41", USD, None),
     (37, "TIR del accionista (anual, después de IR)", f'=IF(Aporte=0,"n.a.",(1+IRR({FMn}!C78:{LC}78,0.05))^12-1)', PCT,
      "Sin aporte propio la TIR no se puede calcular (no hay inversión): mirar la utilidad neta."),
     (38, "Múltiplo sobre el capital aportado", '=IF(Aporte=0,"n.a.",(C22+Aporte)/Aporte)', '0.0"x"', None),
+    (39, "Cobertura del puente: utilidad antes de IR / saldo máximo del puente", "=IFERROR(C16/C30,0)", '0.0"x"',
+     "Cuántas veces el margen del proyecto cubre la deuda puente (colchón para el inversionista)."),
     (40, "sec", "CONTROLES"),
     (41, "Preventa lograda al fin de la preventa (% de ventas a terceros)",
      f"=INDEX({FMn}!C12:{LC}12,MATCH(PrevFin,{FMn}!C3:{LC}3,0))", PCT, None),
@@ -560,7 +572,7 @@ R.cell(row=60, column=2, value="Saldo del puente al activar el crédito (incluye
 calc(R["C60"], f"=INDEX({FMn}!C60:{LC}60,MATCH(MesAct,{FMn}!C3:{LC}3,0))")
 R["E57"] = "Las cobranzas de preventa quedan en escrow: no ayudan a pagar estos montos."
 R["E57"].font = F_NOTE
-R["E59"] = "Se cancela completo en el mes de activación del crédito, con el escrow liberado y el 1.er desembolso del banco."
+R["E59"] = "Deuda subordinada: se cobra al final, cuando ya se canceló el crédito promotor."
 R["E59"].font = F_NOTE
 for col in "BC":
     R[f"{col}57"].fill = FILL_TOT
@@ -676,7 +688,7 @@ RECALC = sys.argv[1] if len(sys.argv) > 1 else None
 if RECALC:
     metrics = [("Efectivo pagado por el terreno", 8, USD), ("Fondos a conseguir antes del crédito", 57, USD), ("Utilidad neta", 22, USD), ("Margen neto", 23, PCT),
                ("Saldo máx. crédito promotor", 28, USD),
-               ("Saldo máx. préstamo puente", 30, USD), ("Costos financieros", 15, USD),
+               ("Saldo máx. préstamo puente", 30, USD), ("Mes de pago del puente", 31, INT), ("Costos financieros", 15, USD),
                ("Déficit no cubierto", 32, USD)]
     results = {}
     tmp = OUT.replace(".xlsx", "_tmp.xlsx")
