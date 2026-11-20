@@ -93,3 +93,20 @@ Horizonte: mes 0 terreno · 1–3 preventa · 4–18 obra · 19–22 cobro de hi
 Hojas: **Resumen** (indicadores y comparativo de mecanismos de terreno) · **Supuestos**
 (celdas amarillas) · **Flujo_Mensual** (cobranzas, egresos, IGV, escrow, crédito promotor,
 préstamo puente, flujo del accionista) · **Terreno_Estrategias** (opciones legales/SUNARP y fuentes).
+
+---
+
+## App «Flujo Inmobiliario» (`app/`)
+
+Aplicación web de una sola página (computadora y celular). El usuario responde 4 bloques de
+preguntas (terreno, proyecto, plazos y ventas, banco) y el motor elige el modelo:
+
+1. **Terreno propio**: sin compra de terreno; la línea del banco queda de respaldo.
+2. **Compra al contado + banco**: el dinero propio alcanza para el terreno y la alcabala.
+3. **50 % ahora · 50 % al final**: el saldo se paga al vendedor tras cancelar el banco.
+
+Muestra el veredicto, indicadores, gráfico, tabla mensual (copiable a Excel), comparación de
+modelos y guarda proyectos en el dispositivo. Para usarla sin internet o instalarla en el celular,
+publique la carpeta `app/` en cualquier hosting estático (p. ej. GitHub Pages) y abra `index.html`;
+el navegador ofrecerá «Agregar a pantalla de inicio».
+`flujo-inmobiliario.html` es el mismo contenido sin cabecera (versión para vista previa).
