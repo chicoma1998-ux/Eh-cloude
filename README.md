@@ -98,15 +98,17 @@ préstamo puente, flujo del accionista) · **Terreno_Estrategias** (opciones leg
 
 ## App «Flujo Inmobiliario» (`app/`)
 
-Aplicación web de una sola página (computadora y celular). El usuario responde 4 bloques de
-preguntas (terreno, proyecto, plazos y ventas, banco) y el motor elige el modelo:
+Aplicación web de una sola página (computadora y celular). El usuario responde 6 bloques de
+preguntas y el motor arma el flujo combinando tres ejes:
 
-1. **Terreno propio**: sin compra de terreno; la línea del banco queda de respaldo.
-2. **Compra al contado + banco**: el dinero propio alcanza para el terreno y la alcabala.
-3. **50 % ahora · 50 % al final**: el saldo se paga al vendedor tras cancelar el banco.
+- **Terreno (6):** propio, contado, pago diferido, permuta total, permuta parcial, propietario socio.
+- **Financiamiento (5, en cascada):** capital propio → preventa (con o sin escrow) → crédito promotor
+  → préstamo puente → socio capitalista; si aún falta dinero, lo informa.
+- **Producto (4):** vivienda libre, MiVivienda, Techo Propio (bono con o sin carta fianza), venta en bloque.
 
-Muestra el veredicto, indicadores, gráfico, tabla mensual (copiable a Excel), comparación de
-modelos y guarda proyectos en el dispositivo. Para usarla sin internet o instalarla en el celular,
-publique la carpeta `app/` en cualquier hosting estático (p. ej. GitHub Pages) y abra `index.html`;
-el navegador ofrecerá «Agregar a pantalla de inicio».
+Simula todas las formas de terreno, marca las que el propietario acepta y elige la que no deja
+faltantes y da mayor utilidad al desarrollador. Muestra veredicto, indicadores, tabla comparativa,
+gráfico, flujo mensual (copiable a Excel) y catálogo; guarda proyectos en el dispositivo.
+Para usarla sin internet o instalarla en el celular, publique la carpeta `app/` en un hosting
+estático (p. ej. GitHub Pages) y abra `index.html`.
 `flujo-inmobiliario.html` es el mismo contenido sin cabecera (versión para vista previa).

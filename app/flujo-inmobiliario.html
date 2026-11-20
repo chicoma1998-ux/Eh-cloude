@@ -3,80 +3,85 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: plano de obra — formulario por etapas a la izquierda, tablero de resultados fijo a la derecha; una columna en celular */
+/* Layout: plano de obra — preguntas por etapas a la izquierda, tablero de resultados a la derecha; una columna en celular */
 :root{
   --bg:#F3F5F7; --surface:#FFFFFF; --ink:#14263A; --muted:#5B6B7C; --line:#D9E0E7;
   --navy:#1B3550; --accent:#C7862B; --accent-soft:#F6E9D5;
-  --good:#1E7A4F; --good-soft:#E2F2EA; --bad:#B23A2E; --bad-soft:#F8E3E0; --bank:#2F6DB5;
+  --good:#1E7A4F; --good-soft:#E2F2EA; --bad:#B23A2E; --bad-soft:#F8E3E0; --bank:#2F6DB5; --bridge:#7A4FB0; --hero:#1B3550; --hero-fg:#FFFFFF;
   --f-display:"Sora",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
   --r:10px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0F1923; --surface:#16232F; --ink:#E6EDF3; --muted:#9AAABA; --line:#2A3A49;
   --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
-  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; color-scheme:dark}}
+  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; --bridge:#B996E8; --hero:#1E3854; --hero-fg:#E6EDF3; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0F1923; --surface:#16232F; --ink:#E6EDF3; --muted:#9AAABA; --line:#2A3A49;
   --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
-  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; color-scheme:dark}
+  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; --bridge:#B996E8; --hero:#1E3854; --hero-fg:#E6EDF3; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;margin:0}
-.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1320px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
 .brand h1{font-family:var(--f-display);font-size:26px;margin:0;letter-spacing:-.01em;color:var(--navy);text-wrap:balance}
-.brand p{margin:2px 0 0;color:var(--muted);max-width:62ch}
+.brand p{margin:2px 0 0;color:var(--muted);max-width:66ch}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px}
-button,.btn{font:600 13px var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;cursor:pointer}
+button{font:600 13px var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;cursor:pointer}
 button:hover{border-color:var(--navy)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button.primary{background:var(--navy);color:var(--surface);border-color:var(--navy)}
-.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;align-items:start}
-@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
-/* formulario */
+.grid{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
 .steps{display:flex;flex-direction:column;gap:12px}
 .step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
 .step h2{font-family:var(--f-display);font-size:15px;margin:0 0 2px;display:flex;align-items:center;gap:10px}
-.step h2 .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--surface);font-size:12px}
+.step h2 .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--surface);font-size:12px;flex:none}
 .step .lead{color:var(--muted);margin:0 0 12px;font-size:13px}
 .field{display:grid;gap:4px;margin-bottom:12px}
 .field:last-child{margin-bottom:0}
-.field label{font-weight:600;font-size:13px}
-.field .hint{color:var(--muted);font-size:12px}
+.field>label,.q{font-weight:600;font-size:13px}
+.hint{color:var(--muted);font-size:12px;font-weight:400}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+.row2 .field{margin-bottom:0}
+.row2+.field,.row2+.row2{margin-top:12px}
 input,select{font:500 14px var(--f-num);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
 .seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{flex:1 1 auto;font-weight:500}
-.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+.seg button{flex:1 1 auto;font-weight:500;padding:7px 10px}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+.chips{display:grid;grid-template-columns:1fr;gap:6px}
+.chips button{text-align:left;font-weight:500;display:flex;gap:8px;align-items:flex-start}
+.chips button::before{content:"";flex:none;width:14px;height:14px;margin-top:2px;border:1.5px solid var(--muted);border-radius:4px}
+.chips button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.chips button[aria-pressed="true"]::before{background:var(--accent);border-color:var(--accent)}
+.chips button>span{min-width:0}
+.chips small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+.sub{border-left:3px solid var(--accent-soft);padding-left:12px;margin:4px 0 12px}
 .sum{font:500 12px var(--f-num);color:var(--muted)}
 .sum.bad{color:var(--bad)}
-/* resultados */
-.results{display:flex;flex-direction:column;gap:14px;position:sticky;top:env(safe-area-inset-top,0px)}
-@media (max-width:920px){.results{position:static}}
-.verdict{background:var(--navy);color:var(--surface);border-radius:var(--r);padding:18px}
+.results{display:flex;flex-direction:column;gap:14px}
+.verdict{background:var(--hero);color:var(--hero-fg);border-radius:var(--r);padding:18px}
 .verdict .eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;opacity:.8}
-.verdict h3{font-family:var(--f-display);font-size:20px;margin:4px 0 8px;text-wrap:balance}
+.verdict h3{font-family:var(--f-display);font-size:20px;margin:4px 0 10px;text-wrap:balance}
 .verdict ul{margin:0;padding-left:18px}
-.verdict li{margin:2px 0}
+.verdict li{margin:3px 0}
+.recipe{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.recipe span{background:rgba(255,255,255,.14);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600}
 .alert{border-radius:8px;padding:10px 12px;font-size:13px;margin-top:10px;background:var(--bad-soft);color:var(--bad);font-weight:500}
 .alert.ok{background:var(--good-soft);color:var(--good)}
-.tabs{display:flex;gap:6px;flex-wrap:wrap}
-.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:0;flex:1 1 150px;text-align:left}
-.tabs button small{font-weight:400;color:var(--muted);font-size:11px}
-.tabs button[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
-.tabs button:disabled{opacity:.45;cursor:not-allowed}
-.tag{font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 @media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-width:0}
 .kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.kpi .v{font:500 18px var(--f-num);margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .v{font:500 17px var(--f-num);margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .kpi .s{font-size:12px;color:var(--muted)}
-.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600}
+.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600;white-space:nowrap}
 .pill.ok{background:var(--good-soft);color:var(--good)}
 .pill.no{background:var(--bad-soft);color:var(--bad)}
+.pill.mid{background:var(--accent-soft);color:var(--ink)}
+.pill.off{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
 .panel h4{font-family:var(--f-display);font-size:14px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);font-family:var(--f-body);font-weight:400}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .chart{width:100%;height:auto;display:block}
 .scroll{overflow-x:auto}
@@ -85,9 +90,18 @@ th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);font-family:var(--f-body);font-weight:500;z-index:1}
 thead th{font-family:var(--f-body);font-weight:600;color:var(--muted)}
 tr.total td{font-weight:600;border-top:1px solid var(--ink)}
+tr.best td{background:var(--good-soft)}
+tr.best td:first-child{background:var(--good-soft)}
 td.neg{color:var(--bad)}
 .ph-p{color:var(--accent)} .ph-c{color:var(--bank)} .ph-f{color:var(--good)}
-.compare td,.compare th{font-size:12px}
+.cat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.cat{grid-template-columns:minmax(0,1fr)}}
+.cat h5{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
+.cat ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.cat li{border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:13px}
+.cat li b{display:flex;justify-content:space-between;gap:6px;align-items:flex-start;font-weight:600}
+.cat li span.why{display:block;color:var(--muted);font-size:12px}
+.cat li.on{border-color:var(--accent);background:var(--accent-soft)}
 .saved{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .saved .item{display:flex;gap:6px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 .saved .item span{min-width:0;overflow-wrap:anywhere}
@@ -95,26 +109,25 @@ td.neg{color:var(--bad)}
 .saved button{padding:4px 8px;font-size:12px}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:20}
 .note{font-size:12px;color:var(--muted);margin:6px 0 0}
+details summary{cursor:pointer;font-weight:600}
 .mbar{display:none}
-@media (max-width:920px){
+@media (max-width:960px){
   .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;gap:10px;align-items:center;justify-content:space-between;
-    background:var(--navy);color:var(--surface);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));
+    background:var(--hero);color:var(--hero-fg);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));
     padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .mbar b{font-family:var(--f-display);font-size:13px;display:block}
   .mbar span{font:500 12px var(--f-num);opacity:.9}
-  .mbar a{color:var(--navy);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap}
-  .wrap{padding-bottom:90px}
-  .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .mbar a{color:var(--hero);background:var(--hero-fg);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap}
+  .wrap{padding-bottom:96px}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 }
-details.how summary{cursor:pointer;font-weight:600}
-@media (prefers-reduced-motion:no-preference){.kpi .v,.verdict{transition:background .2s}}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="brand">
       <h1>Flujo Inmobiliario</h1>
-      <p>Responde las preguntas y el motor elige cuál de los tres modelos de flujo de caja se ajusta a tu proyecto. Todo se recalcula al instante.</p>
+      <p>Responde las preguntas. El motor arma tu flujo de caja combinando cómo consigues el terreno, cómo financias la obra y qué tipo de producto vendes, y te dice cuál combinación conviene.</p>
     </div>
     <div class="toolbar">
       <button id="btnExample" type="button">Cargar ejemplo</button>
@@ -123,88 +136,157 @@ details.how summary{cursor:pointer;font-weight:600}
   </header>
 
   <div class="grid">
-    <!-- ============ FORMULARIO ============ -->
     <form class="steps" id="form" autocomplete="off">
+      <!-- 1 TERRENO -->
       <section class="step">
         <h2><span class="n">1</span>El terreno</h2>
-        <p class="lead">Esta respuesta decide el modelo de flujo de caja.</p>
+        <p class="lead">Define cómo puedes conseguir el terreno.</p>
         <div class="field">
-          <label>¿El terreno ya es tuyo (inscrito a tu nombre)?</label>
-          <div class="seg" role="group" aria-label="Propiedad del terreno">
-            <button type="button" id="ownYes" data-own="1">Sí, es mío</button>
-            <button type="button" id="ownNo" data-own="0">No, debo comprarlo</button>
-          </div>
+          <span class="q">¿El terreno ya es tuyo (inscrito a tu nombre)?</span>
+          <div class="seg" data-key="own" data-opts="1:Sí, es mío|0:No, debo conseguirlo"></div>
         </div>
         <div class="field">
           <label for="land">Valor o precio del terreno</label>
           <input id="land" type="number" min="0" step="1000" inputmode="numeric">
-          <span class="hint" id="landHint">Si es tuyo, se usa para medir la rentabilidad real.</span>
         </div>
-        <div class="field">
-          <label for="cap">¿Cuánto dinero propio tienes hoy para el proyecto?</label>
-          <input id="cap" type="number" min="0" step="1000" inputmode="numeric">
-          <span class="hint">Efectivo disponible para terreno y gastos iniciales.</span>
-        </div>
-        <div class="field">
-          <label for="alc">Alcabala y gastos de compra (% del precio)</label>
-          <input id="alc" type="number" min="0" max="20" step="0.1" inputmode="decimal">
+        <div data-show="own=0">
+          <div class="field">
+            <span class="q">¿Qué formas de pago aceptaría el propietario? <span class="hint">Marca todas las que apliquen.</span></span>
+            <div class="chips" data-multi="opts">
+              <button type="button" data-v="cash">Todo en efectivo a la firma<small>Compra al contado</small></button>
+              <button type="button" data-v="defer">Una parte ahora y el saldo al final<small>Compraventa con pago diferido</small></button>
+              <button type="button" data-v="perm">Departamentos terminados a cambio<small>Permuta total</small></button>
+              <button type="button" data-v="permx">Departamentos y algo de efectivo<small>Permuta parcial</small></button>
+              <button type="button" data-v="jv">Entrar como socio del proyecto<small>Recibe un % de la utilidad en vez de un precio</small></button>
+            </div>
+          </div>
+          <div class="sub" data-show="opts~defer|permx">
+            <div class="field"><label for="deferIni">% del pago en efectivo que se paga a la firma</label><input id="deferIni" type="number" min="0" max="100" step="5" inputmode="numeric"><span class="hint">El resto se paga al final, cuando ya se canceló al banco y al inversionista.</span></div>
+          </div>
+          <div class="sub" data-show="opts~permx">
+            <div class="field"><label for="permPct">% del precio que se paga con departamentos</label><input id="permPct" type="number" min="0" max="100" step="5" inputmode="numeric"></div>
+          </div>
+          <div class="sub" data-show="opts~defer|perm|permx">
+            <div class="field"><label for="prima">Prima que pide el propietario por esperar (% sobre el precio)</label><input id="prima" type="number" min="0" max="60" step="1" inputmode="numeric"><span class="hint">Usual: 5 % a 25 %. Aplica al pago diferido y a la permuta.</span></div>
+          </div>
+          <div class="sub" data-show="opts~jv">
+            <div class="field"><label for="jvShare">% de la utilidad que recibiría el propietario como socio</label><input id="jvShare" type="number" min="0" max="80" step="1" inputmode="numeric"></div>
+          </div>
+          <div class="field">
+            <label for="alc">Alcabala y gastos de compra (% del precio)</label>
+            <input id="alc" type="number" min="0" max="20" step="0.1" inputmode="decimal">
+          </div>
         </div>
       </section>
 
+      <!-- 2 DINERO PROPIO -->
       <section class="step">
-        <h2><span class="n">2</span>El proyecto</h2>
-        <p class="lead">Ingresos y costos totales, con IGV incluido.</p>
+        <h2><span class="n">2</span>Tu dinero</h2>
+        <div class="field">
+          <label for="cap">¿Cuánto dinero propio tienes hoy para el proyecto?</label>
+          <input id="cap" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint">Efectivo disponible para terreno, licencias y lanzamiento.</span>
+        </div>
+      </section>
+
+      <!-- 3 PRODUCTO -->
+      <section class="step">
+        <h2><span class="n">3</span>Qué vas a vender</h2>
+        <div class="field">
+          <span class="q">Tipo de producto</span>
+          <div class="seg" data-key="prod" data-opts="libre:Vivienda libre|mivivienda:MiVivienda|techo:Techo Propio|bloque:Venta en bloque"></div>
+          <span class="hint" id="prodHint"></span>
+        </div>
         <div class="row2">
           <div class="field"><label for="units">N.º de unidades</label><input id="units" type="number" min="1" step="1" inputmode="numeric"></div>
           <div class="field"><label for="price">Precio promedio por unidad</label><input id="price" type="number" min="0" step="1000" inputmode="numeric"></div>
         </div>
-        <div class="field">
-          <label for="cons">Costo total de construcción</label>
-          <input id="cons" type="number" min="0" step="1000" inputmode="numeric">
-          <span class="hint">Obra, sótanos, acabados y equipamiento.</span>
+        <div class="sub" data-show="prod=techo">
+          <div class="field"><label for="bonoPct">% del precio cubierto por el bono del Estado (BFH)</label><input id="bonoPct" type="number" min="0" max="100" step="1" inputmode="numeric"><span class="hint">Lo paga el Fondo MiVivienda. El resto lo cubren el ahorro y el crédito del comprador.</span></div>
+          <div class="field">
+            <span class="q">¿Adelantarás el cobro del bono con carta fianza?</span>
+            <div class="seg" data-key="fianza" data-opts="1:Sí|0:No, lo cobro a la entrega"></div>
+          </div>
+          <div class="field" data-show="fianza=1"><label for="fianzaRate">Costo anual de la carta fianza (% del monto)</label><input id="fianzaRate" type="number" min="0" max="10" step="0.1" inputmode="decimal"></div>
         </div>
-        <div class="row2">
-          <div class="field"><label for="stud">Proyecto, licencias y estudios</label><input id="stud" type="number" min="0" step="1000" inputmode="numeric"></div>
-          <div class="field"><label for="ind">Gerencia, publicidad y comisiones (% de ventas)</label><input id="ind" type="number" min="0" max="40" step="0.1" inputmode="decimal"></div>
-        </div>
-        <div class="field">
-          <label for="cur">Moneda</label>
-          <select id="cur"><option value="US$">Dólares (US$)</option><option value="S/">Soles (S/)</option></select>
+        <div class="sub" data-show="prod=bloque">
+          <div class="row2">
+            <div class="field"><label for="desc">Descuento al comprador en bloque %</label><input id="desc" type="number" min="0" max="40" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="bIni">% que paga a la firma</label><input id="bIni" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+          </div>
+          <div class="field"><label for="bObra">% que paga según avance de obra</label><input id="bObra" type="number" min="0" max="100" step="1" inputmode="numeric"><span class="hint">Un fondo o empresa compra todas las unidades al final de la preventa. El saldo lo paga a la entrega.</span></div>
         </div>
       </section>
 
+      <!-- 4 PLAZOS Y VENTAS -->
       <section class="step">
-        <h2><span class="n">3</span>Plazos y ventas</h2>
-        <p class="lead">Mes 0 es el inicio: compra del terreno o arranque del proyecto.</p>
+        <h2><span class="n">4</span>Plazos y ventas</h2>
+        <p class="lead">Mes 0 es la firma del terreno o el arranque.</p>
         <div class="row2">
           <div class="field"><label for="pre">Meses de preventa</label><input id="pre" type="number" min="1" max="24" step="1" inputmode="numeric"></div>
           <div class="field"><label for="obra">Meses de construcción</label><input id="obra" type="number" min="3" max="48" step="1" inputmode="numeric"></div>
         </div>
-        <div class="field">
-          <label for="sp">% de unidades vendidas en la preventa</label>
-          <input id="sp" type="number" min="0" max="100" step="1" inputmode="numeric">
-          <span class="hint">El resto se vende de forma pareja durante la construcción.</span>
-        </div>
-        <div class="field">
-          <label>¿Cómo pagan los compradores?</label>
+        <div data-show="prod!bloque">
+          <div class="field"><label for="sp">% de unidades vendidas en la preventa</label><input id="sp" type="number" min="0" max="100" step="1" inputmode="numeric"><span class="hint">El resto se vende de forma pareja durante la obra.</span></div>
           <div class="row2">
-            <div class="field"><label for="pi" class="hint">Cuota inicial %</label><input id="pi" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
-            <div class="field"><label for="pc" class="hint">Cuotas en obra %</label><input id="pc" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="pi">Cuota inicial %</label><input id="pi" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="pc">Cuotas durante la obra %</label><input id="pc" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
           </div>
           <span class="sum" id="psum"></span>
         </div>
+        <div class="field" style="margin-top:12px">
+          <span class="q">¿El dinero de la preventa queda retenido (escrow) hasta que entra el banco?</span>
+          <div class="seg" data-key="escrow" data-opts="1:Sí|0:No, lo uso libremente"></div>
+          <span class="hint">Si pides crédito promotor, el banco casi siempre lo exige.</span>
+        </div>
       </section>
 
+      <!-- 5 COSTOS -->
       <section class="step">
-        <h2><span class="n">4</span>Banco</h2>
-        <p class="lead">Línea de crédito promotor. Solo se usa si la caja no alcanza, desde el fin de la preventa hasta la entrega.</p>
+        <h2><span class="n">5</span>Costos</h2>
+        <div class="field"><label for="cons">Costo total de construcción</label><input id="cons" type="number" min="0" step="1000" inputmode="numeric"></div>
         <div class="row2">
-          <div class="field"><label for="pb">% de la obra que financia</label><input id="pb" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
-          <div class="field"><label for="tea">Tasa anual (TEA %)</label><input id="tea" type="number" min="0" max="60" step="0.1" inputmode="decimal"></div>
+          <div class="field"><label for="stud">Proyecto, licencias y estudios</label><input id="stud" type="number" min="0" step="1000" inputmode="numeric"></div>
+          <div class="field"><label for="ind">Gerencia, publicidad y comisiones (% de ventas)</label><input id="ind" type="number" min="0" max="40" step="0.1" inputmode="decimal"></div>
+        </div>
+      </section>
+
+      <!-- 6 FINANCIAMIENTO -->
+      <section class="step">
+        <h2><span class="n">6</span>Financiamiento</h2>
+        <p class="lead">El motor usa las fuentes en este orden: tu dinero, la preventa, el banco, el inversionista puente y el socio capitalista.</p>
+        <div class="field">
+          <span class="q">¿Tienes acceso a crédito promotor de un banco?</span>
+          <div class="seg" data-key="bankOn" data-opts="1:Sí|0:No"></div>
+        </div>
+        <div class="sub" data-show="bankOn=1">
+          <div class="row2">
+            <div class="field"><label for="pb">% de la obra que financia</label><input id="pb" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="tea">Tasa anual %</label><input id="tea" type="number" min="0" max="60" step="0.1" inputmode="decimal"></div>
+          </div>
+          <span class="hint">Se activa al terminar la preventa y solo financia obra.</span>
         </div>
         <div class="field">
-          <label for="ir">Impuesto a la renta %</label>
-          <input id="ir" type="number" min="0" max="50" step="0.1" inputmode="decimal">
+          <span class="q">¿Tienes un inversionista que te preste (préstamo puente)?</span>
+          <div class="seg" data-key="bridgeOn" data-opts="1:Sí|0:No"></div>
+        </div>
+        <div class="sub" data-show="bridgeOn=1">
+          <div class="row2">
+            <div class="field"><label for="bridgeMax">Monto máximo</label><input id="bridgeMax" type="number" min="0" step="1000" inputmode="numeric"></div>
+            <div class="field"><label for="bridgeTea">Tasa anual %</label><input id="bridgeTea" type="number" min="0" max="60" step="0.1" inputmode="decimal"></div>
+          </div>
+          <span class="hint">Intereses acumulados y pagados al final, después del banco. Garantía usual: fideicomiso.</span>
+        </div>
+        <div class="field">
+          <span class="q">¿Aceptarías un socio capitalista que ponga el dinero que falte?</span>
+          <div class="seg" data-key="partnerOn" data-opts="1:Sí|0:No"></div>
+        </div>
+        <div class="sub" data-show="partnerOn=1">
+          <div class="field"><label for="partnerShare">% de la utilidad que pediría el socio</label><input id="partnerShare" type="number" min="0" max="90" step="1" inputmode="numeric"><span class="hint">Recupera su aporte al final y se lleva este % si pone todo el capital; si pone una parte, el % baja en proporción a lo que aportó frente a tu dinero.</span></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="ir">Impuesto a la renta %</label><input id="ir" type="number" min="0" max="50" step="0.1" inputmode="decimal"></div>
+          <div class="field"><label for="cur">Moneda</label><select id="cur"><option value="US$">Dólares (US$)</option><option value="S/">Soles (S/)</option></select></div>
         </div>
       </section>
 
@@ -216,106 +298,178 @@ details.how summary{cursor:pointer;font-weight:600}
       </section>
     </form>
 
-    <!-- ============ RESULTADOS ============ -->
     <div class="results" id="resultado">
       <div class="verdict" id="verdict"></div>
-      <div class="tabs" role="tablist" id="tabs"></div>
       <div class="kpis" id="kpis"></div>
       <div class="panel">
+        <h4>Todas las formas de conseguir el terreno, con tus datos</h4>
+        <div class="scroll"><table id="compare"></table></div>
+        <p class="note">Toca una fila para ver su flujo. ★ = la que elige el motor: primero las que no dejan dinero faltante, luego la de mayor utilidad para ti.</p>
+      </div>
+      <div class="panel">
         <h4>Flujo mes a mes
-          <span class="legend"><span><i style="background:var(--good)"></i>Entra más de lo que sale</span><span><i style="background:var(--bad)"></i>Sale más de lo que entra</span><span><i style="background:var(--bank)"></i>Deuda con el banco</span></span>
+          <span class="legend"><span><i style="background:var(--good)"></i>Entra más</span><span><i style="background:var(--bad)"></i>Sale más</span><span><i style="background:var(--bank)"></i>Deuda banco</span><span><i style="background:var(--bridge)"></i>Deuda puente</span></span>
         </h4>
         <svg class="chart" id="chart" viewBox="0 0 800 260" role="img" aria-label="Gráfico del flujo mensual"></svg>
       </div>
       <div class="panel">
         <h4>Tabla del flujo de caja <button type="button" id="btnCopy">Copiar para Excel</button></h4>
         <div class="scroll"><table id="table"></table></div>
-        <p class="note">Cifras con IGV incluido. Versión didáctica: no separa IGV ni pagos a cuenta del impuesto a la renta.</p>
+        <p class="note">Cifras con IGV incluido. Versión didáctica: no separa el IGV ni los pagos a cuenta del impuesto a la renta.</p>
       </div>
       <div class="panel">
-        <h4>Comparación de los tres modelos con tus datos</h4>
-        <div class="scroll"><table class="compare" id="compare"></table></div>
-      </div>
-      <div class="panel">
-        <details class="how"><summary>¿Cómo decide el motor?</summary>
-          <ul class="note">
-            <li><b>Modelo 1 · Terreno propio:</b> si el terreno ya es tuyo. La obra se paga con la preventa y las ventas; la línea del banco queda de respaldo.</li>
-            <li><b>Modelo 2 · Compra al contado + banco:</b> si tu dinero propio alcanza para pagar el terreno completo y la alcabala.</li>
-            <li><b>Modelo 3 · 50 % ahora y 50 % al final:</b> si solo alcanza para la mitad. El otro 50 % se paga al vendedor cuando ya se vendió todo y se canceló el banco.</li>
-            <li>Si el dinero no alcanza ni para el 50 %, o la caja queda en rojo aun con el banco, el motor te dice cuánto falta conseguir (socio o préstamo puente).</li>
-          </ul>
-        </details>
+        <h4>Catálogo de flujos del motor</h4>
+        <div class="cat" id="catalog"></div>
       </div>
     </div>
   </div>
 </div>
-<div class="mbar" id="mbar"><div><b id="mbarT"></b><span id="mbarS"></span></div><a href="#resultado">Ver resultado</a></div>
+<div class="mbar"><div><b id="mbarT"></b><span id="mbarS"></span></div><a href="#resultado">Ver resultado</a></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
 (function(){
-const MODELS={
-  1:{name:"Terreno propio",short:"Sin banco, salvo respaldo"},
-  2:{name:"Compra al contado + banco",short:"Pagas el terreno completo"},
-  3:{name:"50 % ahora · 50 % al final",short:"Saldo al vendedor al cierre"}
+/* ================= catálogo ================= */
+const LAND={
+  own:{name:"Terreno propio",desc:"No se paga terreno; su valor cuenta como tu aporte."},
+  cash:{name:"Compra al contado",desc:"Pagas el 100 % a la firma."},
+  defer:{name:"Pago diferido",desc:"Una parte a la firma y el saldo al final, con prima."},
+  perm:{name:"Permuta total",desc:"Pagas con departamentos terminados."},
+  permx:{name:"Permuta parcial",desc:"Parte en departamentos y parte en efectivo."},
+  jv:{name:"Propietario socio",desc:"Aporta el terreno y recibe un % de la utilidad."}
 };
-const EXAMPLE={pname:"Ejemplo · Lote demo (23 deptos)",own:0,land:950000,cap:1100000,alc:3,units:23,price:587700,cons:4490251,
-  stud:175120,ind:9.7,cur:"US$",pre:3,obra:15,sp:30,pi:10,pc:10,pb:60,tea:11,ir:29.5};
-const FIELDS=["land","cap","alc","units","price","cons","stud","ind","cur","pre","obra","sp","pi","pc","pb","tea","ir","pname"];
+const PROD={
+  libre:{name:"Vivienda libre",hint:"Compradores con cuota inicial y crédito hipotecario a la entrega."},
+  mivivienda:{name:"MiVivienda",hint:"Igual que vivienda libre, con bono del Estado dentro del crédito hipotecario. El precio debe estar dentro del tope del programa."},
+  techo:{name:"Techo Propio",hint:"Vivienda social: el bono del Estado paga la mayor parte del precio; se puede adelantar con carta fianza."},
+  bloque:{name:"Venta en bloque",hint:"Un solo comprador (fondo o empresa) compra todo al final de la preventa y paga con el avance de obra."}
+};
+const EXAMPLE={pname:"Ejemplo · Lote demo (23 deptos)",own:0,land:950000,opts:["cash","defer","permx"],deferIni:50,permPct:50,prima:12,jvShare:25,alc:3,
+  cap:150000,prod:"libre",units:23,price:587700,bonoPct:70,fianza:1,fianzaRate:3,desc:10,bIni:20,bObra:60,
+  pre:3,obra:15,sp:30,pi:10,pc:10,escrow:1,cons:4490251,stud:175120,ind:9.7,
+  bankOn:1,pb:60,tea:11,bridgeOn:1,bridgeMax:1500000,bridgeTea:18,partnerOn:1,partnerShare:35,ir:29.5,cur:"US$"};
+const NUM=["land","deferIni","permPct","prima","jvShare","alc","cap","units","price","bonoPct","fianzaRate","desc","bIni","bObra","pre","obra","sp","pi","pc","cons","stud","ind","pb","tea","bridgeMax","bridgeTea","partnerShare","ir"];
+const TXT=["pname","cur"];
 const $=id=>document.getElementById(id);
-let state={...EXAMPLE}, view=null, lastRec=null;
+let state={...EXAMPLE}, pick=null, lastBest=null;
 
 function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
 
-function fill(s){FIELDS.forEach(f=>{$(f).value=s[f]});setOwn(s.own)}
-function read(){const s={own:state.own};FIELDS.forEach(f=>{const el=$(f);s[f]=(el.type==="number")?(parseFloat(el.value)||0):el.value});return s}
-function setOwn(v){state.own=+v;$("ownYes").setAttribute("aria-pressed",state.own===1);$("ownNo").setAttribute("aria-pressed",state.own===0);
-  $("landHint").textContent=state.own?"Si es tuyo, se usa para medir la rentabilidad real (no se paga).":"Precio acordado con el propietario."}
+/* ================= controles ================= */
+document.querySelectorAll(".seg[data-key]").forEach(el=>{
+  el.setAttribute("role","group");
+  el.innerHTML=el.dataset.opts.split("|").map(o=>{const [v,l]=o.split(":");return `<button type="button" data-v="${v}">${l}</button>`}).join("");
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{const v=b.dataset.v;state[el.dataset.key]=isNaN(+v)?v:+v;pick=null;sync();render()});
+});
+document.querySelectorAll(".chips[data-multi]").forEach(el=>{
+  el.querySelectorAll("button").forEach(b=>{b.innerHTML=`<span>${b.innerHTML}</span>`});
+  el.querySelectorAll("button").forEach(b=>b.onclick=()=>{const k=el.dataset.multi,v=b.dataset.v;const a=new Set(state[k]||[]);a.has(v)?a.delete(v):a.add(v);state[k]=[...a];pick=null;sync();render()});
+});
+function sync(){
+  document.querySelectorAll(".seg[data-key]").forEach(el=>el.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(String(state[el.dataset.key])===b.dataset.v))));
+  document.querySelectorAll(".chips[data-multi]").forEach(el=>el.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String((state[el.dataset.multi]||[]).includes(b.dataset.v)))));
+  document.querySelectorAll("[data-show]").forEach(el=>{
+    const r=el.dataset.show;let ok;
+    if(r.includes("~")){const [k,vs]=r.split("~");ok=vs.split("|").some(v=>(state[k]||[]).includes(v))}
+    else if(r.includes("!")){const [k,v]=r.split("!");ok=String(state[k])!==v}
+    else{const [k,v]=r.split("=");ok=String(state[k])===v}
+    el.hidden=!ok;
+  });
+  $("prodHint").textContent=PROD[state.prod].hint;
+}
+function fill(s){NUM.concat(TXT).forEach(f=>{$(f).value=s[f]});sync()}
+function read(){NUM.forEach(f=>state[f]=parseFloat($(f).value)||0);TXT.forEach(f=>state[f]=$(f).value);return state}
 
-/* ---------------- motor de simulación ---------------- */
-function simulate(p,model){
-  const P=Math.round(p.pre),C=Math.round(p.obra),E=P+C,N=E+4;
-  const R=p.units*p.price, sp=p.sp/100, pi=p.pi/100, pc=p.pc/100, ps=Math.max(0,1-pi-pc);
+/* ================= motor de simulación ================= */
+function landTerms(key,p){
+  const base=p.land, pr=p.prima/100, di=p.deferIni/100, alc=p.land*p.alc/100;
+  switch(key){
+    case "own": return {now:0,end:0,units:0,share:0,alc:0};
+    case "cash": return {now:base,end:0,units:0,share:0,alc};
+    case "defer": {const t=base*(1+pr);return {now:t*di,end:t*(1-di),units:0,share:0,alc}}
+    case "perm": return {now:0,end:0,units:base*(1+pr),share:0,alc};
+    case "permx": {const t=base*(1+pr),u=t*p.permPct/100,c=t-u;return {now:c*di,end:c*(1-di),units:u,share:0,alc}}
+    case "jv": return {now:0,end:0,units:0,share:p.jvShare/100,alc};
+  }
+}
+function simulate(p,landKey){
+  const P=Math.max(1,Math.round(p.pre)),C=Math.max(1,Math.round(p.obra)),E=P+C,N=E+4,ACT=P+1;
+  const L=landTerms(landKey,p);
+  const R=p.units*p.price;
   const z=()=>new Array(N).fill(0);
-  const sales=z(),coll=z(),land=z(),cons=z(),stud=z(),ind=z(),intr=z(),draw=z(),repay=z(),extra=z(),cash=z(),bank=z(),landEnd=z();
-  for(let m=1;m<=P;m++)sales[m]=R*sp/P;
-  for(let m=P+1;m<=E;m++)sales[m]+=R*(1-sp)/C;
-  for(let m=0;m<N;m++){
-    if(!sales[m])continue;
-    coll[m]+=sales[m]*pi;
-    if(m<E){const k=E-m;for(let j=m+1;j<=E;j++)coll[j]+=sales[m]*pc/k}else coll[m]+=sales[m]*pc;
-  }
-  coll[E+1]+=R*ps/2; coll[E+2]+=R*ps/2;
+  const A={sales:z(),coll:z(),esc:z(),land:z(),cons:z(),stud:z(),ind:z(),fee:z(),
+    bDraw:z(),bPay:z(),bInt:z(),bBal:z(),gDraw:z(),gPay:z(),gInt:z(),gBal:z(),sIn:z(),sOut:z(),short:z(),cash:z(),op:z()};
+  // obra: curva S
   let w=[],ws=0;for(let k=0;k<C;k++){const v=Math.sin(Math.PI*(k+.5)/C)+.25;w.push(v);ws+=v}
-  for(let k=0;k<C;k++)cons[P+1+k]=p.cons*w[k]/ws;
-  for(let m=0;m<=P;m++)stud[m]=p.stud/(P+1);
-  const G=R*p.ind/100;for(let m=0;m<=E+2;m++)ind[m]=G/(E+3);
-  const alc=p.land*p.alc/100;
-  let deferred=0;
-  if(model===2)land[0]=p.land+alc;
-  if(model===3){land[0]=p.land*.5+alc;deferred=p.land*.5}
-  const line=p.cons*p.pb/100, r=Math.pow(1+p.tea/100,1/12)-1;
-  let c=p.cap,bal=0,cum=0,firstDraw=null,landPaidAt=null,maxBal=0;
-  for(let m=0;m<N;m++){
-    intr[m]=bal*r;
-    c+=coll[m]-land[m]-cons[m]-stud[m]-ind[m]-intr[m];
-    if(c<0&&m>P&&m<=E){const d=Math.min(-c,line-cum);if(d>0){draw[m]=d;bal+=d;cum+=d;c+=d;if(firstDraw===null)firstDraw=m}}
-    if(c>0&&bal>0&&m>E){const q=Math.min(c,bal);repay[m]=q;bal-=q;c-=q}
-    if(deferred>0&&bal<=0.5&&m>=E+2){landEnd[m]=deferred;c-=deferred;deferred=0;landPaidAt=m}
-    if(c<0){extra[m]=-c;c=0}
-    cash[m]=c;bank[m]=bal;maxBal=Math.max(maxBal,bal);
+  for(let k=0;k<C;k++)A.cons[P+1+k]=p.cons*w[k]/ws;
+  // ventas y cobranzas
+  let sellable=R, gross=R;
+  if(p.prod==="bloque"){
+    gross=R*(1-p.desc/100); sellable=Math.max(0,gross-L.units);
+    A.sales[P]=sellable;
+    const bi=p.bIni/100,bo=p.bObra/100,bs=Math.max(0,1-bi-bo);
+    A.coll[P]+=sellable*bi;
+    for(let k=0;k<C;k++)A.coll[P+1+k]+=sellable*bo*w[k]/ws;
+    A.coll[E+1]+=sellable*bs;
+  }else{
+    sellable=Math.max(0,R-L.units);
+    const sp=p.sp/100;
+    for(let m=1;m<=P;m++)A.sales[m]=sellable*sp/P;
+    for(let m=P+1;m<=E;m++)A.sales[m]+=sellable*(1-sp)/C;
+    let pi=p.pi/100,pc=p.pc/100,ps=Math.max(0,1-pi-pc),bono=0;
+    if(p.prod==="techo"){bono=Math.min(ps,p.bonoPct/100);ps-=bono}
+    for(let m=0;m<N;m++){const s=A.sales[m];if(!s)continue;
+      A.coll[m]+=s*pi;
+      if(m<E){for(let j=m+1;j<=E;j++)A.coll[j]+=s*pc/(E-m)}else A.coll[m]+=s*pc;
+      if(bono){
+        if(p.fianza){const at=Math.max(m,ACT);A.coll[at]+=s*bono;A.fee[at]+=s*bono*(p.fianzaRate/100)*Math.max(1,E+1-at)/12}
+        else A.coll[E+1]+=s*bono;
+      }
+    }
+    A.coll[E+1]+=sellable*ps/2;A.coll[E+2]+=sellable*ps/2;
   }
-  const sum=a=>a.reduce((x,y)=>x+y,0);
-  const costLand=sum(land)+sum(landEnd), costs=costLand+sum(cons)+sum(stud)+sum(ind), interest=sum(intr);
-  const pre=R-costs-interest, tax=Math.max(0,pre)*p.ir/100, net=pre-tax;
-  const flowsEq=z();flowsEq[0]=-p.cap;for(let m=0;m<N;m++)flowsEq[m]-=extra[m];flowsEq[N-1]+=cash[N-1]-tax;
-  const extraTot=sum(extra), invested=p.cap+extraTot;
-  // exposición sin financiamiento
-  let acc=0,minAcc=0,op=z();for(let m=0;m<N;m++){op[m]=coll[m]-land[m]-landEnd[m]-cons[m]-stud[m]-ind[m];acc+=op[m];minAcc=Math.min(minAcc,acc)}
-  const netLandAdj=model===1?net-p.land:net;
-  return {P,C,E,N,R,sales,coll,land,landEnd,cons,stud,ind,intr,draw,repay,extra,cash,bank,op,
-    costs,interest,pre,tax,net,netLandAdj,margin:R?net/R:0,maxBal,firstDraw,line,extraTot,invested,
-    exposure:-minAcc,irr:irr(flowsEq),landPaidAt,usedBank:maxBal>0.5};
+  for(let m=0;m<=P;m++)A.stud[m]=p.stud/(P+1);
+  const G=gross*p.ind/100;for(let m=0;m<=E+2;m++)A.ind[m]=G/(E+3);
+  A.land[0]=L.now+L.alc;
+  // escrow
+  if(p.escrow){let held=0;for(let m=0;m<ACT;m++){A.esc[m]=-A.coll[m];held+=A.coll[m]}A.esc[ACT]=held}
+  // cascada de caja
+  const line=p.bankOn?p.cons*p.pb/100:0, rb=Math.pow(1+p.tea/100,1/12)-1, rg=Math.pow(1+p.bridgeTea/100,1/12)-1;
+  let c=p.cap,bb=0,bc=0,gb=0,gc=0,sb=0,landEnd=L.end,landEndAt=null,firstBank=null;
+  for(let m=0;m<N;m++){
+    A.bInt[m]=bb*rb; A.gInt[m]=gb*rg; gb+=A.gInt[m];
+    A.op[m]=A.coll[m]-A.land[m]-A.cons[m]-A.stud[m]-A.ind[m]-A.fee[m];
+    c+=A.op[m]+A.esc[m]-A.bInt[m];
+    if(c<0&&line&&m>=ACT&&m<=E){const d=Math.min(-c,line-bc);if(d>0){A.bDraw[m]=d;bb+=d;bc+=d;c+=d;if(firstBank===null)firstBank=m}}
+    if(c<0&&p.bridgeOn&&m<=E+1){const d=Math.min(-c,p.bridgeMax-gc);if(d>0){A.gDraw[m]=d;gb+=d;gc+=d;c+=d}}
+    if(c<0&&p.partnerOn){A.sIn[m]=-c;sb+=-c;c=0}
+    if(c>0&&bb>0&&m>E){const q=Math.min(c,bb);A.bPay[m]=q;bb-=q;c-=q}
+    if(c>0&&gb>0&&bb<=.5&&(m>E||!line)){const q=Math.min(c,gb);A.gPay[m]=q;gb-=q;c-=q}
+    if(landEnd>0&&bb<=.5&&gb<=.5&&m>=E+2){A.land[m]+=landEnd;c-=landEnd;A.op[m]-=landEnd;landEndAt=m;landEnd=0}
+    if(c<0){A.short[m]=-c;c=0}
+    A.bBal[m]=bb;A.gBal[m]=gb;A.cash[m]=c;
+  }
+  if(landEnd>0){A.land[N-1]+=landEnd;A.op[N-1]-=landEnd;A.cash[N-1]-=landEnd;landEndAt=N-1}
+  const S=a=>a.reduce((x,y)=>x+y,0);
+  const income=S(A.coll), costs=S(A.land)+S(A.cons)+S(A.stud)+S(A.ind)+S(A.fee);
+  const interest=S(A.bInt)+S(A.gInt);
+  const pre=income-costs-interest, tax=Math.max(0,pre)*p.ir/100, net=pre-tax;
+  const partnerCut=sb>0?Math.max(0,net)*p.partnerShare/100*Math.min(1,sb/(sb+p.cap)):0;
+  const ownerCut=Math.max(0,net)*L.share;
+  const dev=net-partnerCut-ownerCut;
+  const shortTot=S(A.short);
+  // flujo del desarrollador para TIR
+  const f=z();f[0]=-p.cap;f[N-1]+=p.cap+dev;
+  let acc=0,minAcc=0;A.op.forEach(v=>{acc+=v;minAcc=Math.min(minAcc,acc)});
+  const sources=[];
+  if(p.cap>0)sources.push("Capital propio");
+  sources.push(p.prod==="bloque"?"Comprador en bloque":"Preventa");
+  if(S(A.bDraw)>.5)sources.push("Crédito promotor");
+  if(gc>.5)sources.push("Préstamo puente");
+  if(sb>.5)sources.push("Socio capitalista");
+  return {P,C,E,N,ACT,A,L,R,gross,sellable,income,costs,interest,pre,tax,net,partnerCut,ownerCut,dev,shortTot,
+    bankMax:Math.max(...A.bBal),bridgeMax:Math.max(...A.gBal),partnerIn:sb,firstBank,line,landEndAt,
+    exposure:-minAcc,irr:irr(f),sources,devLandAdj:landKey==="own"?dev-p.land:dev,ok:shortTot<1};
 }
 function irr(f){
   if(!f.some(v=>v<0)||!f.some(v=>v>0))return null;
@@ -325,135 +479,169 @@ function irr(f){
   return Math.pow(1+(lo+hi)/2,12)-1;
 }
 
-/* ---------------- motor de decisión ---------------- */
+/* ================= motor de decisión ================= */
 function decide(p){
-  const alc=p.land*p.alc/100;
-  if(p.own===1)return{model:1,why:["El terreno ya es tuyo: no hay que pagarlo.","La obra se financia con la preventa y las ventas durante la construcción.","La línea del banco queda aprobada solo como respaldo."]};
-  const full=p.land+alc, half=p.land*.5+alc;
-  if(p.cap>=full)return{model:2,why:[`Tu dinero propio (${money(p.cap)}) alcanza para pagar el terreno completo y la alcabala (${money(full)}).`,"Pagas al contado: mejor precio y el banco ve el terreno libre de deudas.","El banco entra si la caja no alcanza durante la obra."]};
-  if(p.cap>=half)return{model:3,why:[`Tu dinero alcanza para el 50 % del terreno y la alcabala (${money(half)}), pero no para el total (${money(full)}).`,"El otro 50 % se le paga al vendedor al final, después de cancelar el banco.","Negocia que el saldo no impida al banco tener la primera garantía."]};
-  return{model:3,short:half-p.cap,why:[`Tu dinero no alcanza ni para el 50 % del terreno (${money(half)}).`,"El modelo más cercano es 50 % ahora y 50 % al final.",`Te faltan ${money(half-p.cap)} solo para la cuota inicial del terreno: busca un socio, un préstamo puente o negocia más plazo con el propietario.`]};
+  const keys=p.own?["own"]:Object.keys(LAND).filter(k=>k!=="own");
+  const rows=keys.map(k=>{const s=simulate(p,k);const accepted=p.own?true:(p.opts||[]).includes(k);return {k,s,accepted}});
+  const pool=rows.filter(r=>r.accepted);
+  let best=null;
+  if(pool.length){
+    const ok=pool.filter(r=>r.s.ok);
+    best=(ok.length?ok:pool).slice().sort((a,b)=>ok.length?b.s.dev-a.s.dev:a.s.shortTot-b.s.shortTot)[0];
+  }
+  return {rows,best,pool};
 }
 
-/* ---------------- formato ---------------- */
+/* ================= formato ================= */
 let CUR="US$";
 const nf=new Intl.NumberFormat("es-PE",{maximumFractionDigits:0});
-function money(v){return (v<0?"−":"")+CUR+" "+nf.format(Math.abs(Math.round(v)))}
-function k(v){const a=Math.abs(v);return (v<0?"−":"")+(a>=1e6?(a/1e6).toFixed(2)+" M":a>=1e3?Math.round(a/1e3)+" k":Math.round(a))}
-function pct(v){return v==null?"n.a.":(v*100).toFixed(1).replace(".",",")+" %"}
-function phase(m,s){return m===0?"Inicio":m<=s.P?"Preventa":m<=s.E?"Obra":"Cierre"}
+const money=v=>(v<0?"−":"")+CUR+" "+nf.format(Math.abs(Math.round(v)));
+const k=v=>{const a=Math.abs(v);return (v<0?"−":"")+(a>=1e6?(a/1e6).toFixed(2)+" M":a>=1e3?Math.round(a/1e3)+" k":Math.round(a))};
+const pct=v=>v==null?"n.a.":(v*100).toFixed(1).replace(".",",")+" %";
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-/* ---------------- render ---------------- */
+/* ================= render ================= */
 function render(){
-  const p=read();state={...p};CUR=p.cur;
-  const tot=p.pi+p.pc;$("psum").textContent=tot>100?"La inicial y las cuotas suman más de 100 %.":`Saldo con crédito hipotecario a la entrega: ${100-tot} %`;
+  const p=read();CUR=p.cur;
+  const tot=p.pi+p.pc;$("psum").textContent=tot>100?"La inicial y las cuotas suman más de 100 %.":`Saldo con crédito hipotecario${p.prod==="techo"?" y bono":""} a la entrega: ${100-tot} %`;
   $("psum").classList.toggle("bad",tot>100);
-  const d=decide(p);
-  if(view===null||d.model!==lastRec||(view===1&&p.own!==1)||(view!==1&&p.own===1))view=d.model;
-  lastRec=d.model;
-  const s=simulate(p,view), sr=view===d.model?s:simulate(p,d.model);
-  // veredicto
-  const bankMsg=sr.usedBank?`Usarás el banco desde el mes ${sr.firstDraw}: hasta ${money(sr.maxBal)} de una línea de ${money(sr.line)}.`:"No necesitas usar la línea del banco: la caja alcanza todo el proyecto.";
-  let alert="";
-  if(d.short)alert=`<div class="alert">Falta conseguir ${money(d.short)} para la cuota inicial del terreno.</div>`;
-  else if(sr.extraTot>1)alert=`<div class="alert">Aun con el banco, la caja queda en rojo: necesitas ${money(sr.extraTot)} adicionales a tu dinero (socio o préstamo puente).</div>`;
-  else alert=`<div class="alert ok">${bankMsg}</div>`;
-  $("verdict").innerHTML=`<div class="eyebrow">El modelo que se ajusta a tus datos</div><h3>Modelo ${d.model} · ${MODELS[d.model].name}</h3><ul>${d.why.map(x=>`<li>${x}</li>`).join("")}</ul>${alert}`;
-  // tabs
-  $("tabs").innerHTML=[1,2,3].map(m=>{const dis=(m===1)!==(p.own===1);return `<button type="button" role="tab" data-m="${m}" aria-selected="${m===view}" ${dis?"disabled":""}><span class="tag">${m===d.model?"Recomendado":"Modelo "+m}</span>${MODELS[m].name}<small>${dis?(m===1?"Solo si el terreno es tuyo":"Solo si debes comprar el terreno"):MODELS[m].short}</small></button>`}).join("");
-  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=+b.dataset.m;render()});
-  // kpis
+  const D=decide(p);
+  if(!D.best){
+    $("verdict").innerHTML=`<div class="eyebrow">Falta una respuesta</div><h3>Marca al menos una forma de pago que aceptaría el propietario</h3><p>Sin eso el motor no puede armar el flujo. Mientras tanto, la tabla de abajo te muestra todas las opciones.</p>`;
+  }
+  const bestKey=D.best?D.best.k:D.rows[0].k;
+  if(lastBest!==bestKey){pick=null;lastBest=bestKey}
+  const viewKey=pick||bestKey;
+  const s=D.rows.find(r=>r.k===viewKey).s;
+  const b=D.best?D.best.s:s;
+  if(D.best){
+    const why=reasons(p,D);
+    let alert;
+    if(!b.ok)alert=`<div class="alert">Con todas las fuentes que marcaste aún faltan ${money(b.shortTot)}. Sube el préstamo puente, acepta un socio o negocia otra forma de pago del terreno.</div>`;
+    else alert=`<div class="alert ok">${b.firstBank!==null?`Usas el banco desde el mes ${b.firstBank}, hasta ${money(b.bankMax)}.`:"No necesitas usar el banco."} ${b.bridgeMax>1?`El puente llega a ${money(b.bridgeMax)}.`:""} ${b.partnerIn>1?`El socio aporta ${money(b.partnerIn)}.`:""}</div>`;
+    $("verdict").innerHTML=`<div class="eyebrow">El flujo que mejor se ajusta a tus respuestas</div>
+      <h3>${LAND[D.best.k].name} · ${PROD[p.prod].name}</h3>
+      <div class="recipe">${b.sources.map(x=>`<span>${x}</span>`).join("")}</div>
+      <ul>${why.map(x=>`<li>${x}</li>`).join("")}</ul>${alert}`;
+  }
   const kp=[
-    ["Ventas totales",money(s.R),`${p.units} unidades`],
-    ["Utilidad neta",money(s.net),`Margen ${pct(s.margin)} · después de IR`],
-    ["¿Usa el banco?",s.usedBank?`<span class="pill no">Sí, mes ${s.firstDraw}</span>`:`<span class="pill ok">No</span>`,s.usedBank?`Deuda máxima ${money(s.maxBal)}`:`Línea de respaldo ${money(s.line)}`],
-    ["Dinero propio necesario",money(s.invested),s.extraTot>1?`Incluye ${money(s.extraTot)} que faltan`:`Tienes ${money(p.cap)}`],
-    ["Intereses del banco",money(s.interest),"Costo financiero"],
-    ["Exposición máxima",money(s.exposure),"Lo que el proyecto llega a deber sin banco"],
-    ["TIR anual del accionista",pct(s.irr),"Sobre el dinero propio"],
-    view===1?["Utilidad restando el terreno",money(s.netLandAdj),"Mide si conviene más vender el terreno"]:
-     view===3?["Saldo del terreno al vendedor",money(p.land*.5),s.landPaidAt!=null?`Se paga en el mes ${s.landPaidAt}`:"Pendiente"]:
-     ["Costo del terreno",money(p.land*(1+p.alc/100)),"Incluye alcabala"]
+    ["Ventas totales",money(s.gross),`${p.units} unidades${s.L.units?` · ${money(s.L.units)} van al propietario`:""}`],
+    ["Tu utilidad",money(s.dev),"Después de IR y de repartir con socios"],
+    ["Utilidad del proyecto",money(s.net),`Margen ${pct(s.gross?s.net/s.gross:0)} después de IR`],
+    ["Dinero que falta",s.ok?`<span class="pill ok">Nada</span>`:`<span class="pill no">${money(s.shortTot)}</span>`,s.ok?"Las fuentes elegidas alcanzan":"Ninguna fuente lo cubre"],
+    ["Banco",s.firstBank!==null?`<span class="pill mid">Mes ${s.firstBank}</span>`:`<span class="pill ok">No se usa</span>`,s.firstBank!==null?`Deuda máxima ${money(s.bankMax)}`:p.bankOn?`Línea disponible ${money(s.line)}`:"Sin crédito promotor"],
+    ["Préstamo puente",money(s.bridgeMax),s.bridgeMax>1?`Intereses ${money(s.A.gInt.reduce((a,b)=>a+b,0))}`:"No se usa"],
+    ["Socio capitalista",money(s.partnerIn),s.partnerIn>1?`Se lleva ${money(s.partnerCut)}`:"No se usa"],
+    ["TIR anual de tu dinero",pct(s.irr),viewKey==="own"?`Restando el terreno: ${money(s.devLandAdj)}`:`Exposición máx. ${money(s.exposure)}`]
   ];
   $("kpis").innerHTML=kp.map(x=>`<div class="kpi"><div class="l">${x[0]}</div><div class="v">${x[1]}</div><div class="s">${x[2]}</div></div>`).join("");
-  chart(s);table(s);compare(p,d);
-  $("mbarT").textContent=`Modelo ${d.model} · ${MODELS[d.model].name}`;
-  $("mbarS").textContent=`Utilidad ${money(sr.net)} · ${sr.extraTot>1?"faltan "+money(sr.extraTot):sr.usedBank?"banco desde mes "+sr.firstDraw:"sin banco"}`;
+  compare(p,D,viewKey);chart(s);table(s);catalog(p,D,s);
+  $("mbarT").textContent=D.best?`${LAND[D.best.k].name} · ${PROD[p.prod].name}`:"Falta elegir formas de pago";
+  $("mbarS").textContent=`Tu utilidad ${money(b.dev)} · ${b.ok?"sin faltantes":"faltan "+money(b.shortTot)}`;
 }
-
+function reasons(p,D){
+  const b=D.best,s=b.s,out=[];
+  if(p.own)out.push("El terreno ya es tuyo: no hay que pagarlo y su valor cuenta como tu aporte.");
+  else{
+    const okN=D.pool.filter(r=>r.s.ok).length;
+    out.push(`El propietario acepta ${D.pool.length} forma${D.pool.length>1?"s":""} de pago; ${okN} se pueden financiar con tus fuentes.`);
+    if(okN>1)out.push(`Entre ellas, ${LAND[b.k].name.toLowerCase()} te deja la mayor utilidad: ${money(s.dev)}.`);
+    const cash=D.rows.find(r=>r.k==="cash");
+    if(b.k!=="cash"&&cash&&!cash.s.ok)out.push(`Comprar al contado dejaría ${money(cash.s.shortTot)} sin financiar.`);
+  }
+  if(p.prod==="techo"&&p.fianza)out.push("El bono de Techo Propio se cobra por adelantado con carta fianza: reduce mucho la necesidad de caja.");
+  if(p.prod==="bloque")out.push("La venta en bloque da caja segura durante la obra a cambio de un descuento en el precio.");
+  if(p.escrow&&p.prod!=="bloque")out.push(`La preventa queda retenida hasta el mes ${s.ACT}; hasta entonces pagas con tu dinero${p.bridgeOn?" y el puente":""}.`);
+  return out;
+}
+function compare(p,D,viewKey){
+  const cols=["Forma de pago del terreno","¿Lo acepta?","Efectivo por terreno","Falta","Banco máx.","Puente máx.","Socio","Tu utilidad","TIR"];
+  let h=`<thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>`;
+  D.rows.forEach(r=>{const s=r.s,best=D.best&&D.best.k===r.k;
+    h+=`<tr data-k="${r.k}" class="${best?"best":""}" style="cursor:pointer${r.k===viewKey?";outline:2px solid var(--accent);outline-offset:-2px":""}"><td>${best?"★ ":""}${LAND[r.k].name}</td>
+    <td>${r.accepted?'<span class="pill ok">Sí</span>':'<span class="pill off">No</span>'}</td>
+    <td>${k(s.A.land.reduce((a,b)=>a+b,0))}</td><td class="${s.ok?"":"neg"}">${s.ok?"–":k(s.shortTot)}</td>
+    <td>${k(s.bankMax)}</td><td>${k(s.bridgeMax)}</td><td>${k(s.partnerIn)}</td><td>${k(s.dev)}</td><td>${pct(s.irr)}</td></tr>`});
+  $("compare").innerHTML=h+"</tbody>";
+  $("compare").querySelectorAll("tr[data-k]").forEach(tr=>tr.onclick=()=>{pick=tr.dataset.k;render()});
+}
 function chart(s){
-  const W=800,H=260,L=56,Rm=10,T=14,B=34,n=s.N;
-  const vals=s.op, maxV=Math.max(1,...vals.map(Math.abs),...s.bank);
-  const rawMax=Math.max(...vals,...s.bank,0), rawMin=Math.min(...vals,0);
+  const W=800,H=260,L=56,Rm=10,T=14,B=34,n=s.N,A=s.A;
+  const vals=A.op.map((v,i)=>v+A.esc[i]);
+  const rawMax=Math.max(...vals,...A.bBal,...A.gBal,0), rawMin=Math.min(...vals,0);
   const raw=(rawMax-rawMin)||1, mag=Math.pow(10,Math.floor(Math.log10(raw/5))), st=[1,2,2.5,5,10].map(x=>x*mag).find(x=>raw/x<=6);
-  const yMax=Math.ceil(rawMax/st)*st, yMin=Math.floor(rawMin/st)*st;
-  const span=(yMax-yMin)||1, y=v=>T+(yMax-v)/span*(H-T-B);
-  const bw=(W-L-Rm)/n, x=i=>L+i*bw;
+  const yMax=Math.ceil(rawMax/st)*st, yMin=Math.floor(rawMin/st)*st, span=(yMax-yMin)||1;
+  const y=v=>T+(yMax-v)/span*(H-T-B), bw=(W-L-Rm)/n, x=i=>L+i*bw;
   const css=getComputedStyle(document.documentElement), col=v=>css.getPropertyValue(v).trim();
   let g="";
-  for(let v=yMin;v<=yMax+st/2;v+=st){g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="${col("--line")}" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="${col("--muted")}" font-family="IBM Plex Mono,monospace">${k(v)}</text>`}
-  // fases
-  const bands=[[1,s.P,"--accent-soft","Preventa"],[s.P+1,s.E,null,"Obra"]];
-  bands.forEach(b=>{if(b[2])g+=`<rect x="${x(b[0])}" y="${T}" width="${(b[1]-b[0]+1)*bw}" height="${H-T-B}" fill="${col(b[2])}" opacity=".6"/>`;g+=`<text x="${x(b[0])+4}" y="${T+11}" font-size="10" fill="${col("--muted")}">${b[3]}</text>`});
+  for(let v=yMin;v<=yMax+st/2;v+=st)g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="${col("--line")}"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="${col("--muted")}" font-family="IBM Plex Mono,monospace">${k(v)}</text>`;
+  g+=`<rect x="${x(1)}" y="${T}" width="${s.P*bw}" height="${H-T-B}" fill="${col("--accent-soft")}" opacity=".6"/><text x="${x(1)+4}" y="${T+11}" font-size="10" fill="${col("--muted")}">Preventa</text><text x="${x(s.P+1)+4}" y="${T+11}" font-size="10" fill="${col("--muted")}">Obra</text>`;
   vals.forEach((v,i)=>{const y0=y(0),y1=y(v);g+=`<rect x="${x(i)+bw*.15}" y="${Math.min(y0,y1)}" width="${bw*.7}" height="${Math.max(1,Math.abs(y1-y0))}" fill="${col(v>=0?"--good":"--bad")}" rx="1.5"><title>Mes ${i}: ${money(v)}</title></rect>`});
-  if(s.usedBank){let d="";s.bank.forEach((v,i)=>{d+=(i?"L":"M")+(x(i)+bw/2).toFixed(1)+","+y(v).toFixed(1)});g+=`<path d="${d}" fill="none" stroke="${col("--bank")}" stroke-width="2.5"/>`}
-  g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(0)}" y2="${y(0)}" stroke="${col("--ink")}" stroke-width="1"/>`;
+  [["bBal","--bank"],["gBal","--bridge"]].forEach(([key,c])=>{if(Math.max(...A[key])<1)return;let d="";A[key].forEach((v,i)=>{d+=(i?"L":"M")+(x(i)+bw/2).toFixed(1)+","+y(v).toFixed(1)});g+=`<path d="${d}" fill="none" stroke="${col(c)}" stroke-width="2.5"/>`});
+  g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(0)}" y2="${y(0)}" stroke="${col("--ink")}"/>`;
   for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/12)))g+=`<text x="${x(i)+bw/2}" y="${H-B+16}" text-anchor="middle" font-size="10" fill="${col("--muted")}">${i}</text>`;
   g+=`<text x="${(L+W)/2}" y="${H-4}" text-anchor="middle" font-size="10" fill="${col("--muted")}">Mes</text>`;
   $("chart").innerHTML=g;
 }
-
 let lastTSV="";
 function table(s){
-  const rows=[
-    ["Ventas firmadas",s.sales],["Cobranzas",s.coll],["Terreno",s.land.map((v,i)=>-(v+s.landEnd[i]))],["Construcción",s.cons.map(v=>-v)],
-    ["Proyecto y licencias",s.stud.map(v=>-v)],["Gerencia, publicidad y comisiones",s.ind.map(v=>-v)],
-    ["Flujo operativo",s.op,1],["Desembolso del banco",s.draw],["Pago al banco",s.repay.map(v=>-v)],["Intereses",s.intr.map(v=>-v)],
-    ["Aporte adicional que falta",s.extra],["Deuda con el banco",s.bank],["Caja al cierre del mes",s.cash,1]];
-  const months=[...Array(s.N).keys()];
-  const cls=m=>m===0?"":m<=s.P?"ph-p":m<=s.E?"ph-c":"ph-f";
-  let h=`<thead><tr><th>Concepto</th><th>Total</th>${months.map(m=>`<th class="${cls(m)}">${m}<br><small>${phase(m,s)}</small></th>`).join("")}</tr></thead><tbody>`;
-  const noTotal={"Deuda con el banco":1,"Caja al cierre del mes":1};
-  rows.forEach(r=>{const t=r[1].reduce((a,b)=>a+b,0);h+=`<tr class="${r[2]?"total":""}"><td>${r[0]}</td><td>${noTotal[r[0]]?"":k(t)}</td>${r[1].map(v=>`<td class="${v<-0.5?"neg":""}">${Math.abs(v)<0.5?"–":k(v)}</td>`).join("")}</tr>`});
+  const A=s.A,neg=a=>a.map(v=>-v);
+  const rows=[["Ventas firmadas",A.sales],["Cobranzas",A.coll],["Preventa retenida / liberada (escrow)",A.esc],["Terreno",neg(A.land)],["Construcción",neg(A.cons)],
+    ["Proyecto y licencias",neg(A.stud)],["Gerencia, publicidad y comisiones",neg(A.ind)],["Carta fianza",neg(A.fee)],["Flujo operativo",A.op.map((v,i)=>v+A.esc[i]),1],
+    ["Banco: desembolso",A.bDraw],["Banco: pago",neg(A.bPay)],["Banco: intereses",neg(A.bInt)],["Puente: desembolso",A.gDraw],["Puente: pago",neg(A.gPay)],
+    ["Socio: aporte",A.sIn],["Dinero que falta",A.short],["Deuda con el banco",A.bBal,0,1],["Deuda del puente (con intereses)",A.gBal,0,1],["Caja al cierre del mes",A.cash,1,1]];
+  const months=[...Array(s.N).keys()], ph=m=>m===0?"Inicio":m<=s.P?"Preventa":m<=s.E?"Obra":"Cierre", cls=m=>m===0?"":m<=s.P?"ph-p":m<=s.E?"ph-c":"ph-f";
+  let h=`<thead><tr><th>Concepto</th><th>Total</th>${months.map(m=>`<th class="${cls(m)}">${m}<br><small>${ph(m)}</small></th>`).join("")}</tr></thead><tbody>`;
+  rows.forEach(r=>{if(!r[1].some(v=>Math.abs(v)>.5)&&!r[2])return;const t=r[1].reduce((a,b)=>a+b,0);
+    h+=`<tr class="${r[2]?"total":""}"><td>${r[0]}</td><td>${r[3]?"":k(t)}</td>${r[1].map(v=>`<td class="${v<-.5?"neg":""}">${Math.abs(v)<.5?"–":k(v)}</td>`).join("")}</tr>`});
   $("table").innerHTML=h+"</tbody>";
   lastTSV=["Concepto\t"+months.join("\t"),...rows.map(r=>r[0]+"\t"+r[1].map(v=>Math.round(v)).join("\t"))].join("\n");
 }
-
-function compare(p,d){
-  const ms=[1,2,3].filter(m=>(m===1)===(p.own===1));
-  const sims=ms.map(m=>[m,simulate(p,m)]);
-  const rows=[["Utilidad neta",s=>money(s.net)],["Dinero propio necesario",s=>money(s.invested)],["¿Usa el banco?",s=>s.usedBank?"Sí, desde el mes "+s.firstDraw:"No"],
-    ["Deuda máxima con el banco",s=>money(s.maxBal)],["Intereses",s=>money(s.interest)],["Falta conseguir",s=>money(s.extraTot)],["TIR anual",s=>pct(s.irr)]];
-  let h=`<thead><tr><th>Indicador</th>${sims.map(([m])=>`<th>Modelo ${m}${m===d.model?" ★":""}</th>`).join("")}</tr></thead><tbody>`;
-  rows.forEach(r=>{h+=`<tr><td>${r[0]}</td>${sims.map(([,s])=>`<td>${r[1](s)}</td>`).join("")}</tr>`});
-  $("compare").innerHTML=h+"</tbody>";
+function catalog(p,D,s){
+  const li=(on,title,status,why)=>`<li class="${on?"on":""}"><b>${title}${status}</b><span class="why">${why}</span></li>`;
+  const land=Object.keys(LAND).map(key=>{
+    const r=D.rows.find(x=>x.k===key);
+    let st,why=LAND[key].desc;
+    if(key==="own"){st=p.own?'<span class="pill ok">En tu flujo</span>':'<span class="pill off">No aplica</span>';if(!p.own)why+=" Solo si el terreno ya es tuyo."}
+    else if(p.own){st='<span class="pill off">No aplica</span>';why+=" Solo si debes conseguir el terreno."}
+    else if(D.best&&D.best.k===key)st='<span class="pill ok">Elegido</span>';
+    else if(!r.accepted)st='<span class="pill off">El propietario no lo acepta</span>';
+    else st=r.s.ok?'<span class="pill mid">Alternativa</span>':'<span class="pill no">No alcanza</span>';
+    return li(D.best&&D.best.k===key||key==="own"&&p.own,LAND[key].name,st,why)});
+  const used=n=>s.sources.includes(n);
+  const fin=[
+    ["Capital propio","Tu dinero al inicio.",p.cap>0?(used("Capital propio")?"ok":"mid"):"off",p.cap>0?"":"No ingresaste dinero propio."],
+    [p.prod==="bloque"?"Comprador en bloque":"Preventa","Cobranzas a compradores antes y durante la obra.","ok",""],
+    ["Crédito promotor","Banco, solo obra, desde el fin de la preventa.",!p.bankOn?"off":used("Crédito promotor")?"ok":"mid",!p.bankOn?"Marcaste que no tienes acceso.":used("Crédito promotor")?"":"Disponible pero no hace falta."],
+    ["Préstamo puente","Inversionista que presta y cobra al final.",!p.bridgeOn?"off":used("Préstamo puente")?"ok":"mid",!p.bridgeOn?"Marcaste que no tienes.":used("Préstamo puente")?"":"Disponible pero no hace falta."],
+    ["Socio capitalista","Pone lo que falta a cambio de un % de la utilidad.",!p.partnerOn?"off":used("Socio capitalista")?"ok":"mid",!p.partnerOn?"Marcaste que no lo aceptas.":used("Socio capitalista")?"":"Disponible pero no hace falta."]
+  ].map(([t,d,st,w])=>li(st==="ok",t,`<span class="pill ${st}">${st==="ok"?"En tu flujo":st==="mid"?"Respaldo":"No disponible"}</span>`,d+(w?" "+w:"")));
+  const prod=Object.keys(PROD).map(key=>li(p.prod===key,PROD[key].name,p.prod===key?'<span class="pill ok">Elegido</span>':'<span class="pill off">Otra opción</span>',PROD[key].hint));
+  $("catalog").innerHTML=`<div><h5>Terreno · 6 formas</h5><ul>${land.join("")}</ul></div><div><h5>Financiamiento · 5 fuentes</h5><ul>${fin.join("")}</ul></div><div><h5>Producto · 4 tipos</h5><ul>${prod.join("")}</ul></div>`;
 }
 
-/* ---------------- guardar ---------------- */
+/* ================= guardar ================= */
 function listSaved(){
-  const all=store("fi_projects")||{};
-  const names=Object.keys(all);
-  $("saved").innerHTML=names.length?names.map(n=>`<div class="item"><span>${n.replace(/</g,"&lt;")}</span><div><button type="button" data-load="${encodeURIComponent(n)}">Abrir</button><button type="button" data-del="${encodeURIComponent(n)}">Borrar</button></div></div>`).join(""):`<p class="note">Aún no tienes proyectos guardados. Escribe un nombre y pulsa «Guardar proyecto».</p>`;
-  $("saved").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{const s=(store("fi_projects")||{})[decodeURIComponent(b.dataset.load)];if(s){state=s;view=null;fill(s);render();toast("Proyecto abierto")}});
+  const all=store("fi2_projects")||{},names=Object.keys(all);
+  $("saved").innerHTML=names.length?names.map(n=>`<div class="item"><span>${esc(n)}</span><div><button type="button" data-load="${encodeURIComponent(n)}">Abrir</button><button type="button" data-del="${encodeURIComponent(n)}">Borrar</button></div></div>`).join(""):`<p class="note">Aún no tienes proyectos guardados. Escribe un nombre y pulsa «Guardar proyecto».</p>`;
+  $("saved").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{const s=(store("fi2_projects")||{})[decodeURIComponent(b.dataset.load)];if(s){state={...EXAMPLE,...s};pick=null;fill(state);render();toast("Proyecto abierto")}});
   $("saved").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-    if(b.dataset.armed){const all=store("fi_projects")||{};delete all[decodeURIComponent(b.dataset.del)];store("fi_projects",all);listSaved();toast("Proyecto borrado")}
+    if(b.dataset.armed){const all=store("fi2_projects")||{};delete all[decodeURIComponent(b.dataset.del)];store("fi2_projects",all);listSaved();toast("Proyecto borrado")}
     else{b.dataset.armed=1;b.textContent="¿Seguro?";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Borrar"}},3000)}});
 }
 function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
-
-$("btnSave").onclick=()=>{const p=read();const name=(p.pname||"").trim()||"Proyecto sin nombre";const all=store("fi_projects")||{};all[name]=p;store("fi_projects",all);listSaved();toast("Guardado: "+name)};
-$("btnExample").onclick=()=>{state={...EXAMPLE};view=null;fill(state);render();toast("Ejemplo cargado")};
+$("btnSave").onclick=()=>{read();const name=(state.pname||"").trim()||"Proyecto sin nombre";const all=store("fi2_projects")||{};all[name]={...state};store("fi2_projects",all);listSaved();toast("Guardado: "+name)};
+$("btnExample").onclick=()=>{state={...EXAMPLE,opts:[...EXAMPLE.opts]};pick=null;fill(state);render();toast("Ejemplo cargado")};
 $("btnCopy").onclick=()=>{const done=()=>toast("Tabla copiada: pégala en Excel");
-  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lastTSV).then(done,fallback);else fallback();
-  function fallback(){const ta=document.createElement("textarea");ta.value=lastTSV;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){toast("Selecciona la tabla y copia con Ctrl+C")}ta.remove()}};
-$("ownYes").onclick=()=>{setOwn(1);view=null;render()};
-$("ownNo").onclick=()=>{setOwn(0);view=null;render()};
-$("form").addEventListener("input",()=>{render();store("fi_draft",read())});
+  const fb=()=>{const ta=document.createElement("textarea");ta.value=lastTSV;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){toast("Selecciona la tabla y copia con Ctrl+C")}ta.remove()};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lastTSV).then(done,fb);else fb()};
+$("form").addEventListener("input",()=>{render();store("fi2_draft",{...state})});
 $("form").addEventListener("submit",e=>e.preventDefault());
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+const _r=render;render=function(){_r();store("fi2_draft",{...state})};
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>render());
 
-const draft=store("fi_draft");
-state=draft&&typeof draft==="object"?{...EXAMPLE,...draft}:{...EXAMPLE};
+const draft=store("fi2_draft");
+state=draft&&typeof draft==="object"?{...EXAMPLE,...draft}:{...EXAMPLE,opts:[...EXAMPLE.opts]};
 fill(state);render();listSaved();
 })();
 </script>
