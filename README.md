@@ -81,3 +81,15 @@ node scripts/generar_cotizacion_docx.js
 # Verificación numérica independiente del modelo
 python scripts/verificar_modelo.py
 ```
+
+---
+
+## Flujo de caja – Lote demo (Huidobro Desarrolladora)
+
+`entregables/Flujo_Caja_Lote_Demo.xlsx`, generado con `python scripts/generar_flujo_caja_demo.py <ruta a recalc.py>`.
+Base: *Anexo A – Cabida numérica Rev. A* (23 deptos, ventas US$ 13.5 M, terreno US$ 950 k).
+Horizonte: mes 0 terreno · 1–3 preventa · 4–18 obra · 19–22 cobro de hipotecarios y cierre.
+
+Hojas: **Resumen** (indicadores y comparativo de mecanismos de terreno) · **Supuestos**
+(celdas amarillas) · **Flujo_Mensual** (cobranzas, egresos, IGV, escrow, crédito promotor,
+préstamo puente, flujo del accionista) · **Terreno_Estrategias** (opciones legales/SUNARP y fuentes).
