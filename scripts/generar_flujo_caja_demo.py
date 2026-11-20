@@ -115,7 +115,7 @@ for lbl, u, s, igv in ventas:
     if u is not None:
         inp(S.cell(row=r, column=2), u, INT)
     inp(S.cell(row=r, column=3), s)
-    inp(S.cell(row=r, column=4), igv)
+    calc(S.cell(row=r, column=4), f"=C{r}*TasaIGV*(1-PctTerrIGV)")
     calc(S.cell(row=r, column=5), f"=C{r}+D{r}")
     calc(S.cell(row=r, column=6), f"=IFERROR(E{r}/$E$13,0)", PCT)
     r += 1
@@ -127,13 +127,25 @@ for col in "ABCDEF":
     S[f"{col}13"].fill = FILL_TOT
 S["G13"] = "Cuadra con Anexo A: US$ 13,517,115 (23 deptos, 1,744 m² vendibles)."
 S["G13"].font = F_NOTE
+S.cell(row=14, column=1, value="Primera venta: % del precio atribuido al terreno (no paga IGV)").font = F
+inp(S["B14"], 0.50, PCT, "Reglamento de la Ley del IGV: en la primera venta de inmuebles por el constructor, "
+    "la base imponible excluye el valor del terreno, que se considera el 50 % del valor de venta. "
+    "Por eso el IGV efectivo es 18 % x 50 % = 9 % del precio sin IGV.")
+name(S, "B14", "PctTerrIGV")
+S["C14"] = "Tasa IGV"
+S["C14"].font = F_B
+S["C14"].alignment = Alignment(horizontal="right")
+inp(S["D14"], 0.18, PCT, "Tasa general: 16 % IGV + 2 % IPM.")
+name(S, "D14", "TasaIGV")
+S["G14"] = "IGV de ventas = precio sin IGV x 18 % x (1 - 50 %) = 9 % efectivo (igual al Anexo A)."
+S["G14"].font = F_NOTE
 name(S, "E13", "VentasTot")
 name(S, "C13", "VentasSinIGV")
 name(S, "D13", "IGVVentas")
 
 # 2. Egresos --------------------------------------------------------------------
 section(S, 15, "2. EGRESOS DEL PROYECTO (Anexo A)", 7)
-for i, h in enumerate(["Concepto", "Sin IGV", "IGV", "Total con IGV", "% IGV/total"]):
+for i, h in enumerate(["Concepto", "Sin IGV", "IGV", "Total con IGV", "% IGV/total", "Afecto IGV (1/0)"]):
     S.cell(row=16, column=1 + i, value=h).font = F_B
 egresos = [
     ("Terreno – precio base acordado", 950000, 0, "Terreno", "Precio del Anexo A. El precio final depende del mecanismo (sección 5)."),
@@ -148,7 +160,9 @@ r = 17
 for lbl, s, igv, nm, note in egresos:
     S.cell(row=r, column=1, value=lbl).font = F
     inp(S.cell(row=r, column=2), s)
-    inp(S.cell(row=r, column=3), igv)
+    inp(S.cell(row=r, column=6), 0 if nm == "Terreno" else 1, INT,
+        "La venta de terreno no está gravada con IGV." if nm == "Terreno" else None)
+    calc(S.cell(row=r, column=3), f"=B{r}*TasaIGV*F{r}")
     calc(S.cell(row=r, column=4), f"=B{r}+C{r}")
     calc(S.cell(row=r, column=5), f"=IFERROR(C{r}/D{r},0)", PCT2)
     if note:
@@ -267,7 +281,7 @@ S["G53"].font = F_NOTE
 # 6. Financiamiento ----------------------------------------------------------------
 section(S, 65, "6. FINANCIAMIENTO", 7)
 fin = [
-    ("Aporte de capital de la desarrolladora", 150000, USD, "Aporte", "Fondos propios reducidos: ajustar al monto real disponible."),
+    ("Aporte de capital de la desarrolladora", 0, USD, "Aporte", "Sin aporte propio: todo lo previo al crédito promotor (incluida la cuota inicial del terreno) lo cubre el préstamo puente."),
     ("Mes del aporte", 0, INT, "MesAporte", None),
     ("Caja mínima operativa", 20000, USD, "CajaMin", None),
     ("Crédito promotor – línea máxima", 3800000, USD, "Linea", "Banco local. Se usa solo lo necesario (no revolvente)."),
@@ -485,7 +499,7 @@ items = [
     (25, "sec", "NECESIDADES DE FINANCIAMIENTO"),
     (26, "Exposición máxima del proyecto (flujo económico acumulado mínimo)", f"=-MIN(0,MIN({FMn}!C42:{LC}42))", USD,
      "Lo que habría que financiar si no hubiera escrow ni crédito."),
-    (27, "Aporte de capital de la desarrolladora", "=Aporte", USD, None),
+    (27, "Aporte de capital de la desarrolladora", "=Aporte", USD, "Supuesto: cero."),
     (28, "Saldo máximo del crédito promotor", f"=MAX({FMn}!C53:{LC}53)", USD, None),
     (29, "  uso de la línea aprobada", "=IFERROR(C28/Linea,0)", PCT, None),
     (30, "Saldo máximo del préstamo puente", f"=MAX({FMn}!C64:{LC}64)", USD, None),
@@ -495,9 +509,9 @@ items = [
     (34, "sec", "INDICADORES"),
     (35, "TIR económica (anual)", f"=(1+IRR({FMn}!C41:{LC}41,0.02))^12-1", PCT, "Flujo del proyecto antes de financiamiento e IR."),
     (36, "VAN económico @ tasa de descuento", f"=NPV(TMDesc,{FMn}!D41:{LC}41)+{FMn}!C41", USD, None),
-    (37, "TIR del accionista (anual, después de IR)", f"=(1+IRR({FMn}!C78:{LC}78,0.05))^12-1", PCT,
-     "Con aporte pequeño la TIR es muy alta: mirar también la utilidad neta."),
-    (38, "Múltiplo sobre el capital aportado", "=IFERROR((C22+Aporte)/Aporte,0)", '0.0"x"', None),
+    (37, "TIR del accionista (anual, después de IR)", f'=IF(Aporte=0,"n.a.",(1+IRR({FMn}!C78:{LC}78,0.05))^12-1)', PCT,
+     "Sin aporte propio la TIR no se puede calcular (no hay inversión): mirar la utilidad neta."),
+    (38, "Múltiplo sobre el capital aportado", '=IF(Aporte=0,"n.a.",(C22+Aporte)/Aporte)', '0.0"x"', None),
     (40, "sec", "CONTROLES"),
     (41, "Preventa lograda al fin de la preventa (% de ventas a terceros)",
      f"=INDEX({FMn}!C12:{LC}12,MATCH(PrevFin,{FMn}!C3:{LC}3,0))", PCT, None),
@@ -521,8 +535,38 @@ for it in items:
         R.cell(row=rw, column=5, value=note).font = F_NOTE
 R.cell(row=18, column=2, value="Referencia Anexo A: utilidad antes de IR US$ 6,353,205 (47.0 %), sin costos financieros.").font = F_NOTE
 
-section(R, 48, "COMPARATIVO DE MECANISMOS DE TERRENO (valores calculados con este modelo)", 5)
-R.cell(row=49, column=2, value="Tabla de valores fijos: se obtuvo corriendo el modelo con cada escenario. "
+section(R, 48, "FONDOS A CONSEGUIR ANTES DEL CRÉDITO PROMOTOR (meses previos a la activación)", 5)
+pre = lambda rw: f'=SUMIF({FMn}!$C$3:${LC}$3,"<"&MesAct,{FMn}!$C${rw}:${LC}${rw})'
+fondos = [
+    (49, "Cuota inicial del terreno (pago a la firma)", pre(25)),
+    (50, "Alcabala y gastos notariales/registrales", pre(26)),
+    (51, "Desarrollo del proyecto (arquitectura, licencia)", pre(27)),
+    (52, "Gerencia de proyectos y gastos administrativos", pre(29) + "+" + pre(30)[1:]),
+    (53, "Publicidad de lanzamiento", pre(31)),
+    (54, "Comisiones de ventas", pre(32)),
+    (55, "IGV neto pagado", pre(33)),
+    (56, "Caja mínima al activar el crédito", "=CajaMin"),
+]
+for rw, lbl, f in fondos:
+    R.cell(row=rw, column=2, value=lbl).font = F
+    calc(R.cell(row=rw, column=3), f)
+R.cell(row=57, column=2, value="TOTAL A CONSEGUIR").font = F_B
+calc(R["C57"], "=SUM(C49:C56)", USD, True)
+R.cell(row=58, column=2, value="Cubierto con: aporte propio").font = F
+calc(R["C58"], "=Aporte")
+R.cell(row=59, column=2, value="Cubierto con: préstamo puente / inversionista").font = F
+calc(R["C59"], pre(62))
+R.cell(row=60, column=2, value="Saldo del puente al activar el crédito (incluye intereses)").font = F
+calc(R["C60"], f"=INDEX({FMn}!C60:{LC}60,MATCH(MesAct,{FMn}!C3:{LC}3,0))")
+R["E57"] = "Las cobranzas de preventa quedan en escrow: no ayudan a pagar estos montos."
+R["E57"].font = F_NOTE
+R["E59"] = "Se repaga con la liberación del escrow y las cobranzas al final."
+R["E59"].font = F_NOTE
+for col in "BC":
+    R[f"{col}57"].fill = FILL_TOT
+
+section(R, 62, "COMPARATIVO DE MECANISMOS DE TERRENO (valores calculados con este modelo)", 5)
+R.cell(row=63, column=2, value="Tabla de valores fijos: se obtuvo corriendo el modelo con cada escenario. "
                                "Si cambia supuestos, vuelva a correr scripts/generar_flujo_caja_demo.py.").font = F_NOTE
 R.freeze_panes = "A4"
 
@@ -630,10 +674,10 @@ wb.save(OUT)
 # ═══════════════════════════ comparativo: correr cada escenario y guardar valores
 RECALC = sys.argv[1] if len(sys.argv) > 1 else None
 if RECALC:
-    metrics = [("Efectivo pagado por el terreno", 8, USD), ("Utilidad neta", 22, USD), ("Margen neto", 23, PCT),
-               ("Aporte propio", 27, USD), ("Saldo máx. crédito promotor", 28, USD),
+    metrics = [("Efectivo pagado por el terreno", 8, USD), ("Fondos a conseguir antes del crédito", 57, USD), ("Utilidad neta", 22, USD), ("Margen neto", 23, PCT),
+               ("Saldo máx. crédito promotor", 28, USD),
                ("Saldo máx. préstamo puente", 30, USD), ("Costos financieros", 15, USD),
-               ("TIR accionista (anual)", 37, PCT), ("Déficit no cubierto", 32, USD)]
+               ("Déficit no cubierto", 32, USD)]
     results = {}
     tmp = OUT.replace(".xlsx", "_tmp.xlsx")
     for esc in range(1, 5):
@@ -651,12 +695,12 @@ if RECALC:
     hdr = ["Indicador", "1 Contado", "2 Pago diferido", "3 Permuta total", "4 Mixto"]
     ws.column_dimensions["F"].width = 16
     for i, h in enumerate(hdr):
-        c = ws.cell(row=50, column=2 + i, value=h)
+        c = ws.cell(row=64, column=2 + i, value=h)
         c.font = F_B
     for k, (lbl, _, fmt) in enumerate(metrics):
-        ws.cell(row=51 + k, column=2, value=lbl).font = F
+        ws.cell(row=65 + k, column=2, value=lbl).font = F
         for esc in range(1, 5):
-            c = ws.cell(row=51 + k, column=2 + esc, value=results[esc][k])
+            c = ws.cell(row=65 + k, column=2 + esc, value=results[esc][k])
             c.font = F
             c.number_format = fmt
     w.calculation.fullCalcOnLoad = True
