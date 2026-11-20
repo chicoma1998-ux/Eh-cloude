@@ -215,7 +215,7 @@ name(S, "B41", "PubPrev")
 # 4. Ventas y cobranza ---------------------------------------------------------
 section(S, 43, "4. FORMA DE PAGO DE LOS COMPRADORES", 7)
 S.cell(row=44, column=1, value="Cuota inicial (al firmar la compraventa)").font = F
-inp(S["B44"], 0.20, PCT, "Recomendado 20 %: con 10 % el préstamo puente sube a ~US$ 1.6 M y dura hasta el mes 19; con 20 % se paga en el mes 4 con la preventa.")
+inp(S["B44"], 0.10, PCT, "Supuesto del cliente: 10 %.")
 name(S, "B44", "PctIni")
 S.cell(row=45, column=1, value="Cuotas durante la obra (repartidas hasta la entrega)").font = F
 inp(S["B45"], 0.10, PCT)
@@ -288,7 +288,7 @@ fin = [
     ("Crédito promotor – mes de activación", 4, INT, "MesAct", "Requiere: terreno inscrito a nombre de la desarrolladora (o fideicomiso), licencia y meta de preventa."),
     ("Crédito promotor – TEA", 0.11, PCT, "TEABanco", "Referencial en US$; confirmar con cotización del banco."),
     ("Crédito promotor – comisión de estructuración (% línea)", 0.01, PCT, "ComBanco", None),
-    ("Supervisión bancaria / fideicomiso (US$ por mes de obra)", 1500, USD, "SupBanco", None),
+    ("Supervisión bancaria (US$ por mes de obra)", 1500, USD, "SupBanco", None),
     ("Préstamo puente / inversionista – monto máximo", 2500000, USD, "PuenteMax", "Cubre los meses previos al crédito promotor. Fondo privado, socio o financiamiento participativo."),
     ("Préstamo puente – TEA (intereses capitalizados)", 0.18, PCT, "TEAPuente", "Referencial para deuda privada subordinada en US$. Intereses capitalizados: se pagan juntos al final."),
     ("Retener cobranzas en escrow hasta activar el crédito (1 = sí, 0 = no)", 1, INT, "Escrow", "Práctica usual: las cuotas de preventa quedan en cuenta recaudadora hasta alcanzar el punto de equilibrio."),
@@ -314,9 +314,27 @@ S.cell(row=82, column=1, value="Crédito promotor – % del costo de construcci�
 inp(S["B82"], 0.60, PCT, "Rango usual en bancos peruanos: 50 % a 70 % del costo de obra. 60 % es de aprobación holgada si hay preventa y terreno inscrito.")
 name(S, "B82", "PctLinea")
 calc(S["B69"], "=PctLinea*Construccion")
-S.cell(row=83, column=1, value="Pago del préstamo puente: 1 = al activar el crédito · 0 = al final, después del banco").font = F
-inp(S["B83"], 0, INT, "0 recomendado: el banco no deja que su crédito pague otras deudas; exige que el puente quede subordinado hasta cancelar el crédito promotor.")
+S.cell(row=83, column=1, value="Pago del préstamo puente al activar el crédito (1 = sí · 0 = al final)").font = F
+calc(S["B83"], "=IF(EstrPuente=1,1,0)", INT)
 name(S, "B83", "PagoPuente")
+S["G83"] = "Se deduce de la estructura elegida (fila 84)."
+S["G83"].font = F_NOTE
+section(S, 85, "7. GARANTÍA DEL PRÉSTAMO PUENTE", 7)
+S.cell(row=84, column=1, value="Estructura del puente: 1 = hipoteca (se paga al entrar el banco) · 2 = fideicomiso").font = F_B
+inp(S["B84"], 2, INT, "1: compraventa + hipoteca simultánea a favor del inversionista; el banco exige levantarla, así que el puente se paga con el 1.er desembolso. "
+    "2: el terreno entra a un fideicomiso; el banco y el inversionista son beneficiarios en ese orden; el puente se cobra al final.")
+name(S, "B84", "EstrPuente")
+garant = [
+    (86, "Hipoteca: constitución (notaría, SUNARP, tasación)", 3500, "HipCost", "Al firmar (mes 0)."),
+    (87, "Hipoteca: levantamiento (notaría y SUNARP)", 1000, "HipLev", "En el mes de activación del crédito."),
+    (88, "Fideicomiso: estructuración, contrato y abogados", 7000, "FidEst", "Pago único al constituirlo (mes 0). Referencial."),
+    (89, "Fideicomiso: comisión mensual de la fiduciaria", 1500, "FidMes", "Desde la firma hasta el cierre (gerencia). Referencial: cotizar con 2-3 fiduciarias."),
+]
+for rw, lbl, v, nm, note in garant:
+    S.cell(row=rw, column=1, value=lbl).font = F
+    inp(S.cell(row=rw, column=2), v, USD)
+    name(S, f"B{rw}", nm)
+    S.cell(row=rw, column=7, value=note).font = F_NOTE
 S["G82"] = "Supuesto conservador recomendado: 60 %."
 S["G82"].font = F_NOTE
 S.cell(row=81, column=1, value="Tasa mensual de descuento").font = F
@@ -442,7 +460,10 @@ row_formula(52, "  (–) Amortización (con cobranzas)", lambda c, p: f"=MIN({c}
 row_formula(53, "  Saldo final", lambda c, p: f"={c}50+{c}51-{c}52", total=False)
 row_formula(54, "  Intereses pagados", lambda c, p: f"={c}50*TMBanco")
 row_formula(55, "  Comisión de estructuración", lambda c, p: f"=IF({c}3=MesAct,Linea*ComBanco,0)")
-row_formula(56, "  Supervisión bancaria / fideicomiso",
+row_formula(48, "Costos de la garantía del puente (hipoteca o fideicomiso)",
+            lambda c, p: f"=IF(EstrPuente=1,IF({c}3=MesTerreno,HipCost,0)+IF({c}3=MesAct,HipLev,0),"
+                         f"IF({c}3=MesTerreno,FidEst,0)+IF(AND({c}3>=MesTerreno,{c}3<=GerFin),FidMes,0))")
+row_formula(56, "  Supervisión bancaria",
             lambda c, p: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),SupBanco,0)")
 row_formula(57, "  Desembolsos acumulados", lambda c, p: f"=SUM($C$51:{c}51)", total=False)
 FM.cell(row=59, column=1, value="Préstamo puente / inversionista").font = F_B
@@ -455,7 +476,7 @@ row_formula(64, "  Saldo final", lambda c, p: f"={c}60+{c}61+{c}62-{c}63", total
 row_formula(65, "  Desembolsos acumulados", lambda c, p: f"=SUM($C$62:{c}62)", total=False)
 FM.cell(row=66, column=1, value="Cascada de caja").font = F_B
 row_formula(67, "  Caja antes de financiamiento",
-            lambda c, p: f"={c}46+{c}43+{c}47-{c}54-{c}55-{c}56", total=False)
+            lambda c, p: f"={c}46+{c}43+{c}47-{c}48-{c}54-{c}55-{c}56", total=False)
 row_formula(68, "  Necesidad de fondos", lambda c, p: f"=MAX(0,CajaMin-{c}67)")
 row_formula(69, "  Excedente para repagar deuda", lambda c, p: f"=MAX(0,{c}67+{c}51+{c}62-CajaMin)", total=False)
 row_formula(70, "  DÉFICIT NO CUBIERTO (debe ser cero)", lambda c, p: f"=MAX(0,{c}68-{c}51-{c}62)")
@@ -497,7 +518,9 @@ items = [
     (13, "Cobranzas totales", f"={FMn}!B19", USD, None),
     (14, "Egresos operativos totales (con IGV neto)", f"={FMn}!B38", USD, None),
     (15, "Costos financieros (intereses, comisiones, supervisión)",
-     f"={FMn}!B54+{FMn}!B55+{FMn}!B56+{FMn}!B61", USD, None),
+     f"={FMn}!B48+{FMn}!B54+{FMn}!B55+{FMn}!B56+{FMn}!B61", USD, "Incluye costos de hipoteca o fideicomiso del puente."),
+    (19, "Puente adicional requerido después de activar el banco", f'=SUMIF({FMn}!C3:{LC}3,">"&MesAct,{FMn}!C62:{LC}62)', USD,
+     "Con la hipoteca (estructura 1) este monto no tiene garantía: el banco ya tiene la primera hipoteca."),
     (16, "Utilidad antes de IR (contable, sin IGV)",
      f"=VentasSinIGV-({FMn}!B27+{FMn}!B28+{FMn}!B29+{FMn}!B30+{FMn}!B31+{FMn}!B32-{FMn}!B35)-PrecioTerr-{FMn}!B26-C15", USD,
      "Ventas sin IGV – costos sin IGV – terreno – alcabala – costos financieros."),
@@ -701,6 +724,20 @@ if RECALC:
         assert info.get("status") == "success", info
         v = load_workbook(tmp, data_only=True)["Resumen"]
         results[esc] = [v.cell(row=m[1], column=3).value for m in metrics]
+    m2 = [("Costos de garantía (hipoteca/fideicomiso)", None, USD), ("Intereses del puente", 33, USD),
+          ("Costos financieros totales", 15, USD), ("Saldo máx. préstamo puente", 30, USD),
+          ("Puente adicional después del banco", 19, USD), ("Saldo máx. crédito promotor", 28, USD),
+          ("Utilidad neta", 22, USD)]
+    res2 = {}
+    for est in (1, 2):
+        w = load_workbook(OUT)
+        w["Supuestos"]["B84"] = est
+        w.save(tmp)
+        out = subprocess.run([sys.executable, RECALC, tmp, "90"], capture_output=True, text=True)
+        assert json.loads(out.stdout).get("status") == "success"
+        wv = load_workbook(tmp, data_only=True)
+        v = wv["Resumen"]
+        res2[est] = [wv["Flujo_Mensual"]["B48"].value if m[1] is None else v.cell(row=m[1], column=3).value for m in m2]
     os.remove(tmp)
     w = load_workbook(OUT)
     ws = w["Resumen"]
@@ -715,7 +752,18 @@ if RECALC:
             c = ws.cell(row=65 + k, column=2 + esc, value=results[esc][k])
             c.font = F
             c.number_format = fmt
+    section(ws, 76, "COMPARATIVO DE GARANTÍA DEL PUENTE (escenario de terreno elegido, valores calculados)", 6)
+    for i, h in enumerate(["Indicador", "1 · Hipoteca", "2 · Fideicomiso", "Diferencia (2 – 1)"]):
+        ws.cell(row=77, column=2 + i, value=h).font = F_B
+    for k, (lbl, _, fmt) in enumerate(m2):
+        ws.cell(row=78 + k, column=2, value=lbl).font = F
+        for j, est in enumerate((1, 2)):
+            c = ws.cell(row=78 + k, column=3 + j, value=res2[est][k])
+            c.font = F
+            c.number_format = fmt
+        calc(ws.cell(row=78 + k, column=5), f"=D{78 + k}-C{78 + k}", fmt)
     w.calculation.fullCalcOnLoad = True
     w.save(OUT)
+    print(json.dumps(res2, default=str))
     print(json.dumps(results, indent=1, default=str))
 print("OK", OUT)
