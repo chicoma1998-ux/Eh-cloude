@@ -284,9 +284,36 @@ details summary{cursor:pointer;font-weight:600}
         <div class="sub" data-show="partnerOn=1">
           <div class="field"><label for="partnerShare">% de la utilidad que pediría el socio</label><input id="partnerShare" type="number" min="0" max="90" step="1" inputmode="numeric"><span class="hint">Recupera su aporte al final y se lleva este % si pone todo el capital; si pone una parte, el % baja en proporción a lo que aportó frente a tu dinero.</span></div>
         </div>
+        <div class="field"><label for="cur">Moneda</label><select id="cur"><option value="US$">Dólares (US$)</option><option value="S/">Soles (S/)</option></select></div>
+      </section>
+
+      <!-- 7 IMPUESTOS -->
+      <section class="step">
+        <h2><span class="n">7</span>Impuestos</h2>
+        <p class="lead">Los precios y costos que ingresaste incluyen IGV. El motor separa el IGV y paga el impuesto a la renta en el mes que corresponde.</p>
+        <div class="field">
+          <span class="q">¿La venta de las unidades paga IGV?</span>
+          <div class="seg" data-key="igv" data-opts="grav:Sí, gravada (9 % efectivo)|exo:Exonerada (vivienda hasta 35 UIT)"></div>
+          <span class="hint" id="igvHint"></span>
+        </div>
         <div class="row2">
-          <div class="field"><label for="ir">Impuesto a la renta %</label><input id="ir" type="number" min="0" max="50" step="0.1" inputmode="decimal"></div>
-          <div class="field"><label for="cur">Moneda</label><select id="cur"><option value="US$">Dólares (US$)</option><option value="S/">Soles (S/)</option></select></div>
+          <div class="field"><label for="uit">Valor de la UIT (S/)</label><input id="uit" type="number" min="0" step="50" inputmode="numeric"></div>
+          <div class="field" data-show="cur=US$"><label for="tc">Tipo de cambio (S/ por US$)</label><input id="tc" type="number" min="0" step="0.01" inputmode="decimal"></div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <span class="q">¿En qué régimen tributario está tu empresa?</span>
+          <div class="seg" data-key="regime" data-opts="general:Régimen General|mype:Régimen MYPE Tributario"></div>
+          <span class="hint" id="regHint"></span>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="coef">Coeficiente de pagos a cuenta (%)</label><input id="coef" type="number" min="0" max="30" step="0.01" inputmode="decimal"></div>
+          <div class="field"><label for="ir">Tasa del impuesto a la renta (%)</label><input id="ir" type="number" min="0" max="50" step="0.1" inputmode="decimal"></div>
+        </div>
+        <span class="hint">El coeficiente sale de tu declaración del año anterior. Si la empresa es nueva o no pagó impuesto, déjalo en 0: se usa 1.5 %.</span>
+        <div class="field" style="margin-top:12px">
+          <label for="start">Mes del calendario en que empieza el proyecto (mes 0)</label>
+          <select id="start"></select>
+          <span class="hint">Sirve para saber cuándo cae la declaración anual (marzo–abril del año siguiente a la entrega).</span>
         </div>
       </section>
 
@@ -313,9 +340,14 @@ details summary{cursor:pointer;font-weight:600}
         <svg class="chart" id="chart" viewBox="0 0 800 260" role="img" aria-label="Gráfico del flujo mensual"></svg>
       </div>
       <div class="panel">
+        <h4>Impuestos del proyecto</h4>
+        <div class="scroll"><table id="taxes"></table></div>
+        <p class="note" id="taxNote"></p>
+      </div>
+      <div class="panel">
         <h4>Tabla del flujo de caja <button type="button" id="btnCopy">Copiar para Excel</button></h4>
         <div class="scroll"><table id="table"></table></div>
-        <p class="note">Cifras con IGV incluido. Versión didáctica: no separa el IGV ni los pagos a cuenta del impuesto a la renta.</p>
+        <p class="note">Cobranzas y costos con IGV; el IGV neto y el impuesto a la renta se pagan en sus propias filas. Versión didáctica: no incluye el IGV de la permuta ni el ITF.</p>
       </div>
       <div class="panel">
         <h4>Catálogo de flujos del motor</h4>
@@ -347,8 +379,8 @@ const PROD={
 const EXAMPLE={pname:"Ejemplo · Lote demo (23 deptos)",own:0,land:950000,opts:["cash","defer","permx"],deferIni:50,permPct:50,prima:12,jvShare:25,alc:3,
   cap:150000,prod:"libre",units:23,price:587700,bonoPct:70,fianza:1,fianzaRate:3,desc:10,bIni:20,bObra:60,
   pre:3,obra:15,sp:30,pi:10,pc:10,escrow:1,cons:4490251,stud:175120,ind:9.7,
-  bankOn:1,pb:60,tea:11,bridgeOn:1,bridgeMax:1500000,bridgeTea:18,partnerOn:1,partnerShare:35,ir:29.5,cur:"US$"};
-const NUM=["land","deferIni","permPct","prima","jvShare","alc","cap","units","price","bonoPct","fianzaRate","desc","bIni","bObra","pre","obra","sp","pi","pc","cons","stud","ind","pb","tea","bridgeMax","bridgeTea","partnerShare","ir"];
+  bankOn:1,pb:60,tea:11,bridgeOn:1,bridgeMax:1500000,bridgeTea:18,partnerOn:1,partnerShare:35,ir:29.5,cur:"US$",igv:"grav",uit:5350,tc:3.75,regime:"general",coef:0,start:1};
+const NUM=["land","deferIni","permPct","prima","jvShare","alc","cap","units","price","bonoPct","fianzaRate","desc","bIni","bObra","pre","obra","sp","pi","pc","cons","stud","ind","pb","tea","bridgeMax","bridgeTea","partnerShare","ir","uit","tc","coef","start"];
 const TXT=["pname","cur"];
 const $=id=>document.getElementById(id);
 let state={...EXAMPLE}, pick=null, lastBest=null;
@@ -392,13 +424,34 @@ function landTerms(key,p){
     case "jv": return {now:0,end:0,units:0,share:p.jvShare/100,alc};
   }
 }
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+$("start").innerHTML=MESES.map((m,i)=>`<option value="${i+1}">${m[0].toUpperCase()+m.slice(1)}</option>`).join("");
+function uitCur(p){return p.cur==="US$"?p.uit/(p.tc||1):p.uit}
+/* Impuesto a la renta anual según régimen */
+function taxRules(p,ingresos){
+  const U=uitCur(p);
+  let regime=p.regime, note="";
+  if(regime==="mype"&&ingresos>1700*U){regime="general";note="Tus ingresos del año superan 1,700 UIT: la empresa pasa al Régimen General."}
+  const coef=Math.max(p.coef/100,0.015);
+  let accRate=coef;
+  if(regime==="mype")accRate=ingresos<=300*U?0.01:coef;
+  const tax=renta=>{renta=Math.max(0,renta);if(regime==="mype"){const t=15*U;return Math.min(renta,t)*0.10+Math.max(0,renta-t)*p.ir/100}return renta*p.ir/100};
+  return {regime,note,accRate,tax};
+}
 function simulate(p,landKey){
-  const P=Math.max(1,Math.round(p.pre)),C=Math.max(1,Math.round(p.obra)),E=P+C,N=E+4,ACT=P+1;
+  let plan={acc:0,reg:0},r;
+  for(let it=0;it<4;it++){r=simCore(p,landKey,plan);plan={acc:r.tx.acc,reg:r.tx.reg}}
+  return r;
+}
+function simCore(p,landKey,plan){
+  const P=Math.max(1,Math.round(p.pre)),C=Math.max(1,Math.round(p.obra)),E=P+C,ACT=P+1;
+  const calE=((Math.round(p.start||1)-1+E)%12+12)%12+1, ACC=E+1, REG=E+(12-calE)+4, N=Math.max(E+4,REG+1);
   const L=landTerms(landKey,p);
   const R=p.units*p.price;
   const z=()=>new Array(N).fill(0);
   const A={sales:z(),coll:z(),esc:z(),land:z(),cons:z(),stud:z(),ind:z(),fee:z(),
-    bDraw:z(),bPay:z(),bInt:z(),bBal:z(),gDraw:z(),gPay:z(),gInt:z(),gBal:z(),sIn:z(),sOut:z(),short:z(),cash:z(),op:z()};
+    bDraw:z(),bPay:z(),bInt:z(),bBal:z(),gDraw:z(),gPay:z(),gInt:z(),gBal:z(),sIn:z(),sOut:z(),short:z(),cash:z(),op:z(),
+    igvD:z(),igvC:z(),igvP:z(),igvS:z(),irP:z()};
   // obra: curva S
   let w=[],ws=0;for(let k=0;k<C;k++){const v=Math.sin(Math.PI*(k+.5)/C)+.25;w.push(v);ws+=v}
   for(let k=0;k<C;k++)A.cons[P+1+k]=p.cons*w[k]/ws;
@@ -431,6 +484,15 @@ function simulate(p,landKey){
   for(let m=0;m<=P;m++)A.stud[m]=p.stud/(P+1);
   const G=gross*p.ind/100;for(let m=0;m<=E+2;m++)A.ind[m]=G/(E+3);
   A.land[0]=L.now+L.alc;
+  // IGV: débito sobre lo cobrado (9 % efectivo en primera venta), crédito fiscal de compras (18 %)
+  const grav=p.igv!=="exo", kD=grav?0.09/1.09:0, kC=grav?0.18/1.18:0;
+  let saf=0;
+  for(let m=0;m<N;m++){
+    A.igvD[m]=A.coll[m]*kD; A.igvC[m]=(A.cons[m]+A.stud[m]+A.ind[m])*kC;
+    saf+=A.igvC[m]-A.igvD[m]; if(saf<0){A.igvP[m]=-saf;saf=0} A.igvS[m]=saf;
+  }
+  // impuesto a la renta: pago a cuenta al mes siguiente de la entrega y regularización en abril del año siguiente
+  A.irP[ACC]+=plan.acc; A.irP[REG]+=plan.reg;
   // escrow
   if(p.escrow){let held=0;for(let m=0;m<ACT;m++){A.esc[m]=-A.coll[m];held+=A.coll[m]}A.esc[ACT]=held}
   // cascada de caja
@@ -438,7 +500,7 @@ function simulate(p,landKey){
   let c=p.cap,bb=0,bc=0,gb=0,gc=0,sb=0,landEnd=L.end,landEndAt=null,firstBank=null;
   for(let m=0;m<N;m++){
     A.bInt[m]=bb*rb; A.gInt[m]=gb*rg; gb+=A.gInt[m];
-    A.op[m]=A.coll[m]-A.land[m]-A.cons[m]-A.stud[m]-A.ind[m]-A.fee[m];
+    A.op[m]=A.coll[m]-A.land[m]-A.cons[m]-A.stud[m]-A.ind[m]-A.fee[m]-A.igvP[m]-A.irP[m];
     c+=A.op[m]+A.esc[m]-A.bInt[m];
     if(c<0&&line&&m>=ACT&&m<=E){const d=Math.min(-c,line-bc);if(d>0){A.bDraw[m]=d;bb+=d;bc+=d;c+=d;if(firstBank===null)firstBank=m}}
     if(c<0&&p.bridgeOn&&m<=E+1){const d=Math.min(-c,p.bridgeMax-gc);if(d>0){A.gDraw[m]=d;gb+=d;gc+=d;c+=d}}
@@ -451,23 +513,27 @@ function simulate(p,landKey){
   }
   if(landEnd>0){A.land[N-1]+=landEnd;A.op[N-1]-=landEnd;A.cash[N-1]-=landEnd;landEndAt=N-1}
   const S=a=>a.reduce((x,y)=>x+y,0);
-  const income=S(A.coll), costs=S(A.land)+S(A.cons)+S(A.stud)+S(A.ind)+S(A.fee);
+  const income=S(A.coll), igvNet=S(A.igvP), costs=S(A.land)+S(A.cons)+S(A.stud)+S(A.ind)+S(A.fee);
   const interest=S(A.bInt)+S(A.gInt);
-  const pre=income-costs-interest, tax=Math.max(0,pre)*p.ir/100, net=pre-tax;
+  const pre=income-igvNet-costs-interest;
+  const ingresos=sellable/(grav?1.09:1);
+  const TR=taxRules(p,ingresos), tax=TR.tax(pre), acc=ingresos*TR.accRate, reg=tax-acc, net=pre-tax;
+  const tx={acc,reg,tax,ingresos,regime:TR.regime,note:TR.note,accRate:TR.accRate,ACC,REG,calE,igvNet,
+    igvD:S(A.igvD),igvC:S(A.igvC),safMax:Math.max(...A.igvS),safEnd:A.igvS[N-1],grav};
   const partnerCut=sb>0?Math.max(0,net)*p.partnerShare/100*Math.min(1,sb/(sb+p.cap)):0;
   const ownerCut=Math.max(0,net)*L.share;
   const dev=net-partnerCut-ownerCut;
   const shortTot=S(A.short);
   // flujo del desarrollador para TIR
   const f=z();f[0]=-p.cap;f[N-1]+=p.cap+dev;
-  let acc=0,minAcc=0;A.op.forEach(v=>{acc+=v;minAcc=Math.min(minAcc,acc)});
+  let cum=0,minAcc=0;A.op.forEach(v=>{cum+=v;minAcc=Math.min(minAcc,cum)});
   const sources=[];
   if(p.cap>0)sources.push("Capital propio");
   sources.push(p.prod==="bloque"?"Comprador en bloque":"Preventa");
   if(S(A.bDraw)>.5)sources.push("Crédito promotor");
   if(gc>.5)sources.push("Préstamo puente");
   if(sb>.5)sources.push("Socio capitalista");
-  return {P,C,E,N,ACT,A,L,R,gross,sellable,income,costs,interest,pre,tax,net,partnerCut,ownerCut,dev,shortTot,
+  return {P,C,E,N,ACT,A,L,R,gross,sellable,income,costs,interest,pre,tax,net,tx,partnerCut,ownerCut,dev,shortTot,
     bankMax:Math.max(...A.bBal),bridgeMax:Math.max(...A.gBal),partnerIn:sb,firstBank,line,landEndAt,
     exposure:-minAcc,irr:irr(f),sources,devLandAdj:landKey==="own"?dev-p.land:dev,ok:shortTot<1};
 }
@@ -505,6 +571,9 @@ function render(){
   const p=read();CUR=p.cur;
   const tot=p.pi+p.pc;$("psum").textContent=tot>100?"La inicial y las cuotas suman más de 100 %.":`Saldo con crédito hipotecario${p.prod==="techo"?" y bono":""} a la entrega: ${100-tot} %`;
   $("psum").classList.toggle("bad",tot>100);
+  const U35=35*uitCur(p), pSin=p.price/(p.igv==="exo"?1:1.09);
+  $("igvHint").textContent=`35 UIT = ${money(U35)}. Tu precio promedio sin IGV es ${money(pSin)}: `+(pSin<=U35?"podría acogerse a la exoneración si es vivienda con licencia (confirma que siga vigente).":"supera el tope, así que la venta está gravada.");
+  $("regHint").textContent=p.regime==="mype"?"Impuesto: 10 % hasta 15 UIT de utilidad y la tasa general sobre el resto. Pagos a cuenta de 1 % si los ingresos del año no pasan de 300 UIT. Si superan 1,700 UIT, pasas al Régimen General.":"Impuesto a la tasa general. Pagos a cuenta: el mayor entre tu coeficiente y 1.5 %.";
   const D=decide(p);
   if(!D.best){
     $("verdict").innerHTML=`<div class="eyebrow">Falta una respuesta</div><h3>Marca al menos una forma de pago que aceptaría el propietario</h3><p>Sin eso el motor no puede armar el flujo. Mientras tanto, la tabla de abajo te muestra todas las opciones.</p>`;
@@ -527,7 +596,7 @@ function render(){
   const kp=[
     ["Ventas totales",money(s.gross),`${p.units} unidades${s.L.units?` · ${money(s.L.units)} van al propietario`:""}`],
     ["Tu utilidad",money(s.dev),"Después de IR y de repartir con socios"],
-    ["Utilidad del proyecto",money(s.net),`Margen ${pct(s.gross?s.net/s.gross:0)} después de IR`],
+    ["Utilidad del proyecto",money(s.net),`Margen ${pct(s.tx.ingresos?s.net/s.tx.ingresos:0)} sobre ventas sin IGV`],
     ["Dinero que falta",s.ok?`<span class="pill ok">Nada</span>`:`<span class="pill no">${money(s.shortTot)}</span>`,s.ok?"Las fuentes elegidas alcanzan":"Ninguna fuente lo cubre"],
     ["Banco",s.firstBank!==null?`<span class="pill mid">Mes ${s.firstBank}</span>`:`<span class="pill ok">No se usa</span>`,s.firstBank!==null?`Deuda máxima ${money(s.bankMax)}`:p.bankOn?`Línea disponible ${money(s.line)}`:"Sin crédito promotor"],
     ["Préstamo puente",money(s.bridgeMax),s.bridgeMax>1?`Intereses ${money(s.A.gInt.reduce((a,b)=>a+b,0))}`:"No se usa"],
@@ -535,7 +604,7 @@ function render(){
     ["TIR anual de tu dinero",pct(s.irr),viewKey==="own"?`Restando el terreno: ${money(s.devLandAdj)}`:`Exposición máx. ${money(s.exposure)}`]
   ];
   $("kpis").innerHTML=kp.map(x=>`<div class="kpi"><div class="l">${x[0]}</div><div class="v">${x[1]}</div><div class="s">${x[2]}</div></div>`).join("");
-  compare(p,D,viewKey);chart(s);table(s);catalog(p,D,s);
+  compare(p,D,viewKey);chart(s);table(s);catalog(p,D,s);taxes(p,s);
   $("mbarT").textContent=D.best?`${LAND[D.best.k].name} · ${PROD[p.prod].name}`:"Falta elegir formas de pago";
   $("mbarS").textContent=`Tu utilidad ${money(b.dev)} · ${b.ok?"sin faltantes":"faltan "+money(b.shortTot)}`;
 }
@@ -583,11 +652,28 @@ function chart(s){
   g+=`<text x="${(L+W)/2}" y="${H-4}" text-anchor="middle" font-size="10" fill="${col("--muted")}">Mes</text>`;
   $("chart").innerHTML=g;
 }
+function taxes(p,s){
+  const t=s.tx, mes=m=>{const c=((Math.round(p.start||1)-1+m)%12+12)%12;return `mes ${m} (${MESES[c]})`};
+  const rows=[
+    ["Ingresos por ventas sin IGV",money(t.ingresos),"Se reconocen al entregar las unidades."],
+    ["IGV de las ventas (débito)",money(t.igvD),t.grav?"9 % efectivo sobre lo cobrado: la parte del terreno (50 %) no paga IGV.":"Exonerada: no se cobra IGV."],
+    ["IGV de las compras (crédito fiscal)",money(t.igvC),t.grav?"18 % de obra, proyecto, gerencia y publicidad.":"Sin ventas gravadas no se puede usar: queda como costo."],
+    ["IGV neto pagado a SUNAT",money(t.igvNet),t.grav?"Débito menos crédito, mes a mes.":"—"],
+    ["Saldo a favor de IGV máximo",money(t.safMax),t.safEnd>1?`Quedan ${money(t.safEnd)} sin usar: sirven para otros proyectos de la empresa; si no hay más ventas, son costo.`:"Se termina de usar antes del cierre."],
+    ["Utilidad antes del impuesto a la renta",money(s.pre),"Después de IGV neto, costos e intereses."],
+    ["Impuesto a la renta del año",money(t.tax),t.regime==="mype"?"Régimen MYPE Tributario.":`Régimen General (${p.ir} %).`],
+    ["Pago a cuenta",money(t.acc),`${(t.accRate*100).toFixed(2).replace(".",",")} % de los ingresos · ${mes(t.ACC)}`],
+    [t.reg>=0?"Regularización anual":"Saldo a favor del impuesto a la renta",money(Math.abs(t.reg)),`${t.reg>=0?"Se paga":"Se recupera"} en la declaración anual · ${mes(t.REG)}`]
+  ];
+  $("taxes").innerHTML=`<tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left;font-family:var(--f-body);color:var(--muted)">${r[2]}</td></tr>`).join("")}</tbody>`;
+  $("taxNote").textContent=(t.note?t.note+" ":"")+"Modelo didáctico: confirma con tu contador el régimen, el coeficiente y la vigencia de la exoneración.";
+}
 let lastTSV="";
 function table(s){
   const A=s.A,neg=a=>a.map(v=>-v);
   const rows=[["Ventas firmadas",A.sales],["Cobranzas",A.coll],["Preventa retenida / liberada (escrow)",A.esc],["Terreno",neg(A.land)],["Construcción",neg(A.cons)],
-    ["Proyecto y licencias",neg(A.stud)],["Gerencia, publicidad y comisiones",neg(A.ind)],["Carta fianza",neg(A.fee)],["Flujo operativo",A.op.map((v,i)=>v+A.esc[i]),1],
+    ["Proyecto y licencias",neg(A.stud)],["Gerencia, publicidad y comisiones",neg(A.ind)],["Carta fianza",neg(A.fee)],
+    ["IGV de ventas (débito)",A.igvD],["IGV de compras (crédito fiscal)",A.igvC],["IGV pagado a SUNAT",neg(A.igvP)],["Saldo a favor de IGV",A.igvS,0,1],["Impuesto a la renta pagado",neg(A.irP)],["Flujo operativo",A.op.map((v,i)=>v+A.esc[i]),1],
     ["Banco: desembolso",A.bDraw],["Banco: pago",neg(A.bPay)],["Banco: intereses",neg(A.bInt)],["Puente: desembolso",A.gDraw],["Puente: pago",neg(A.gPay)],
     ["Socio: aporte",A.sIn],["Dinero que falta",A.short],["Deuda con el banco",A.bBal,0,1],["Deuda del puente (con intereses)",A.gBal,0,1],["Caja al cierre del mes",A.cash,1,1]];
   const months=[...Array(s.N).keys()], ph=m=>m===0?"Inicio":m<=s.P?"Preventa":m<=s.E?"Obra":"Cierre", cls=m=>m===0?"":m<=s.P?"ph-p":m<=s.E?"ph-c":"ph-f";
