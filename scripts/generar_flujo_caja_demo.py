@@ -284,7 +284,7 @@ fin = [
     ("Aporte de capital de la desarrolladora", 0, USD, "Aporte", "Sin aporte propio: todo lo previo al crédito promotor (incluida la cuota inicial del terreno) lo cubre el préstamo puente."),
     ("Mes del aporte", 0, INT, "MesAporte", None),
     ("Caja mínima operativa", 20000, USD, "CajaMin", None),
-    ("Crédito promotor – línea máxima", 3800000, USD, "Linea", "Banco local. Se usa solo lo necesario (no revolvente)."),
+    ("Crédito promotor – línea máxima", 4300000, USD, "Linea", "Banco local. Se usa solo lo necesario (no revolvente). Incluye refinanciar el préstamo puente al activarse: negociarlo así con el banco."),
     ("Crédito promotor – mes de activación", 4, INT, "MesAct", "Requiere: terreno inscrito a nombre de la desarrolladora (o fideicomiso), licencia y meta de preventa."),
     ("Crédito promotor – TEA", 0.11, PCT, "TEABanco", "Referencial en US$; confirmar con cotización del banco."),
     ("Crédito promotor – comisión de estructuración (% línea)", 0.01, PCT, "ComBanco", None),
@@ -426,9 +426,9 @@ row_formula(46, "Caja inicial", lambda c, p: f"={p}72", first=lambda c: "=0", to
 row_formula(47, "Aporte de capital de la desarrolladora", lambda c, p: f"=IF({c}3=MesAporte,Aporte,0)")
 FM.cell(row=49, column=1, value="Crédito promotor (banco)").font = F_B
 row_formula(50, "  Saldo inicial", lambda c, p: f"={p}53", first=lambda c: "=0", total=False)
-row_formula(51, "  (+) Desembolso",
-            lambda c, p: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68,Linea-{p}57),0)",
-            first=lambda c: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68,Linea),0)")
+row_formula(51, "  (+) Desembolso (al activar incluye el pago total del puente)",
+            lambda c, p: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68+IF({c}3=MesAct,MAX(0,{c}60+{c}61-MAX(0,{c}67-CajaMin)),0),Linea-{p}57),0)",
+            first=lambda c: f"=IF(AND({c}3>=MesAct,{c}3<=MesEntrega),MIN({c}68+IF({c}3=MesAct,MAX(0,{c}60+{c}61-MAX(0,{c}67-CajaMin)),0),Linea),0)")
 row_formula(52, "  (–) Amortización (con cobranzas)", lambda c, p: f"=MIN({c}69,{c}50)")
 row_formula(53, "  Saldo final", lambda c, p: f"={c}50+{c}51-{c}52", total=False)
 row_formula(54, "  Intereses pagados", lambda c, p: f"={c}50*TMBanco")
@@ -439,9 +439,9 @@ row_formula(57, "  Desembolsos acumulados", lambda c, p: f"=SUM($C$51:{c}51)", t
 FM.cell(row=59, column=1, value="Préstamo puente / inversionista").font = F_B
 row_formula(60, "  Saldo inicial", lambda c, p: f"={p}64", first=lambda c: "=0", total=False)
 row_formula(61, "  Intereses capitalizados", lambda c, p: f"={c}60*TMPuente")
-row_formula(62, "  (+) Desembolso", lambda c, p: f"=MIN({c}68-{c}51,PuenteMax-{p}65)",
-            first=lambda c: f"=MIN({c}68-{c}51,PuenteMax)")
-row_formula(63, "  (–) Repago (después de cancelar el banco)", lambda c, p: f"=MIN({c}69-{c}52,{c}60+{c}61)")
+row_formula(62, "  (+) Desembolso", lambda c, p: f"=MAX(0,MIN({c}68-{c}51,PuenteMax-{p}65))",
+            first=lambda c: f"=MAX(0,MIN({c}68-{c}51,PuenteMax))")
+row_formula(63, "  (–) Repago (se cancela con el 1.er desembolso del banco)", lambda c, p: f"=MIN({c}69-{c}52,{c}60+{c}61)")
 row_formula(64, "  Saldo final", lambda c, p: f"={c}60+{c}61+{c}62-{c}63", total=False)
 row_formula(65, "  Desembolsos acumulados", lambda c, p: f"=SUM($C$62:{c}62)", total=False)
 FM.cell(row=66, column=1, value="Cascada de caja").font = F_B
@@ -560,7 +560,7 @@ R.cell(row=60, column=2, value="Saldo del puente al activar el crédito (incluye
 calc(R["C60"], f"=INDEX({FMn}!C60:{LC}60,MATCH(MesAct,{FMn}!C3:{LC}3,0))")
 R["E57"] = "Las cobranzas de preventa quedan en escrow: no ayudan a pagar estos montos."
 R["E57"].font = F_NOTE
-R["E59"] = "Se repaga con la liberación del escrow y las cobranzas al final."
+R["E59"] = "Se cancela completo en el mes de activación del crédito, con el escrow liberado y el 1.er desembolso del banco."
 R["E59"].font = F_NOTE
 for col in "BC":
     R[f"{col}57"].fill = FILL_TOT
