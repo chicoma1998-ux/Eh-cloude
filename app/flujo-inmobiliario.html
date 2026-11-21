@@ -20,6 +20,7 @@
   --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
   --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; --bridge:#B996E8; --hero:#1E3854; --hero-fg:#E6EDF3; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;margin:0}
 .wrap{max-width:1320px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
@@ -130,6 +131,7 @@ details summary{cursor:pointer;font-weight:600}
       <p>Responde las preguntas. El motor arma tu flujo de caja combinando cómo consigues el terreno, cómo financias la obra y qué tipo de producto vendes, y te dice cuál combinación conviene.</p>
     </div>
     <div class="toolbar">
+      <button id="btnClear" type="button">Vaciar datos</button>
       <button id="btnExample" type="button">Cargar ejemplo</button>
       <button id="btnSave" type="button" class="primary">Guardar proyecto</button>
     </div>
@@ -612,6 +614,14 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 /* ================= render ================= */
 function render(){
   const p=read();CUR=p.cur;
+  // si faltan datos básicos (por ejemplo, después de «Vaciar datos») se muestra un aviso en lugar del flujo
+  const _miss=[["units","N.º de unidades"],["price","Precio promedio por unidad"],["cons","Costo total de construcción"],["pre","Meses de preventa"],["obra","Meses de construcción"]].filter(([f])=>!(p[f]>0)).map(x=>x[1]);
+  document.querySelectorAll("#resultado > :not(#verdict)").forEach(e=>e.hidden=_miss.length>0);
+  if(_miss.length){
+    $("verdict").innerHTML=`<div class="eyebrow">Datos vacíos</div><h3>Completa los datos para ver tu flujo de caja</h3><ul>${_miss.map(x=>`<li>Falta: ${x}</li>`).join("")}</ul><p class="note" style="color:inherit;opacity:.85">Puedes escribir tus propios datos o pulsar «Cargar ejemplo».</p>`;
+    $("mbarT").textContent="Completa los datos";$("mbarS").textContent=`Faltan ${_miss.length} dato${_miss.length>1?"s":""} básicos`;
+    return;
+  }
   const tot=p.pi+p.pc;$("psum").textContent=tot>100?"La inicial y las cuotas suman más de 100 %.":`Saldo con crédito hipotecario${p.prod==="techo"?" y bono":""} ${p.hip==="esc"?"a la firma de la escritura":"a la entrega"}: ${100-tot} %`;
   $("psum").classList.toggle("bad",tot>100);
   const U35=35*uitCur(p), pSin=p.price/(p.igv==="exo"?1:1.09);
@@ -793,6 +803,11 @@ function listSaved(){
 }
 function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
 $("btnSave").onclick=()=>{read();const name=(state.pname||"").trim()||"Proyecto sin nombre";const all=store("fig_projects")||{};all[name]={...state};store("fig_projects",all);listSaved();toast("Guardado: "+name)};
+$("btnClear").onclick=()=>{const b=$("btnClear");
+  if(!b.dataset.armed){b.dataset.armed=1;b.textContent="¿Vaciar todo? Toca otra vez";setTimeout(()=>{delete b.dataset.armed;b.textContent="Vaciar datos"},3000);return}
+  delete b.dataset.armed;b.textContent="Vaciar datos";
+  NUM.concat(["pname"]).forEach(f=>{const el=$(f);if(el&&el.tagName==="INPUT")el.value=""});
+  pick=null;render();toast("Datos vaciados: escribe los tuyos")};
 $("btnExample").onclick=()=>{state={...EXAMPLE,opts:[...EXAMPLE.opts]};pick=null;fill(state);render();toast("Ejemplo cargado")};
 $("btnCopy").onclick=()=>{const done=()=>toast("Tabla copiada: pégala en Excel");
   const fb=()=>{const ta=document.createElement("textarea");ta.value=lastTSV;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){toast("Selecciona la tabla y copia con Ctrl+C")}ta.remove()};
