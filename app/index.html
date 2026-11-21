@@ -488,7 +488,7 @@ function simCore(p,landKey,plan){
   if(p.prod==="bloque"){
     gross=R*(1-p.desc/100); sellable=Math.max(0,gross-L.units);
     A.sales[P]=sellable;
-    const bi=p.bIni/100,bo=p.bObra/100,bs=Math.max(0,1-bi-bo);
+    const bi=Math.min(1,p.bIni/100),bo=Math.min(1-bi,p.bObra/100),bs=Math.max(0,1-bi-bo);
     A.coll[P]+=sellable*bi;
     for(let k=0;k<C;k++)A.coll[P+1+k]+=sellable*bo*w[k]/ws;
     A.coll[E+1]+=sellable*bs;
@@ -497,7 +497,7 @@ function simCore(p,landKey,plan){
     const sp=p.sp/100;
     for(let m=1;m<=P;m++)A.sales[m]=sellable*sp/P;
     for(let m=P+1;m<=E;m++)A.sales[m]+=sellable*(1-sp)/C;
-    let pi=p.pi/100,pc=p.pc/100,ps=Math.max(0,1-pi-pc),bono=0;
+    let pi=Math.min(1,p.pi/100),pc=Math.min(1-pi,p.pc/100),ps=Math.max(0,1-pi-pc),bono=0;
     if(p.prod==="techo"){bono=Math.min(ps,p.bonoPct/100);ps-=bono}
     for(let m=0;m<N;m++){const s=A.sales[m];if(!s)continue;
       A.coll[m]+=s*pi;
@@ -545,7 +545,7 @@ function simCore(p,landKey,plan){
     if(c<0){A.short[m]=-c;c=0}
     A.bBal[m]=bb;A.gBal[m]=gb;A.cash[m]=c;
   }
-  if(landEnd>0){A.land[N-1]+=landEnd;A.op[N-1]-=landEnd;A.cash[N-1]-=landEnd;landEndAt=N-1}
+  if(landEnd>0){A.land[N-1]+=landEnd;A.op[N-1]-=landEnd;A.cash[N-1]-=landEnd;landEndAt=N-1;if(A.cash[N-1]<0){A.short[N-1]+=-A.cash[N-1];A.cash[N-1]=0}}
   const S=a=>a.reduce((x,y)=>x+y,0);
   const income=S(A.coll), igvNet=S(A.igvP), costs=S(A.land)+S(A.cons)+S(A.stud)+S(A.ind)+S(A.fee)+S(A.gar);
   const interest=S(A.bInt)+S(A.gInt);
@@ -557,6 +557,10 @@ function simCore(p,landKey,plan){
   const partnerCut=sb>0?Math.max(0,net)*p.partnerShare/100*Math.min(1,sb/(sb+p.cap)):0;
   const ownerCut=Math.max(0,net)*L.share;
   const dev=net-partnerCut-ownerCut;
+  // último mes: devolución del aporte del socio capitalista y reparto de utilidades a los socios
+  A.sOut[N-1]=sb+partnerCut; A.oOut=z(); A.oOut[N-1]=ownerCut;
+  A.cash[N-1]-=A.sOut[N-1]+ownerCut; if(A.cash[N-1]<0){A.short[N-1]+=-A.cash[N-1];A.cash[N-1]=0}
+  const debtEnd=A.bBal[N-1]+A.gBal[N-1];
   const shortTot=S(A.short);
   // flujo del desarrollador para TIR
   const f=z();f[0]=-p.cap;f[N-1]+=p.cap+dev;
@@ -570,7 +574,7 @@ function simCore(p,landKey,plan){
   const ap=aporteCalc(p,landKey,L,gross);
   return {ap,P,C,E,N,ACT,A,L,R,gross,sellable,income,costs,interest,pre,tax,net,tx,partnerCut,ownerCut,dev,shortTot,
     bankMax:Math.max(...A.bBal),bridgeMax:Math.max(...A.gBal),partnerIn:sb,firstBank,line,landEndAt,
-    exposure:-minAcc,irr:irr(f),sources,devLandAdj:landKey==="own"?dev-p.land:dev,ok:shortTot<1};
+    exposure:-minAcc,irr:irr(f),sources,debtEnd,devLandAdj:landKey==="own"?dev-p.land:dev,ok:shortTot<1&&debtEnd<1};
 }
 /* Aporte del promotor que evalúa el banco: en todas las formas el terreno cuenta completo.
    En pago diferido y permuta se asume que el vendedor renuncia a la hipoteca legal y cobra después del banco. */
@@ -651,7 +655,8 @@ function render(){
   if(D.best){
     const why=reasons(p,D);
     let alert;
-    if(!b.ok)alert=`<div class="alert">Con todas las fuentes que marcaste aún faltan ${money(b.shortTot)}. Sube el préstamo puente, acepta un socio o negocia otra forma de pago del terreno.</div>`;
+    if(b.debtEnd>1)alert=`<div class="alert">Las ventas no alcanzan para pagar todas las deudas: al final quedan ${money(b.debtEnd)} sin pagar al banco o al inversionista. Revisa precios, costos o la forma de pago del terreno.</div>`;
+    else if(!b.ok)alert=`<div class="alert">Con todas las fuentes que marcaste aún faltan ${money(b.shortTot)}. Sube el préstamo puente, acepta un socio o negocia otra forma de pago del terreno.</div>`;
     else alert=`<div class="alert ok">${b.firstBank!==null?`Usas el banco desde el mes ${b.firstBank}, hasta ${money(b.bankMax)}.`:"No necesitas usar el banco."} ${b.bridgeMax>1?`El puente llega a ${money(b.bridgeMax)}.`:""} ${b.partnerIn>1?`El socio aporta ${money(b.partnerIn)}.`:""}</div>`;
     // los avisos siguen a la forma de pago que estás viendo
     if(viewKey!==D.best.k){
@@ -751,7 +756,7 @@ function table(s){
     ["Proyecto y licencias",neg(A.stud)],["Gerencia, publicidad y comisiones",neg(A.ind)],["Carta fianza",neg(A.fee)],["Garantía por desembolso anticipado",neg(A.gar)],
     ["IGV de ventas (débito)",A.igvD],["IGV de compras (crédito fiscal)",A.igvC],["IGV pagado a SUNAT",neg(A.igvP)],["Saldo a favor de IGV",A.igvS,0,1],["Impuesto a la renta pagado",neg(A.irP)],["Flujo operativo",A.op.map((v,i)=>v+A.esc[i]),1],
     ["Banco: desembolso",A.bDraw],["Banco: pago",neg(A.bPay)],["Banco: intereses",neg(A.bInt)],["Puente: desembolso",A.gDraw],["Puente: pago",neg(A.gPay)],
-    ["Socio: aporte",A.sIn],["Dinero que falta",A.short],["Deuda con el banco",A.bBal,0,1],["Deuda del puente (con intereses)",A.gBal,0,1],["Caja al cierre del mes",A.cash,1,1]];
+    ["Socio: aporte",A.sIn],["Socio: devolución y su % de utilidad",A.sOut.map(v=>-v)],["Propietario socio: su % de utilidad",A.oOut.map(v=>-v)],["Dinero que falta",A.short],["Deuda con el banco",A.bBal,0,1],["Deuda del puente (con intereses)",A.gBal,0,1],["Caja al cierre del mes",A.cash,1,1]];
   const months=[...Array(s.N).keys()], ph=m=>m===0?"Inicio":m<=s.P?"Preventa":m<=s.E?"Obra":"Cierre", cls=m=>m===0?"":m<=s.P?"ph-p":m<=s.E?"ph-c":"ph-f";
   let h=`<thead><tr><th>Concepto</th><th>Total</th>${months.map(m=>`<th class="${cls(m)}">${m}<br><small>${ph(m)}</small></th>`).join("")}</tr></thead><tbody>`;
   rows.forEach(r=>{if(!r[1].some(v=>Math.abs(v)>.5)&&!r[2])return;const t=r[1].reduce((a,b)=>a+b,0);
