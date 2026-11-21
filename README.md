@@ -96,7 +96,7 @@ préstamo puente, flujo del accionista) · **Terreno_Estrategias** (opciones leg
 
 ---
 
-## App «Flujo Inmobiliario» (`app/`)
+## App «Flujo Inmobiliario General» (`app/`)
 
 Aplicación web de una sola página (computadora y celular). El usuario responde 6 bloques de
 preguntas y el motor arma el flujo combinando tres ejes:
@@ -112,3 +112,6 @@ gráfico, flujo mensual (copiable a Excel) y catálogo; guarda proyectos en el d
 Para usarla sin internet o instalarla en el celular, publique la carpeta `app/` en un hosting
 estático (p. ej. GitHub Pages) y abra `index.html`.
 `flujo-inmobiliario.html` es el mismo contenido sin cabecera (versión para vista previa).
+
+Versión general en un solo archivo para descargar: `app/Flujo_Inmobiliario_General.html`.
+Versiones de la primera app (3 modelos): `app/v1/Flujo_Inmobiliario_v1.0.html` a `v1.5.html`.
