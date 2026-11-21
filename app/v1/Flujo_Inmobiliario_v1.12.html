@@ -1,0 +1,1132 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flujo Inmobiliario</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: plano de obra — formulario por etapas a la izquierda, tablero de resultados fijo a la derecha; una columna en celular */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#14263A; --muted:#5B6B7C; --line:#D9E0E7;
+  --navy:#1B3550; --accent:#C7862B; --accent-soft:#F6E9D5;
+  --good:#1E7A4F; --good-soft:#E2F2EA; --bad:#B23A2E; --bad-soft:#F8E3E0; --bank:#2F6DB5;
+  --f-display:"Sora",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1923; --surface:#16232F; --ink:#E6EDF3; --muted:#9AAABA; --line:#2A3A49;
+  --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
+  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1923; --surface:#16232F; --ink:#E6EDF3; --muted:#9AAABA; --line:#2A3A49;
+  --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
+  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand h1{font-family:var(--f-display);font-size:26px;margin:0;letter-spacing:-.01em;color:var(--navy);text-wrap:balance}
+.brand p{margin:2px 0 0;color:var(--muted);max-width:62ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+button,.btn{font:600 13px var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--navy)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--navy);color:var(--surface);border-color:var(--navy)}
+.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+/* formulario */
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.step h2{font-family:var(--f-display);font-size:15px;margin:0 0 2px;display:flex;align-items:center;gap:10px}
+.step h2 .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--surface);font-size:12px}
+.step .lead{color:var(--muted);margin:0 0 12px;font-size:13px}
+.field{display:grid;gap:4px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{font-weight:600;font-size:13px}
+.field .hint{color:var(--muted);font-size:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+textarea{font:500 13px var(--f-num);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0;resize:vertical}
+input,select{font:500 14px var(--f-num);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+.sum{font:500 12px var(--f-num);color:var(--muted)}
+.sum.bad{color:var(--bad)}
+/* resultados */
+.results{display:flex;flex-direction:column;gap:14px;position:sticky;top:env(safe-area-inset-top,0px)}
+@media (max-width:920px){.results{position:static}}
+.verdict{background:var(--navy);color:var(--surface);border-radius:var(--r);padding:18px}
+.verdict .eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;opacity:.8}
+.verdict h3{font-family:var(--f-display);font-size:20px;margin:4px 0 8px;text-wrap:balance}
+.verdict ul{margin:0;padding-left:18px}
+.verdict li{margin:2px 0}
+.alert{border-radius:8px;padding:10px 12px;font-size:13px;margin-top:10px;background:var(--bad-soft);color:var(--bad);font-weight:500}
+.alert.ok{background:var(--good-soft);color:var(--good)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:0;flex:1 1 150px;text-align:left}
+.tabs button small{font-weight:400;color:var(--muted);font-size:11px}
+.tabs button[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.tag{font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-width:0}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.kpi .v{font:500 18px var(--f-num);margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .s{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
+.panel h4{font-family:var(--f-display);font-size:14px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.chart{width:100%;height:auto;display:block}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;font:400 12px var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);font-family:var(--f-body);font-weight:500;z-index:1}
+thead th{font-family:var(--f-body);font-weight:600;color:var(--muted)}
+tr.total td{font-weight:600;border-top:1px solid var(--ink)}
+td.neg{color:var(--bad)}
+.ph-p{color:var(--accent)} .ph-c{color:var(--bank)} .ph-f{color:var(--good)}
+.compare td,.compare th{font-size:12px}
+.saved{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.saved .item{display:flex;gap:6px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.saved .item span{min-width:0;overflow-wrap:anywhere}
+.saved .item div{display:flex;gap:4px}
+.saved button{padding:4px 8px;font-size:12px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:20}
+.note{font-size:12px;color:var(--muted);margin:6px 0 0}
+.mbar{display:none}
+@media (max-width:920px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;gap:10px;align-items:center;justify-content:space-between;
+    background:var(--navy);color:var(--surface);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .mbar b{font-family:var(--f-display);font-size:13px;display:block}
+  .mbar span{font:500 12px var(--f-num);opacity:.9}
+  .mbar a{color:var(--navy);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap}
+  .wrap{padding-bottom:90px}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+}
+details.how summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion:no-preference){.kpi .v,.verdict{transition:background .2s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Flujo Inmobiliario</h1>
+      <p>Responde las preguntas y el motor elige cuál de los tres modelos de flujo de caja se ajusta a tu proyecto. Todo se recalcula al instante.</p>
+      <p class="note">Versión 1.12 · Se abre con los datos vacíos; pulsa «Cargar ejemplo» para ver el Lote demo.</p>
+    </div>
+    <div class="toolbar">
+      <button id="btnClear" type="button">Vaciar datos</button>
+      <button id="btnExample" type="button">Cargar ejemplo</button>
+      <button id="btnSave" type="button" class="primary">Guardar proyecto</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ============ FORMULARIO ============ -->
+    <form class="steps" id="form" autocomplete="off">
+      <section class="step">
+        <h2><span class="n">1</span>El terreno</h2>
+        <p class="lead">Esta respuesta decide el modelo de flujo de caja.</p>
+        <div class="field">
+          <label>¿El terreno ya es tuyo (inscrito a tu nombre)?</label>
+          <div class="seg" role="group" aria-label="Propiedad del terreno">
+            <button type="button" id="ownYes" data-own="1">Sí, es mío</button>
+            <button type="button" id="ownNo" data-own="0">No, debo comprarlo</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="land">Valor o precio del terreno</label>
+          <input id="land" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint" id="landHint">Si es tuyo, se usa para medir la rentabilidad real.</span>
+        </div>
+        <div class="field">
+          <label for="cap">¿Cuánto dinero propio tienes hoy para el proyecto?</label>
+          <input id="cap" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint">Efectivo disponible para terreno y gastos iniciales.</span>
+        </div>
+        <div class="field" id="iniBox">
+          <label for="ini">Modelo 3: % del precio del terreno que pagas a la firma</label>
+          <input id="ini" type="number" min="0" max="100" step="1" inputmode="numeric">
+          <span class="hint" id="iniHint"></span>
+        </div>
+        <div class="field">
+          <label for="alc">Alcabala y gastos de compra (% del precio)</label>
+          <input id="alc" type="number" min="0" max="20" step="0.1" inputmode="decimal">
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">2</span>El proyecto</h2>
+        <p class="lead">Ingresos y costos totales, con IGV incluido.</p>
+        <div class="row2">
+          <div class="field"><label for="units">N.º de unidades</label><input id="units" type="number" min="1" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="price">Precio promedio por unidad</label><input id="price" type="number" min="0" step="1000" inputmode="numeric"></div>
+        </div>
+        <div class="field">
+          <label for="cons">Costo total de construcción</label>
+          <input id="cons" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint">Obra, sótanos, acabados y equipamiento.</span>
+        </div>
+        <div class="field">
+          <label>¿Qué curva S deseas usar para repartir el costo de obra mes a mes?</label>
+          <div class="seg" role="group" aria-label="Curva S">
+            <button type="button" id="curveAuto">Predeterminada (obra típica)</button>
+            <button type="button" id="curveOwn">Subir mi propia curva S</button>
+          </div>
+          <span class="hint" id="curveHint"></span>
+        </div>
+        <div class="field" id="presetBox">
+          <label for="shape">Forma de la curva predeterminada</label>
+          <select id="shape" style="font-family:var(--f-body)">
+            <option value="tipica">Obra típica (sube y baja de forma pareja)</option>
+            <option value="pareja">Pareja (el mismo monto cada mes)</option>
+            <option value="inicio">Más carga al inicio (con sótanos)</option>
+            <option value="final">Más carga al final (acabados)</option>
+          </select>
+        </div>
+        <div class="field" id="curveBox" hidden>
+          <label for="curveFile">Importa tu curva S (Excel .xlsx o CSV)</label>
+          <input id="curveFile" type="file" accept=".xlsx,.csv,.txt">
+          <label for="curvePaste" style="margin-top:6px">O pega aquí los valores copiados de Excel (un valor por mes)</label>
+          <textarea id="curvePaste" rows="4" placeholder="Ejemplo: 2,7 %  4,2 %  5,6 % … o montos: 119 543  188 494 …"></textarea>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button type="button" id="curveApply">Usar valores pegados</button>
+            <button type="button" id="curveTpl">Descargar plantilla</button>
+            <button type="button" id="curveFit" hidden></button>
+          </div>
+          <span class="sum" id="curveMsg"></span>
+        </div>
+        <div class="field">
+          <svg id="curveMini" viewBox="0 0 300 60" style="width:100%;height:auto" role="img" aria-label="Vista previa de la curva S"></svg>
+          <span class="hint" id="curveLegend"></span>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="stud">Proyecto, licencias y estudios</label><input id="stud" type="number" min="0" step="1000" inputmode="numeric"></div>
+          <div class="field"><label for="ind">Gerencia, publicidad y comisiones (% de ventas)</label><input id="ind" type="number" min="0" max="40" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="field">
+          <label for="cur">Moneda</label>
+          <select id="cur"><option value="US$">Dólares (US$)</option><option value="S/">Soles (S/)</option></select>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">3</span>Plazos y ventas</h2>
+        <p class="lead">Mes 0 es el inicio: compra del terreno o arranque del proyecto.</p>
+        <div class="row2">
+          <div class="field"><label for="pre">Meses de preventa</label><input id="pre" type="number" min="1" max="24" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="obra">Meses de construcción</label><input id="obra" type="number" min="3" max="48" step="1" inputmode="numeric"></div>
+        </div>
+        <div class="field">
+          <label for="abs">Coeficiente de absorción (% de unidades que vendes al mes)</label>
+          <input id="abs" type="number" min="0.1" max="100" step="0.1" inputmode="decimal">
+          <span class="hint">Se vende desde el mes 1 (preventa) y sigue después de la entrega hasta vender todo.</span>
+        </div>
+        <div class="field">
+          <label>¿Sobre qué base se calcula tu coeficiente?</label>
+          <div class="seg" role="group" aria-label="Base del coeficiente de absorción">
+            <button type="button" id="absA">A · Sobre el total de unidades</button>
+            <button type="button" id="absB">B · Sobre lo que queda por vender</button>
+          </div>
+          <span class="hint" id="absHint"></span>
+          <span class="sum" id="absSum"></span>
+        </div>
+        <div class="field">
+          <label for="metaP">Meta de preventa que exige el banco para desembolsar (% de unidades)</label>
+          <input id="metaP" type="number" min="0" max="100" step="1" inputmode="numeric">
+          <span class="hint">El banco empieza a desembolsar recién cuando las ventas llegan a esta meta.</span>
+        </div>
+        <div class="field">
+          <label>¿Cómo pagan los compradores?</label>
+          <div class="row2">
+            <div class="field"><label for="pi" class="hint">Cuota inicial %</label><input id="pi" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="pc" class="hint">Cuotas en obra %</label><input id="pc" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+          </div>
+          <span class="sum" id="psum"></span>
+        </div>
+        <div class="field">
+          <label>¿Cuándo desembolsa el banco del comprador su crédito hipotecario?</label>
+          <div class="seg" role="group" aria-label="Momento del desembolso hipotecario">
+            <button type="button" id="hipEnd">Al final (entrega)</button>
+            <button type="button" id="hipEsc">A la firma de la escritura</button>
+          </div>
+          <span class="hint" id="hipHint"></span>
+        </div>
+        <div class="row2" id="hipBox">
+          <div class="field"><label for="dias">Días entre la minuta y la escritura</label><input id="dias" type="number" min="0" max="120" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="fz">Costo de la garantía que pide el banco (% anual)</label><input id="fz" type="number" min="0" max="10" step="0.1" inputmode="decimal"></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">4</span>Banco</h2>
+        <p class="lead">Línea de crédito promotor. Solo se usa si la caja no alcanza, desde el fin de la preventa hasta la entrega.</p>
+        <div class="row2">
+          <div class="field"><label for="pb">% de la obra que financia</label><input id="pb" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="tea">Tasa anual (TEA %)</label><input id="tea" type="number" min="0" max="60" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="field">
+          <label for="pctAp">Aporte mínimo que exige el banco (% del costo total del proyecto)</label>
+          <input id="pctAp" type="number" min="0" max="100" step="1" inputmode="numeric">
+          <span class="hint">Suele estar entre 25 % y 35 %; 30 % es lo más común. Confírmalo con tu banco.</span>
+        </div>
+        <div class="field">
+          <label for="ir">Impuesto a la renta %</label>
+          <input id="ir" type="number" min="0" max="50" step="0.1" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>¿Cómo deseas que se pague el impuesto a la renta en el flujo de caja?</label>
+          <div class="seg" role="group" aria-label="Pago del impuesto a la renta">
+            <button type="button" id="irEnd">Al final (un solo pago)</button>
+            <button type="button" id="irMon">Mes a mes según tu coeficiente</button>
+          </div>
+          <span class="hint" id="irHint"></span>
+        </div>
+        <div class="field" id="irBox" hidden>
+          <label for="coefIR">Coeficiente de pagos a cuenta (%)</label>
+          <input id="coefIR" type="number" min="0" max="30" step="0.01" inputmode="decimal">
+          <span class="hint">Sale de tu declaración del año anterior. En el Régimen General se paga el mayor entre tu coeficiente y 1.5 %; si la empresa es nueva, deja 1.5.</span>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2>Mis proyectos guardados</h2>
+        <p class="lead">Se guardan solo en este dispositivo.</p>
+        <div class="field"><label for="pname">Nombre del proyecto</label><input id="pname" type="text" style="font-family:var(--f-body)"></div>
+        <div class="saved" id="saved"></div>
+      </section>
+    </form>
+
+    <!-- ============ RESULTADOS ============ -->
+    <div class="results" id="resultado">
+      <div class="verdict" id="verdict"></div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="panel">
+        <h4>Flujo mes a mes
+          <span class="legend"><span><i style="background:var(--good)"></i>Entra más de lo que sale</span><span><i style="background:var(--bad)"></i>Sale más de lo que entra</span><span><i style="background:var(--bank)"></i>Deuda con el banco</span></span>
+        </h4>
+        <svg class="chart" id="chart" viewBox="0 0 800 260" role="img" aria-label="Gráfico del flujo mensual"></svg>
+      </div>
+      <div class="panel">
+        <h4>Tabla del flujo de caja <span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" id="btnXlsx" class="primary">Exportar a Excel</button><button type="button" id="btnCopy">Copiar tabla</button></span></h4>
+        <div class="scroll"><table id="table"></table></div>
+        <p class="note">Ingresos y costos con IGV. El IGV neto (9 % en ventas, 18 % de crédito en compras) y el impuesto a la renta se pagan en sus filas. El dinero que falta se muestra sin costo financiero y la preventa se usa sin retención (escrow).</p>
+      </div>
+      <div class="panel">
+        <h4>Aporte del promotor para el banco</h4>
+        <div class="scroll"><table id="aporte"></table></div>
+        <p class="note">El banco compara tu aporte (terreno, expediente y efectivo) con un % del costo total. En los tres modelos el terreno cuenta completo; en el modelo 3 eso supone que el vendedor cobra después del banco. La preventa y el crédito no cuentan como aporte. El % exacto y si valoriza el terreno a precio de compra o de tasación lo define cada banco.</p>
+      </div>
+      <div class="panel">
+        <h4>Comparación de los tres modelos con tus datos</h4>
+        <div class="scroll"><table class="compare" id="compare"></table></div>
+      </div>
+      <div class="panel">
+        <details class="how"><summary>¿Cómo decide el motor?</summary>
+          <ul class="note">
+            <li><b>Modelo 1 · Terreno propio:</b> si el terreno ya es tuyo. La obra se paga con la preventa y las ventas; la línea del banco queda de respaldo.</li>
+            <li><b>Modelo 2 · Compra al contado + banco:</b> si tu dinero propio alcanza para pagar el terreno completo y la alcabala.</li>
+            <li><b>Modelo 3 · Parte ahora y saldo al final:</b> si tu dinero no alcanza para todo el terreno. Pagas a la firma el % que acuerdes con el propietario y el saldo cuando ya se vendió todo y se canceló el banco.</li>
+            <li><b>Aporte para el banco:</b> el banco suma el terreno, el expediente técnico y tu efectivo, y lo compara con el % mínimo del costo total del proyecto. La preventa no cuenta como aporte.</li>
+            <li>Si el dinero no alcanza ni para el 50 %, o la caja queda en rojo aun con el banco, el motor te dice cuánto falta conseguir (socio o préstamo puente).</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="mbar" id="mbar"><div><b id="mbarT"></b><span id="mbarS"></span></div><a href="#resultado">Ver resultado</a></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const MODELS={
+  1:{name:"Terreno propio",short:"Sin banco, salvo respaldo"},
+  2:{name:"Compra al contado + banco",short:"Pagas el terreno completo"},
+  3:{name:"50 % ahora · 50 % al final",short:"Saldo al vendedor al cierre"}
+};
+const EXAMPLE={pname:"Ejemplo · Lote demo (23 deptos)",own:0,land:950000,cap:1100000,alc:3,units:23,price:587700,cons:4490251,
+  stud:175120,ind:9.7,cur:"US$",pre:3,obra:15,abs:5,absBase:"A",metaP:30,pi:10,pc:10,pb:60,tea:11,ir:29.5,irMode:"end",coefIR:1.5,hip:"end",dias:15,fz:0,ini:50,pctAp:30,shape:"tipica"};
+const FIELDS=["land","cap","alc","units","price","cons","stud","ind","cur","pre","obra","abs","metaP","pi","pc","pb","tea","ir","dias","fz","coefIR","ini","pctAp","shape","pname"];
+const $=id=>document.getElementById(id);
+let state={...EXAMPLE}, view=null, lastRec=null;
+
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+
+function fill(s){FIELDS.forEach(f=>{$(f).value=s[f]??EXAMPLE[f]});setOwn(s.own);setHip(s.hip||"end");setIR(s.irMode||"end");setAbs(s.absBase||"A");state.curve=s.curve||null;state.curveSrc=s.curveSrc||"";setCurve(s.curveMode||"auto")}
+function read(){const s={own:state.own,hip:state.hip||"end",irMode:state.irMode||"end",absBase:state.absBase||"A",curveMode:state.curveMode||"auto",curve:state.curve||null,curveSrc:state.curveSrc||""};FIELDS.forEach(f=>{const el=$(f);s[f]=(el.type==="number")?(parseFloat(el.value)||0):el.value});return s}
+function setAbs(v){state.absBase=v;$("absA").setAttribute("aria-pressed",v==="A");$("absB").setAttribute("aria-pressed",v==="B");
+  $("absHint").textContent=v==="B"?"B: cada mes se vende ese % de las unidades que aún quedan; las ventas van bajando con el tiempo (cuando queda menos de 1 unidad, se vende).":"A: cada mes se vende ese % del total de unidades; el ritmo es parejo hasta vender todo.";}
+function setIR(v){state.irMode=v;$("irEnd").setAttribute("aria-pressed",v==="end");$("irMon").setAttribute("aria-pressed",v==="mon");$("irBox").hidden=v!=="mon";
+  $("irHint").textContent=v==="mon"?"Cada mes se paga a cuenta un % de los ingresos sin IGV; al final se paga la diferencia con el impuesto del año (o se recupera si se pagó de más).":"Todo el impuesto se paga en el último mes del flujo, en la declaración del año.";}
+function setHip(v){state.hip=v;$("hipEnd").setAttribute("aria-pressed",v==="end");$("hipEsc").setAttribute("aria-pressed",v==="esc");$("hipBox").hidden=v!=="esc";
+  $("hipHint").textContent=v==="esc"?"El saldo hipotecario entra al firmar la escritura, unos días después de la minuta de cada venta. El banco del comprador suele pedir una garantía (carta fianza o fideicomiso) hasta la entrega.":"El saldo hipotecario entra cuando se entregan las unidades terminadas.";}
+function setOwn(v){state.own=+v;$("ownYes").setAttribute("aria-pressed",state.own===1);$("ownNo").setAttribute("aria-pressed",state.own===0);
+  $("landHint").textContent=state.own?"Si es tuyo, se usa para medir la rentabilidad real (no se paga).":"Precio acordado con el propietario."}
+
+/* ---------------- motor de simulación ---------------- */
+function simulate(p,model){
+  const P=Math.round(p.pre),C=Math.round(p.obra),E=P+C;
+  // unidades vendidas por mes según el coeficiente de absorción (A: % del total · B: % de lo que queda)
+  const U=p.units, a=Math.min(1,Math.max(0.0001,p.abs/100)), uSold=[0];let left=U,mm=1;
+  while(left>1e-9&&mm<=600){let u=p.absBase==="B"?a*left:a*U;if(left-u<(p.absBase==="B"?1:1e-9)||u>left)u=left;uSold[mm]=u;left-=u;mm++}
+  const lastSale=uSold.length-1, N=Math.max(E+4,lastSale+3);
+  const R=p.units*p.price, sp=Math.min(1,p.sp/100||0), pi=Math.min(1,p.pi/100), pc=Math.min(1-pi,p.pc/100), ps=Math.max(0,1-pi-pc);
+  const z=()=>new Array(N).fill(0);
+  const collIni=z(),collCuo=z(),collSal=z(),wPct=z(),igvS=z(),cBefore=z(),sales=z(),fz=z(),coll=z(),land=z(),cons=z(),stud=z(),ind=z(),intr=z(),draw=z(),repay=z(),extra=z(),cash=z(),bank=z(),landEnd=z(),igvD=z(),igvC=z(),igvP=z(),irP=z();
+  const units=z();for(let m=1;m<=lastSale;m++){units[m]=uSold[m];sales[m]=uSold[m]*p.price}
+  // meta de preventa: el banco puede desembolsar desde el primer mes de obra en que las ventas acumuladas la alcanzan
+  let cumU=0,metaAt=null;for(let m=1;m<N;m++){cumU+=units[m];if(metaAt===null&&cumU>=U*p.metaP/100-1e-9)metaAt=m}
+  const ACT=metaAt===null?Infinity:Math.max(P+1,metaAt);
+  const soldPre=units.slice(0,P+1).reduce((x,y)=>x+y,0), soldE=units.slice(0,E+1).reduce((x,y)=>x+y,0);
+  for(let m=0;m<N;m++){
+    if(!sales[m])continue;
+    coll[m]+=sales[m]*pi;collIni[m]+=sales[m]*pi;
+    if(m<E){const k=E-m;for(let j=m+1;j<=E;j++){coll[j]+=sales[m]*pc/k;collCuo[j]+=sales[m]*pc/k}}else{coll[m]+=sales[m]*pc;collCuo[m]+=sales[m]*pc}
+  }
+  if(p.hip==="esc"){
+    // desembolso hipotecario a la firma de la escritura: parte en el mes de la minuta y parte el mes siguiente según los días
+    const f=Math.min(1,Math.max(0,p.dias)/30);
+    for(let m=0;m<N;m++){const s=sales[m]*ps;if(!s)continue;
+      const m2=Math.min(N-1,m+1+Math.floor(Math.max(0,p.dias-30)/30));
+      coll[m]+=s*(1-f); coll[m2]+=s*f; collSal[m]+=s*(1-f); collSal[m2]+=s*f;
+      fz[m]+=s*(p.fz/100)*Math.max(0,E+1-m)/12;}
+  }else{
+    // hipotecario a la entrega: lo vendido hasta la entrega se cobra mitad en E+1 y mitad en E+2; lo vendido después, al mes siguiente de la venta
+    const before=sales.slice(0,E+1).reduce((x,y)=>x+y,0)*ps;
+    coll[E+1]+=before/2; coll[E+2]+=before/2; collSal[E+1]+=before/2; collSal[E+2]+=before/2;
+    for(let m=E+1;m<N;m++){const s=sales[m]*ps;if(!s)continue;const m2=Math.min(N-1,m+1);coll[m2]+=s;collSal[m2]+=s}
+  }
+  const curveOwn=p.curveMode==="own"&&Array.isArray(p.curve)&&p.curve.length===C;
+  let w=[],ws=0;if(curveOwn){w=p.curve.slice()}else{w=shapeCurve(p.shape||"tipica",C)}ws=w.reduce((a,b)=>a+b,0);
+  for(let k=0;k<C;k++){cons[P+1+k]=p.cons*w[k]/ws;wPct[P+1+k]=w[k]/ws}
+  for(let m=0;m<=P;m++)stud[m]=p.stud/(P+1);
+  const indEnd=Math.max(E+2,lastSale);const G=R*p.ind/100;for(let m=0;m<=indEnd;m++)ind[m]=G/(indEnd+1);
+  // IGV: 9 % efectivo en la primera venta (sobre lo cobrado) y 18 % de crédito fiscal en las compras
+  let saf=0;
+  for(let m=0;m<N;m++){igvD[m]=coll[m]*0.09/1.09;igvC[m]=(cons[m]+stud[m]+ind[m])*0.18/1.18;saf+=igvC[m]-igvD[m];if(saf<0){igvP[m]=-saf;saf=0}igvS[m]=saf}
+  const alc=p.land*p.alc/100;
+  let deferred=0;
+  if(model===2)land[0]=p.land+alc;
+  if(model===3){const a=Math.min(1,Math.max(0,p.ini/100));land[0]=p.land*a+alc;deferred=p.land*(1-a)}
+  // pagos a cuenta del impuesto a la renta: % de los ingresos sin IGV de cada mes (el mayor entre el coeficiente y 1.5 %)
+  const irRate=p.irMode==="mon"?Math.max(p.coefIR/100,0.015):0;
+  for(let m=0;m<N-1;m++)irP[m]=coll[m]/1.09*irRate;
+  const line=p.cons*p.pb/100, r=Math.pow(1+p.tea/100,1/12)-1;
+  let c=p.cap,bal=0,cum=0,firstDraw=null,landPaidAt=null,maxBal=0;
+  for(let m=0;m<N;m++){
+    intr[m]=bal*r;
+    c+=coll[m]-land[m]-cons[m]-stud[m]-ind[m]-fz[m]-igvP[m]-irP[m]-intr[m];cBefore[m]=c;
+    if(c<0&&m>=ACT&&m<=E){const d=Math.min(-c,line-cum);if(d>0){draw[m]=d;bal+=d;cum+=d;c+=d;if(firstDraw===null)firstDraw=m}}
+    if(c>0&&bal>0&&m>E){const q=Math.min(c,bal);repay[m]=q;bal-=q;c-=q}
+    if(deferred>0&&bal<=0.5&&m>=E+2){landEnd[m]=deferred;c-=deferred;deferred=0;landPaidAt=m}
+    if(c<0){extra[m]=-c;c=0}
+    cash[m]=c;bank[m]=bal;maxBal=Math.max(maxBal,bal);
+  }
+  // si el saldo del terreno no se pudo pagar (el banco nunca quedó en cero), se paga en el último mes
+  if(deferred>0){landEnd[N-1]+=deferred;cash[N-1]-=deferred;landPaidAt=N-1;deferred=0;if(cash[N-1]<0){extra[N-1]+=-cash[N-1];cash[N-1]=0}}
+  const sum=a=>a.reduce((x,y)=>x+y,0);
+  const costLand=sum(land)+sum(landEnd), costs=costLand+sum(cons)+sum(stud)+sum(ind)+sum(fz), interest=sum(intr), igvNet=sum(igvP);
+  const pre=sum(coll)-igvNet-costs-interest, tax=Math.max(0,pre)*p.ir/100, net=pre-tax;
+  // impuesto a la renta: al final (todo) o regularización final = impuesto del año − pagos a cuenta ya hechos
+  const irAcc=sum(irP), irReg=tax-irAcc;
+  irP[N-1]+=irReg; cash[N-1]-=irReg; if(cash[N-1]<0){extra[N-1]+=-cash[N-1];cash[N-1]=0}
+  const salesNet=R/1.09;
+  const flowsEq=z();flowsEq[0]=-p.cap;for(let m=0;m<N;m++)flowsEq[m]-=extra[m];flowsEq[N-1]+=cash[N-1];
+  const extraTot=sum(extra), invested=p.cap+extraTot;
+  // exposición sin financiamiento
+  let acc=0,minAcc=0,op=z();for(let m=0;m<N;m++){op[m]=coll[m]-land[m]-landEnd[m]-cons[m]-stud[m]-ind[m]-fz[m]-igvP[m]-irP[m];acc+=op[m];minAcc=Math.min(minAcc,acc)}
+  const netLandAdj=model===1?net-p.land:net;
+  return {units,lastSale,metaAt,ACT,soldPre,soldE,indEnd,irRate,irAcc,irReg,curveOwn,collIni,collCuo,collSal,wPct,igvS,cBefore,model,P,C,E,N,R,sales,fz,coll,land,landEnd,cons,stud,ind,intr,draw,repay,extra,cash,bank,op,igvD,igvC,igvP,irP,igvNet,
+    costs,interest,pre,tax,net,netLandAdj,margin:salesNet?net/salesNet:0,maxBal,firstDraw,line,extraTot,invested,
+    exposure:-minAcc,irr:irr(flowsEq),landPaidAt,usedBank:maxBal>0.5};
+}
+function irr(f){
+  if(!f.some(v=>v<0)||!f.some(v=>v>0))return null;
+  const npv=r=>f.reduce((s,v,i)=>s+v/Math.pow(1+r,i),0);
+  let lo=-0.99,hi=5;if(npv(lo)*npv(hi)>0)return null;
+  for(let i=0;i<200;i++){const mid=(lo+hi)/2;if(npv(lo)*npv(mid)<=0)hi=mid;else lo=mid}
+  return Math.pow(1+(lo+hi)/2,12)-1;
+}
+
+/* ---------------- aporte del promotor ---------------- */
+function aporte(p,model){
+  const R=p.units*p.price, alc=model===1?0:p.land*p.alc/100;
+  const base=p.land+alc+p.cons+p.stud+R*p.ind/100;
+  const req=base*p.pctAp/100;
+  // Premisa del modelo 3: el vendedor cobra el saldo después del banco (subordinado) y renuncia a la hipoteca legal,
+  // por eso el terreno cuenta completo como aporte en los tres modelos.
+  const landPart=p.land+alc;
+  const paidNow=model===1?0:model===2?p.land+alc:p.land*Math.min(1,p.ini/100)+alc;   // efectivo por terreno a la firma
+  const cashNeeded=paidNow+p.stud;                              // lo que se paga con dinero propio antes del banco
+  const extraCash=Math.max(0,p.cap-cashNeeded);
+  const third=Math.max(0,cashNeeded-p.cap);                    // parte que tendría que poner un socio
+  const total=landPart+p.stud+extraCash;
+  const gap=Math.max(0,req-total);
+  // dinero propio mínimo para cumplir
+  const capMin=cashNeeded+Math.max(0,req-landPart-p.stud);
+  const owed=model===3?p.land-(paidNow-alc):0;
+  return {base,req,landPart,paidNow,owed,stud:p.stud,extraCash,third,total,gap,ok:gap<1,capMin};
+}
+
+/* ---------------- motor de decisión ---------------- */
+function decide(p){
+  const alc=p.land*p.alc/100;
+  if(p.own===1)return{model:1,why:["El terreno ya es tuyo: no hay que pagarlo.","La obra se financia con la preventa y las ventas durante la construcción.","La línea del banco queda aprobada solo como respaldo."]};
+  const full=p.land+alc, a=Math.min(100,Math.max(0,p.ini)), half=p.land*a/100+alc;
+  if(p.cap>=full){
+    const a2=aporte(p,2), a3=aporte(p,3);
+    if(!a2.ok&&a3.ok)return{model:3,why:[`Tu dinero (${money(p.cap)}) alcanza para comprar al contado, pero así no llegas al aporte del banco (faltan ${money(a2.gap)}).`,`Pagando el ${a} % a la firma y el saldo después del banco, el terreno cuenta completo y el dinero que no gastas queda en la cuenta del proyecto: el aporte sí se cumple.`,`Con este modelo te basta con ${money(a3.capMin)} de dinero propio para cumplir el aporte.`]};
+  }
+  if(p.cap>=full)return{model:2,why:[`Tu dinero propio (${money(p.cap)}) alcanza para pagar el terreno completo y la alcabala (${money(full)}).`,"Pagas al contado: mejor precio y el banco ve el terreno libre de deudas.","El banco entra si la caja no alcanza durante la obra."]};
+  if(p.cap>=half)return{model:3,why:[`Tu dinero alcanza para pagar el ${a} % del terreno y la alcabala a la firma (${money(half)}), pero no para el total (${money(full)}).`,`El ${100-a} % restante se le paga al vendedor al final, después de cancelar el banco.`,"Premisa: el vendedor renuncia a la hipoteca legal y cobra después del banco, así el terreno cuenta completo como aporte."]};
+  return{model:3,short:half-p.cap,why:[`Tu dinero no alcanza para pagar el ${a} % del terreno a la firma (${money(half)}).`,`Con tu dinero podrías pagar hasta el ${Math.max(0,Math.floor((p.cap-p.land*p.alc/100)/p.land*100))} %: negocia ese porcentaje con el propietario.`,`Si mantienes el ${a} %, te faltan ${money(half-p.cap)} para la firma: busca un socio o un préstamo puente.`]};
+}
+
+/* ---------------- formato ---------------- */
+let CUR="US$";
+const nf=new Intl.NumberFormat("es-PE",{maximumFractionDigits:0});
+function money(v){return (v<0?"−":"")+CUR+" "+nf.format(Math.abs(Math.round(v)))}
+function k(v){const a=Math.abs(v);return (v<0?"−":"")+(a>=1e6?(a/1e6).toFixed(2)+" M":a>=1e3?Math.round(a/1e3)+" k":Math.round(a))}
+function pct(v){return v==null?"n.a.":(v*100).toFixed(1).replace(".",",")+" %"}
+function phase(m,s){return m===0?"Inicio":m<=s.P?"Preventa":m<=s.E?"Obra":"Cierre"}
+
+/* ---------------- render ---------------- */
+function render(){
+  const p=read();state={...p};CUR=p.cur;
+  // si faltan datos básicos (por ejemplo, después de «Vaciar datos») se muestra un aviso en lugar del flujo
+  const _miss=[["units","N.º de unidades"],["price","Precio promedio por unidad"],["cons","Costo total de construcción"],["pre","Meses de preventa"],["obra","Meses de construcción"]].filter(([f])=>!(p[f]>0)).map(x=>x[1]);
+  document.querySelectorAll("#resultado > :not(#verdict)").forEach(e=>e.hidden=_miss.length>0);
+  if(_miss.length){
+    lastSim=null;
+    $("verdict").innerHTML=`<div class="eyebrow">Datos vacíos</div><h3>Completa los datos para ver tu flujo de caja</h3><ul>${_miss.map(x=>`<li>Falta: ${x}</li>`).join("")}</ul><p class="note" style="color:inherit;opacity:.85">Puedes escribir tus propios datos o pulsar «Cargar ejemplo».</p>`;
+    $("mbarT").textContent="Completa los datos";$("mbarS").textContent=`Faltan ${_miss.length} dato${_miss.length>1?"s":""} básicos`;
+    return;
+  }
+  {const a=Math.max(0.1,p.abs)/100,U=p.units||0;
+    $("absSum").textContent=U?(state.absBase==="B"?`≈ ${(a*U).toFixed(1)} unidades el primer mes, luego menos cada mes.`:`= ${(a*U).toFixed(2)} unidades por mes · se vende todo en ${Math.ceil(1/a-1e-9)} meses.`):"";}
+  const tot=p.pi+p.pc;$("psum").textContent=tot>100?"La inicial y las cuotas suman más de 100 %.":`Saldo con crédito hipotecario ${p.hip==="esc"?"a la firma de la escritura":"a la entrega"}: ${100-tot} %`;
+  $("psum").classList.toggle("bad",tot>100);
+  MODELS[3].name=`${p.ini} % ahora · ${100-p.ini} % al final`;
+  $("iniBox").hidden=p.own===1;
+  $("iniHint").textContent=`El saldo (${100-p.ini} %) se paga al final. Con tu dinero alcanza para pagar hasta el ${Math.max(0,Math.min(100,Math.floor((p.cap-p.land*p.alc/100)/(p.land||1)*100)))} % a la firma.`;
+  const d=decide(p);
+  if(view===null||d.model!==lastRec||(view===1&&p.own!==1)||(view!==1&&p.own===1))view=d.model;
+  lastRec=d.model;
+  curveStatus();
+  const s=simulate(p,view), sr=view===d.model?s:simulate(p,d.model);
+  // veredicto
+  // las alertas siguen al modelo que estás viendo (el que elegiste en las pestañas)
+  const alc0=p.land*p.alc/100, firma=view===2?p.land+alc0:view===3?p.land*Math.min(1,p.ini/100)+alc0:0, shortV=Math.max(0,firma-p.cap);
+  const bankMsg=s.usedBank?`Usarás el banco desde el mes ${s.firstDraw}: hasta ${money(s.maxBal)} de una línea de ${money(s.line)}.`:"No necesitas usar la línea del banco: la caja alcanza todo el proyecto.";
+  let alert="";
+  if(view!==d.model)alert+=`<div class="alert ok" style="background:rgba(255,255,255,.12);color:inherit">Estás viendo el modelo ${view} · ${MODELS[view].name}. Los avisos de abajo son de este modelo.</div>`;
+  if(shortV>1)alert+=`<div class="alert">Faltan ${money(shortV)} para el pago del terreno a la firma; en todo el proyecto faltan ${money(s.extraTot)} (socio o préstamo puente).</div>`;
+  else if(s.extraTot>1)alert+=`<div class="alert">Aun con el banco, la caja queda en rojo: necesitas ${money(s.extraTot)} adicionales a tu dinero (socio o préstamo puente).</div>`;
+  else alert+=`<div class="alert ok">${bankMsg}</div>`;
+  {const U=p.units,meta=p.metaP;
+    if(s.metaAt===null||s.metaAt>s.E)alert+=`<div class="alert">Con esta absorción no llegas a la meta de preventa (${meta} %) antes de terminar la obra: el banco no desembolsaría.</div>`;
+    else if(s.metaAt>s.P)alert+=`<div class="alert">Con esta absorción llegas a la meta de preventa (${meta} %) recién en el mes ${s.metaAt}: el banco no puede entrar antes de ese mes.</div>`;
+    if(s.lastSale>s.E)alert+=`<div class="alert">A la entrega (mes ${s.E}) quedan ${(U-s.soldE).toFixed(1)} unidades sin vender; la última se vende en el mes ${s.lastSale}.</div>`;}
+  const ap=aporte(p,view);
+  alert+=ap.ok?`<div class="alert ok">Aporte para el banco: ${money(ap.total)}, cumple el mínimo de ${p.pctAp} % (${money(ap.req)}). Con este modelo te basta con ${money(ap.capMin)} de dinero propio.</div>`
+    :`<div class="alert">Aporte para el banco: ${money(ap.total)} de ${money(ap.req)} (${p.pctAp} % del costo total). Faltan ${money(ap.gap)} de aporte.</div>`;
+  $("verdict").innerHTML=`<div class="eyebrow">El modelo que se ajusta a tus datos</div><h3>Modelo ${d.model} · ${MODELS[d.model].name}</h3><ul>${d.why.map(x=>`<li>${x}</li>`).join("")}</ul>${alert}`;
+  // tabs
+  $("tabs").innerHTML=[1,2,3].map(m=>{const dis=(m===1)!==(p.own===1);return `<button type="button" role="tab" data-m="${m}" aria-selected="${m===view}" ${dis?"disabled":""}><span class="tag">${m===d.model?"Recomendado":"Modelo "+m}</span>${MODELS[m].name}<small>${dis?(m===1?"Solo si el terreno es tuyo":"Solo si debes comprar el terreno"):MODELS[m].short}</small></button>`}).join("");
+  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=+b.dataset.m;render()});
+  // kpis
+  const kp=[
+    ["Ventas totales",money(s.R),`${p.units} unidades`],
+    ["Utilidad neta",money(s.net),`Margen ${pct(s.margin)} sobre ventas sin IGV · después de IR`],
+    ["¿Usa el banco?",s.usedBank?`<span class="pill no">Sí, mes ${s.firstDraw}</span>`:`<span class="pill ok">No</span>`,s.usedBank?`Deuda máxima ${money(s.maxBal)}`:`Línea de respaldo ${money(s.line)}`],
+    ["Dinero propio necesario",money(s.invested),s.extraTot>1?`Incluye ${money(s.extraTot)} que faltan`:`Tienes ${money(p.cap)}`],
+    ["IGV neto pagado a SUNAT",money(s.igvNet),`Impuesto a la renta ${money(s.tax)}`],
+    (()=>{const a=aporte(p,view);return ["Aporte para el banco",a.ok?`<span class="pill ok">Cumple</span>`:`<span class="pill no">Faltan ${money(a.gap)}</span>`,`${money(a.total)} de ${money(a.req)} (${p.pctAp} %)`]})(),
+    ["Velocidad de ventas",`Última unidad: mes ${s.lastSale}`,`${(s.soldPre/p.units*100).toFixed(0)} % vendido al fin de la preventa · ${(p.units-s.soldE).toFixed(1)} und. en stock a la entrega`],
+    view===1?["Utilidad restando el terreno",money(s.netLandAdj),"Mide si conviene más vender el terreno"]:
+     view===3?["Saldo del terreno al vendedor",money(p.land*(1-Math.min(1,p.ini/100))),s.landPaidAt!=null?`Se paga en el mes ${s.landPaidAt}`:"Pendiente"]:
+     ["Costo del terreno",money(p.land*(1+p.alc/100)),"Incluye alcabala"]
+  ];
+  $("kpis").innerHTML=kp.map(x=>`<div class="kpi"><div class="l">${x[0]}</div><div class="v">${x[1]}</div><div class="s">${x[2]}</div></div>`).join("");
+  chart(s);table(s);compare(p,d);aporteTable(p,view);lastSim=s;lastP={...p};
+  $("mbarT").textContent=`Modelo ${d.model} · ${MODELS[d.model].name}`;
+  $("mbarS").textContent=`Utilidad ${money(sr.net)} · ${sr.extraTot>1?"faltan "+money(sr.extraTot):sr.usedBank?"banco desde mes "+sr.firstDraw:"sin banco"}`;
+}
+
+function chart(s){
+  const W=800,H=260,L=56,Rm=10,T=14,B=34,n=s.N;
+  const vals=s.op, maxV=Math.max(1,...vals.map(Math.abs),...s.bank);
+  const rawMax=Math.max(...vals,...s.bank,0), rawMin=Math.min(...vals,0);
+  const raw=(rawMax-rawMin)||1, mag=Math.pow(10,Math.floor(Math.log10(raw/5))), st=[1,2,2.5,5,10].map(x=>x*mag).find(x=>raw/x<=6);
+  const yMax=Math.ceil(rawMax/st)*st, yMin=Math.floor(rawMin/st)*st;
+  const span=(yMax-yMin)||1, y=v=>T+(yMax-v)/span*(H-T-B);
+  const bw=(W-L-Rm)/n, x=i=>L+i*bw;
+  const css=getComputedStyle(document.documentElement), col=v=>css.getPropertyValue(v).trim();
+  let g="";
+  for(let v=yMin;v<=yMax+st/2;v+=st){g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="${col("--line")}" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="${col("--muted")}" font-family="IBM Plex Mono,monospace">${k(v)}</text>`}
+  // fases
+  const bands=[[1,s.P,"--accent-soft","Preventa"],[s.P+1,s.E,null,"Obra"]];
+  bands.forEach(b=>{if(b[2])g+=`<rect x="${x(b[0])}" y="${T}" width="${(b[1]-b[0]+1)*bw}" height="${H-T-B}" fill="${col(b[2])}" opacity=".6"/>`;g+=`<text x="${x(b[0])+4}" y="${T+11}" font-size="10" fill="${col("--muted")}">${b[3]}</text>`});
+  vals.forEach((v,i)=>{const y0=y(0),y1=y(v);g+=`<rect x="${x(i)+bw*.15}" y="${Math.min(y0,y1)}" width="${bw*.7}" height="${Math.max(1,Math.abs(y1-y0))}" fill="${col(v>=0?"--good":"--bad")}" rx="1.5"><title>Mes ${i}: ${money(v)}</title></rect>`});
+  if(s.usedBank){let d="";s.bank.forEach((v,i)=>{d+=(i?"L":"M")+(x(i)+bw/2).toFixed(1)+","+y(v).toFixed(1)});g+=`<path d="${d}" fill="none" stroke="${col("--bank")}" stroke-width="2.5"/>`}
+  g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(0)}" y2="${y(0)}" stroke="${col("--ink")}" stroke-width="1"/>`;
+  for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/12)))g+=`<text x="${x(i)+bw/2}" y="${H-B+16}" text-anchor="middle" font-size="10" fill="${col("--muted")}">${i}</text>`;
+  g+=`<text x="${(L+W)/2}" y="${H-4}" text-anchor="middle" font-size="10" fill="${col("--muted")}">Mes</text>`;
+  $("chart").innerHTML=g;
+}
+
+function aporteTable(p,model){
+  const a=aporte(p,model);
+  const rows=[
+    ["Costo total del proyecto",money(a.base),"Terreno, alcabala, construcción, expediente y gerencia/ventas."],
+    [`Aporte mínimo exigido (${p.pctAp} %)`,money(a.req),""],
+    [model===1?"Terreno aportado (valor)":"Terreno (valor completo + alcabala)",money(a.landPart),model===3?`Pagas el ${p.ini} % a la firma; el saldo (${money(a.owed)}) se le paga al vendedor después del banco.`:model===2?"Pagado al contado.":"Ya es tuyo."],
+    ["Expediente técnico (proyecto y licencias)",money(a.stud),"Pagado antes del crédito."],
+    ["Efectivo adicional en la cuenta del proyecto",money(a.extraCash),"Tu dinero que sobra después de terreno y expediente."],
+    ["Aporte total",money(a.total),a.third>1?`Incluye ${money(a.third)} que tendría que poner un socio.`:"Todo con tu dinero."],
+    [a.ok?"Cumple":"Falta de aporte",a.ok?"✓":money(a.gap),a.ok?"":"Súbelo con más dinero propio en la cuenta del proyecto o con un socio que entre como accionista."],
+    ["Dinero propio mínimo para cumplir",money(a.capMin),"Con el resto de supuestos igual."]
+  ];
+  if(model===3)rows.push(["Saldo del terreno subordinado al banco",money(a.owed),"El vendedor renuncia a la hipoteca legal y cobra después del banco; su garantía va por otra vía (por ejemplo, un fideicomiso)."]);
+  $("aporte").innerHTML=`<tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left;font-family:var(--f-body);color:var(--muted);white-space:normal;min-width:220px">${r[2]}</td></tr>`).join("")}</tbody>`;
+}
+/* ================= Exportar a Excel (.xlsx sin librerías) ================= */
+let lastSim=null,lastP=null;
+const XLB=()=>{
+  const enc=new TextEncoder();
+  const crcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+  const crc=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=crcT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const col=i=>{let s="";i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s};
+  /* ---- estilos ---- */
+  const fonts=['<font><sz val="10"/><color rgb="FF14263A"/><name val="Arial"/><family val="2"/></font>'];
+  const fills=['<fill><patternFill patternType="none"/></fill>','<fill><patternFill patternType="gray125"/></fill>'];
+  const borders=['<border><left/><right/><top/><bottom/><diagonal/></border>'];
+  const fmts=[],xfs=['<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'],cache={};
+  const put=(a,x)=>{let i=a.indexOf(x);if(i<0){a.push(x);i=a.length-1}return i};
+  const FMT={money:'#,##0;[Red](#,##0);"–"',pct:'0.0%;[Red]-0.0%;"–"',int:'0',dec:'#,##0.0'};
+  function style(st){
+    if(!st)return 0;const key=JSON.stringify(st);if(key in cache)return cache[key];
+    const fo=put(fonts,`<font>${st.b?"<b/>":""}${st.i?"<i/>":""}<sz val="${st.sz||10}"/><color rgb="FF${st.color||"14263A"}"/><name val="Arial"/><family val="2"/></font>`);
+    const fi=st.fill?put(fills,`<fill><patternFill patternType="solid"><fgColor rgb="FF${st.fill}"/><bgColor indexed="64"/></patternFill></fill>`):0;
+    const bc=st.bc||"D9E0E7",e=(tag,on,w)=>on?`<${tag} style="${w||"thin"}"><color rgb="FF${on===true?bc:on}"/></${tag}>`:`<${tag}/>`;
+    const B=st.border||"";
+    const bo=B?put(borders,`<border>${e("left",B.includes("l"))}${e("right",B.includes("r"))}${e("top",B.includes("t"),B.includes("T")?"medium":"thin")}${e("bottom",B.includes("b"),B.includes("B")?"medium":"thin")}<diagonal/></border>`):0;
+    let nf=0;const code=st.fmt?(FMT[st.fmt]||st.fmt):null;
+    if(code){let i=fmts.indexOf(code);if(i<0){fmts.push(code);i=fmts.length-1}nf=164+i}
+    const al=`<alignment${st.h?` horizontal="${st.h}"`:""} vertical="${st.v||"center"}"${st.wrap?' wrapText="1"':""}${st.indent?` indent="${st.indent}"`:""}/>`;
+    xfs.push(`<xf numFmtId="${nf}" fontId="${fo}" fillId="${fi}" borderId="${bo}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"${al?' applyAlignment="1"':""}>${al}</xf>`);
+    return cache[key]=xfs.length-1;
+  }
+  const stylesXml=()=>`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">${fmts.length?`<numFmts count="${fmts.length}">${fmts.map((f,i)=>`<numFmt numFmtId="${164+i}" formatCode="${esc(f)}"/>`).join("")}</numFmts>`:""}<fonts count="${fonts.length}">${fonts.join("")}</fonts><fills count="${fills.length}">${fills.join("")}</fills><borders count="${borders.length}">${borders.join("")}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join("")}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  /* ---- hojas ---- */
+  const sheets=[];
+  function sheet(name,o){sheets.push({name,...o})}
+  function sheetXml(sh,i){
+    let x=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">`;
+    if(sh.tab)x+=`<sheetPr><tabColor rgb="FF${sh.tab}"/></sheetPr>`;
+    x+=`<sheetViews><sheetView workbookViewId="0"${sh.grid===false?' showGridLines="0"':""}${i===0?' tabSelected="1"':""}>`;
+    if(sh.freeze){const [r,c]=sh.freeze;x+=`<pane${c?` xSplit="${c}"`:""}${r?` ySplit="${r}"`:""} topLeftCell="${col(c)}${r+1}" activePane="${r&&c?"bottomRight":r?"bottomLeft":"topRight"}" state="frozen"/>`}
+    x+=`</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>`;
+    if(sh.cols)x+=`<cols>${sh.cols.map((w,j)=>`<col min="${j+1}" max="${j+1}" width="${w}" customWidth="1"/>`).join("")}</cols>`;
+    x+="<sheetData>";
+    sh.rows.forEach((row,ri)=>{if(!row)return;const ht=sh.heights&&sh.heights[ri];
+      x+=`<row r="${ri+1}"${ht?` ht="${ht}" customHeight="1"`:""}>`;
+      row.forEach((cell,ci)=>{if(cell===undefined||cell===null||cell==="")return;
+        const o=typeof cell==="object"?cell:{v:cell};const ref=col(ci)+(ri+1),s=style(o.s);
+        if(o.f!=null){const isT=typeof o.v==="string";x+=`<c r="${ref}" s="${s}"${isT?' t="str"':""}><f>${esc(o.f)}</f>${o.v!=null?`<v>${isT?esc(o.v):Math.round(o.v*1e6)/1e6}</v>`:""}</c>`}
+        else if(o.v==null)x+=`<c r="${ref}" s="${s}"/>`;
+        else if(typeof o.v==="number")x+=`<c r="${ref}" s="${s}"><v>${Math.round(o.v*1e6)/1e6}</v></c>`;
+        else x+=`<c r="${ref}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${esc(o.v)}</t></is></c>`;});
+      x+="</row>"});
+    x+="</sheetData>";
+    if(sh.merges&&sh.merges.length)x+=`<mergeCells count="${sh.merges.length}">${sh.merges.map(m=>`<mergeCell ref="${m}"/>`).join("")}</mergeCells>`;
+    if(sh.validations)x+=`<dataValidations count="${sh.validations.length}">${sh.validations.map(v=>`<dataValidation type="list" allowBlank="0" showInputMessage="1" showErrorMessage="1" errorTitle="Mes no válido" error="Elige un mes de la lista." promptTitle="Elige un mes" prompt="${esc(v.prompt||"")}" sqref="${v.sqref}"><formula1>${esc(v.list)}</formula1></dataValidation>`).join("")}</dataValidations>`;
+    x+=`<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>`;
+    if(sh.chart)x+=`<drawing r:id="rId1"/>`;
+    return x+"</worksheet>";
+  }
+  /* ---- gráfico ---- */
+  function chartXml(c){
+    const cache=(arr,fmt)=>`<c:numCache><c:formatCode>${fmt||"General"}</c:formatCode><c:ptCount val="${arr.length}"/>${arr.map((v,i)=>`<c:pt idx="${i}"><c:v>${Math.round(v*100)/100}</c:v></c:pt>`).join("")}</c:numCache>`;
+    const cat=`<c:cat><c:numRef><c:f>${esc(c.cats.ref)}</c:f>${cache(c.cats.vals)}</c:numRef></c:cat>`;
+    const ser=(s,i,line)=>`<c:ser><c:idx val="${i}"/><c:order val="${i}"/><c:tx><c:v>${esc(s.name)}</c:v></c:tx><c:spPr>${line?`<a:ln w="28575" cap="rnd"><a:solidFill><a:srgbClr val="${s.color}"/></a:solidFill>${s.dash?'<a:prstDash val="dash"/>':""}<a:round/></a:ln>`:`<a:solidFill><a:srgbClr val="${s.color}"/></a:solidFill>`}</c:spPr>${line?'<c:marker><c:symbol val="none"/></c:marker>':'<c:invertIfNegative val="0"/>'}${cat}<c:val><c:numRef><c:f>${esc(s.ref)}</c:f>${cache(s.vals,"#,##0")}</c:numRef></c:val>${line?'<c:smooth val="0"/>':""}</c:ser>`;
+    const txt=(t,sz,b)=>`<c:tx><c:rich><a:bodyPr/><a:lstStyle/><a:p><a:pPr><a:defRPr sz="${sz}" b="${b?1:0}"/></a:pPr><a:r><a:rPr lang="es-PE" sz="${sz}" b="${b?1:0}"><a:solidFill><a:srgbClr val="14263A"/></a:solidFill></a:rPr><a:t>${esc(t)}</a:t></a:r></a:p></c:rich></c:tx>`;
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><c:roundedCorners val="0"/><c:chart><c:title>${txt(c.title,1200,1)}<c:overlay val="0"/></c:title><c:autoTitleDeleted val="0"/><c:plotArea><c:layout/>
+<c:barChart><c:barDir val="col"/><c:grouping val="clustered"/><c:varyColors val="0"/>${c.bars.map((s,i)=>ser(s,i,false)).join("")}<c:gapWidth val="40"/><c:overlap val="100"/><c:axId val="5001"/><c:axId val="5002"/></c:barChart>
+<c:lineChart><c:grouping val="standard"/><c:varyColors val="0"/>${c.lines.map((s,i)=>ser(s,i+c.bars.length,true)).join("")}<c:marker val="1"/><c:axId val="5001"/><c:axId val="5002"/></c:lineChart>
+<c:catAx><c:axId val="5001"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="b"/><c:title>${txt("Mes",900,0)}<c:overlay val="0"/></c:title><c:numFmt formatCode="General" sourceLinked="0"/><c:majorTickMark val="none"/><c:minorTickMark val="none"/><c:tickLblPos val="low"/><c:spPr><a:ln><a:solidFill><a:srgbClr val="9AA7B4"/></a:solidFill></a:ln></c:spPr><c:crossAx val="5002"/><c:crosses val="autoZero"/><c:auto val="1"/><c:lblAlgn val="ctr"/><c:lblOffset val="100"/><c:noMultiLvlLbl val="0"/></c:catAx>
+<c:valAx><c:axId val="5002"/><c:scaling><c:orientation val="minMax"/></c:scaling><c:delete val="0"/><c:axPos val="l"/><c:majorGridlines><c:spPr><a:ln><a:solidFill><a:srgbClr val="E3E8EE"/></a:solidFill></a:ln></c:spPr></c:majorGridlines><c:numFmt formatCode="#,##0" sourceLinked="0"/><c:majorTickMark val="none"/><c:minorTickMark val="none"/><c:tickLblPos val="nextTo"/><c:spPr><a:ln><a:noFill/></a:ln></c:spPr><c:crossAx val="5001"/><c:crosses val="autoZero"/><c:crossBetween val="between"/></c:valAx>
+</c:plotArea><c:legend><c:legendPos val="b"/><c:overlay val="0"/></c:legend><c:plotVisOnly val="1"/><c:dispBlanksAs val="gap"/></c:chart><c:spPr><a:solidFill><a:srgbClr val="FFFFFF"/></a:solidFill><a:ln><a:solidFill><a:srgbClr val="D9E0E7"/></a:solidFill></a:ln></c:spPr></c:chartSpace>`;
+  }
+  const drawingXml=a=>`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>${a[0]}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${a[1]}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>${a[2]}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${a[3]}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="2" name="Gráfico del flujo"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor></xdr:wsDr>`;
+  /* ---- zip ---- */
+  function zip(files){
+    const parts=[],central=[];let off=0;
+    for(const f of files){
+      const name=enc.encode(f.name),data=enc.encode(f.data),c=crc(data);
+      const h=new DataView(new ArrayBuffer(30));
+      h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);h.setUint32(14,c,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);
+      parts.push(new Uint8Array(h.buffer),name,data);
+      const cd=new DataView(new ArrayBuffer(46));
+      cd.setUint32(0,0x02014b50,true);cd.setUint16(4,20,true);cd.setUint16(6,20,true);cd.setUint16(8,0x0800,true);cd.setUint16(14,0x21,true);cd.setUint32(16,c,true);cd.setUint32(20,data.length,true);cd.setUint32(24,data.length,true);cd.setUint16(28,name.length,true);cd.setUint32(42,off,true);
+      central.push(new Uint8Array(cd.buffer),name);off+=30+name.length+data.length;
+    }
+    const size=central.reduce((a,b)=>a+b.length,0),end=new DataView(new ArrayBuffer(22));
+    end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,size,true);end.setUint32(16,off,true);
+    return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  }
+  function blob(){
+    const sx=sheets.map((s,i)=>sheetXml(s,i));// genera estilos primero
+    const files=[],ct=[],wbRels=[];let chartN=0;
+    sheets.forEach((s,i)=>{
+      files.push({name:`xl/worksheets/sheet${i+1}.xml`,data:sx[i]});
+      ct.push(`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`);
+      wbRels.push(`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`);
+      if(s.chart){chartN++;
+        files.push({name:`xl/worksheets/_rels/sheet${i+1}.xml.rels`,data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${chartN}.xml"/></Relationships>`});
+        files.push({name:`xl/drawings/drawing${chartN}.xml`,data:drawingXml(s.chart.anchor)});
+        files.push({name:`xl/drawings/_rels/drawing${chartN}.xml.rels`,data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="../charts/chart${chartN}.xml"/></Relationships>`});
+        files.push({name:`xl/charts/chart${chartN}.xml`,data:chartXml(s.chart)});
+        ct.push(`<Override PartName="/xl/drawings/drawing${chartN}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart${chartN}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>`);
+      }
+    });
+    files.unshift(
+      {name:"[Content_Types].xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${ct.join("")}</Types>`},
+      {name:"_rels/.rels",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+      {name:"xl/workbook.xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView activeTab="0"/></bookViews><sheets>${sheets.map((s,i)=>`<sheet name="${esc(s.name)}" sheetId="${i+1}"${s.hidden?' state="hidden"':""} r:id="rId${i+1}"/>`).join("")}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`},
+      {name:"xl/_rels/workbook.xml.rels",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${wbRels.join("")}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+      {name:"xl/styles.xml",data:stylesXml()});
+    return zip(files);
+  }
+  return {sheet,blob,col};
+};
+function downloadBlob(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+
+/* paleta del Excel */
+const XC={navy:"1B3550",ink:"14263A",muted:"5B6B7C",line:"D9E0E7",band:"EEF2F6",soft:"F6F8FA",accent:"C7862B",
+  ph:{Inicio:"E6EAEF",Preventa:"FBE7CC",Obra:"D6E6F7",Cierre:"D5EFE0"},phInk:{Inicio:"5B6B7C",Preventa:"8A5A12",Obra:"1F4E8C",Cierre:"1E6B45"},
+  good:"1E7A4F",goodSoft:"E2F2EA",bad:"B23A2E",badSoft:"F8E3E0",input:"1F4E8C"};
+
+function exportXlsx(){
+  const s=lastSim,p=lastP;
+  if(!s||!p){toast("Completa los datos antes de exportar");return}
+  const N=s.N,P=s.P,E=s.E,C=s.C,months=[...Array(N).keys()],SUM=a=>a.reduce((x,y)=>x+y,0);
+  const n=v=>nf.format(Math.round(v)),pc=v=>(Math.round(v*1000)/10).toString().replace(".",",")+" %";
+  const fase=m=>m===0?"Inicio":m<=P?"Preventa":m<=E?"Obra":"Cierre";
+  const R=s.R,aAbs=Math.min(1,p.abs/100),U=p.units,leftAt=m=>U-s.units.slice(0,m).reduce((x,y)=>x+y,0),u1=v=>(Math.round(v*100)/100).toString().replace(".",","),pi=Math.min(1,p.pi/100),pcu=Math.min(1-pi,p.pc/100),ps=Math.max(0,1-pi-pcu);
+  const mname=`Modelo ${s.model} · ${MODELS[s.model].name}`,rTEA=Math.pow(1+p.tea/100,1/12)-1,alc=p.land*p.alc/100;
+  const curFmt=`"${p.cur} "#,##0;[Red]-"${p.cur} "#,##0;"–"`;
+  const shapeName=s.curveOwn?"tu curva S importada":"la curva «"+SHAPES[p.shape||"tipica"]+"»";
+  const X=XLB(),L=X.col;
+  // series derivadas
+  const neg=a=>a.map(v=>-v);
+  const capIn=months.map(m=>m===0?p.cap:0);
+  const egresos=months.map(m=>s.land[m]+s.landEnd[m]+s.cons[m]+s.stud[m]+s.ind[m]+s.fz[m]+s.igvP[m]+s.irP[m]);
+  const entradas=months.map(m=>s.coll[m]+s.draw[m]+s.extra[m]+capIn[m]);
+  const salidas=months.map(m=>egresos[m]+s.repay[m]+s.intr[m]);
+  const ap=aporte(p,s.model);
+
+  /* ================= Hoja 1 · Flujo de caja ================= */
+  const W=2+N, lastCol=L(W-1);
+  const T={b:1,sz:16,color:"FFFFFF",fill:XC.navy,v:"center",indent:1};
+  const r1=[],h1={},m1=[`A1:${lastCol}1`,`A2:${lastCol}2`];
+  r1[0]=[{v:`Flujo de caja · ${p.pname||"Proyecto"}`,s:T},...Array(W-1).fill({s:{fill:XC.navy}})];h1[0]=30;
+  r1[1]=[{v:`${mname}   ·   Cifras en ${p.cur}, con IGV   ·   Generado el ${new Date().toLocaleDateString("es-PE")}`,s:{color:"FFFFFF",fill:XC.navy,indent:1,i:1}},...Array(W-1).fill({s:{fill:XC.navy}})];h1[1]=20;
+  r1[3]=[{v:"Fases del proyecto:",s:{b:1,color:XC.muted}},null,...["Inicio","Preventa","Obra","Cierre"].map(f=>({v:f,s:{b:1,h:"center",fill:XC.ph[f],color:XC.phInk[f]}})),
+    {v:`Mes 0 = firma · meses 1–${P} preventa · ${P+1}–${E} obra (entrega en el mes ${E}) · luego cierre`,s:{color:XC.muted,i:1}}];
+  const HR=5;r1[HR]=[{v:"Concepto",s:{b:1,color:"FFFFFF",fill:XC.navy,indent:1}},{v:"Total",s:{b:1,color:"FFFFFF",fill:XC.navy,h:"center"}},...months.map(m=>({v:`Mes ${m}`,s:{b:1,color:"FFFFFF",fill:XC.navy,h:"center"}}))];h1[HR]=20;
+  r1[HR+1]=[{v:"Fase",s:{color:XC.muted,i:1,indent:1,border:"b"}},{s:{border:"b"}},...months.map(m=>({v:fase(m),s:{b:1,sz:9,h:"center",fill:XC.ph[fase(m)],color:XC.phInk[fase(m)],border:"b"}}))];
+  let rr=HR+2;const rowOf={};
+  const sec=(t,hint)=>{r1[rr]=[{v:t,s:{b:1,color:XC.navy,fill:XC.band,indent:1}},{s:{fill:XC.band}},...months.map((m,i)=>i===0&&hint?{v:hint,s:{i:1,color:XC.muted,fill:XC.band}}:{s:{fill:XC.band}})];h1[rr]=18;rr++};
+  const line=(lbl,arr,kind,key)=>{
+    const st={main:{b:1,fmt:"money",border:"b"},sub:{fmt:"money",color:XC.muted,border:"b"},info:{fmt:"money",i:1,color:XC.muted,border:"b"},
+      pct:{fmt:"pct",color:XC.muted,i:1,border:"b"},total:{b:1,fmt:"money",fill:XC.soft,border:"tb",bc:"9AA7B4"},big:{b:1,fmt:"money",fill:"DCE6F2",border:"Tb",bc:XC.navy},
+      bal:{fmt:"money",border:"b"},units:{fmt:'#,##0.0;-#,##0.0;"–"',i:1,color:XC.muted,border:"b"}}[kind||"main"];
+    const lab={...st,fmt:undefined,indent:kind==="sub"||kind==="pct"?3:1};delete lab.fmt;
+    const tot=kind==="pct"?SUM(arr):(kind==="bal"||kind==="big"?null:SUM(arr));
+    r1[rr]=[{v:lbl,s:lab},tot==null?{s:{...st,fmt:undefined}}:{v:tot,s:st},...arr.map(v=>({v:Math.abs(v)<0.005?0:v,s:st}))];
+    if(key)rowOf[key]=rr+1;rr++;
+  };
+  sec("INGRESOS","Lo que pagan los compradores");
+  line("Unidades vendidas en el mes",s.units,"units");
+  line("Ventas firmadas (contratos, aún no es caja)",s.sales,"info","ventas");
+  line("Ingresos",s.coll,"main","coll");
+  line("Cuotas iniciales",s.collIni,"sub");line("Cuotas durante la obra",s.collCuo,"sub");line("Saldo con crédito hipotecario",s.collSal,"sub");
+  sec("EGRESOS","Pagos del proyecto");
+  line("Terreno (precio + alcabala)",neg(months.map(m=>s.land[m]+s.landEnd[m])));
+  line("Construcción",neg(s.cons));line("% de avance de obra del mes",s.wPct,"pct");
+  line("Proyecto, licencias y estudios",neg(s.stud));line("Gerencia, publicidad y comisiones",neg(s.ind));
+  if(SUM(s.fz)>0.5)line("Garantía por desembolso anticipado",neg(s.fz));
+  line("IGV pagado a SUNAT",neg(s.igvP));line("Impuesto a la renta",neg(s.irP));
+  line("Total egresos",neg(egresos),"total","egr");
+  sec("FLUJO OPERATIVO","Ingresos menos egresos, antes de banco y aportes");
+  line("Flujo operativo del mes",s.op,"total","op");
+  sec("FINANCIAMIENTO","Cómo se cubre la caja");
+  line("Dinero propio (caja inicial)",capIn);line("Desembolso del banco",s.draw);line("Pago al banco",neg(s.repay));line("Intereses del banco",neg(s.intr));
+  line("Aporte adicional que falta",s.extra);
+  sec("SALDOS AL CIERRE DEL MES");
+  line("Caja al cierre del mes",s.cash,"big","cash");line("Deuda con el banco",s.bank,"bal","bank");
+  rr++;
+  // leyenda de cálculo
+  r1[rr]=[{v:"¿CÓMO SE CALCULA CADA FILA?",s:{b:1,color:"FFFFFF",fill:XC.accent,indent:1}},...Array(W-1).fill({s:{fill:XC.accent}})];m1.push(`A${rr+1}:${lastCol}${rr+1}`);h1[rr]=20;rr++;
+  const how=[
+    ["Ventas firmadas",`Unidades vendidas en el mes × precio promedio (${n(p.price)}). Unidades: absorción ${pc(aAbs)} ${p.absBase==="B"?"de las unidades que quedan por vender":"del total de unidades"}. La última se vende en el mes ${s.lastSale}. Son contratos: el dinero entra en «Ingresos».`],
+    ["Ingresos",`Cuota inicial ${pc(pi)} en el mes de la venta${pcu>0?` + cuotas ${pc(pcu)} repartidas hasta la entrega`:" (sin cuotas durante la obra)"} + saldo hipotecario ${pc(ps)} ${p.hip==="esc"?`a la firma de la escritura (${p.dias} días después de la minuta)`:`después de la entrega (lo vendido hasta el mes ${E}: mitad en el mes ${E+1} y mitad en el ${E+2}; lo vendido después, al mes siguiente de cada venta)`}.`],
+    ["Terreno",s.model===1?"Terreno propio: no se paga.":s.model===2?`Compra al contado en el mes 0: ${n(p.land)} + alcabala ${p.alc} % (${n(alc)}).`:`${p.ini} % del precio + alcabala en el mes 0; el saldo (${100-p.ini} %) se paga cuando la deuda con el banco ya es cero.`],
+    ["Construcción",`${n(p.cons)} repartido en ${C} meses de obra según ${shapeName}; la fila «% de avance» muestra el porcentaje de cada mes.`],
+    ["Proyecto, licencias y estudios",`${n(p.stud)} en partes iguales del mes 0 al ${P}, antes de empezar la obra.`],
+    ["Gerencia, publicidad y comisiones",`${p.ind} % de las ventas (${n(R*p.ind/100)}) en partes iguales del mes 0 al ${s.indEnd}.`],
+    ["IGV pagado a SUNAT","IGV de las ventas (9/109 de lo cobrado) menos crédito fiscal (18/118 de obra, proyecto y gerencia), descontando el saldo a favor acumulado."],
+    ["Impuesto a la renta",p.irMode==="mon"?`Pagos a cuenta: ${pc(s.irRate)} de los ingresos sin IGV de cada mes. En el último mes se regulariza: impuesto del año ${n(s.tax)} (${p.ir} % de la utilidad) − pagos a cuenta ${n(s.irAcc)}.`:`${p.ir} % de la utilidad antes de impuestos (${n(s.pre)}), pagado en el último mes.`],
+    ["Desembolso del banco",`Si la caja queda negativa entre los meses ${P+1} y ${E}, el banco presta lo necesario hasta su línea (${n(s.line)} = ${p.pb} % de la obra).`],
+    ["Pago al banco e intereses",`Después de la entrega, todo excedente paga la deuda. Intereses: deuda del mes anterior × ${pc(rTEA)} mensual (TEA ${p.tea} %).`],
+    ["Aporte adicional que falta","Dinero que falta cuando la caja queda negativa y el banco no la cubre: socio o préstamo puente."],
+    ["Caja al cierre del mes",`Caja del mes anterior + entradas − salidas. Empieza con tu dinero propio (${n(p.cap)}).`]];
+  how.forEach(([a,b],i)=>{r1[rr]=[{v:a,s:{b:1,v:"top",indent:1,border:"b",fill:i%2?null:XC.soft}},{v:b,s:{wrap:1,v:"top",border:"b",fill:i%2?null:XC.soft}},...Array(W-2).fill({s:{border:"b",fill:i%2?null:XC.soft}})];
+    m1.push(`B${rr+1}:${L(Math.min(W-1,13))}${rr+1}`);h1[rr]=30;rr++});
+  rr++;r1[rr]=[{v:"Más detalle: la hoja «Explicación por mes» muestra de dónde sale cada cifra y la hoja «Supuestos» lista todos los datos usados.",s:{i:1,color:XC.muted}}];
+  X.sheet("Flujo de caja",{rows:r1,cols:[40,14,...months.map(()=>12)],merges:m1,heights:h1,freeze:[HR+2,2],grid:false,tab:XC.navy});
+
+  /* ================= Hoja 2 · Supuestos ================= */
+  const r2=[],h2={},m2=["B1:E1","B2:E2","B3:E3"];
+  r2[0]=[null,{v:"Supuestos del flujo de caja",s:{b:1,sz:16,color:"FFFFFF",fill:XC.navy,indent:1}},{s:{fill:XC.navy}},{s:{fill:XC.navy}},{s:{fill:XC.navy}}];h2[0]=30;
+  r2[1]=[null,{v:`${p.pname||"Proyecto"} · ${mname}`,s:{color:"FFFFFF",fill:XC.navy,indent:1,i:1}},{s:{fill:XC.navy}},{s:{fill:XC.navy}},{s:{fill:XC.navy}}];
+  r2[2]=[null,{v:"Estos son los datos con los que se armó el flujo. Los valores en azul son los que ingresaste en la app; para cambiarlos, cámbialos en la app y vuelve a exportar.",s:{wrap:1,color:XC.muted,i:1}}];h2[2]=30;
+  let q=4;
+  const sh2=t=>{r2[q]=[null,{v:t,s:{b:1,color:"FFFFFF",fill:XC.navy,indent:1}},{s:{fill:XC.navy}},{s:{fill:XC.navy}},{s:{fill:XC.navy}}];h2[q]=20;q++;
+    r2[q]=[null,...["Dato","Valor","Unidad","Explicación"].map(x=>({v:x,s:{b:1,color:XC.muted,fill:XC.band,border:"b",h:x==="Valor"?"right":x==="Unidad"?"center":undefined}}))];q++};
+  let zebra=0;
+  const add=(dato,val,unit,expl,kind)=>{const f=zebra++%2?null:XC.soft;
+    const vs={b:1,color:kind==="calc"?XC.ink:XC.input,h:"right",fill:f,border:"b",fmt:typeof val==="number"?(kind==="pct"?"pct":kind==="int"?"#,##0":kind==="money"?curFmt:"#,##0"):undefined};
+    r2[q]=[null,{v:dato,s:{indent:1,fill:f,border:"b"}},{v:val,s:vs},{v:unit||"",s:{color:XC.muted,h:"center",fill:f,border:"b"}},{v:expl||"",s:{wrap:1,color:XC.muted,fill:f,border:"b"}}];
+    if(expl&&expl.length>70)h2[q]=30;q++};
+  sh2("1 · TERRENO Y MODELO");
+  add("Modelo de flujo",mname,"","Define cómo y cuándo se paga el terreno.","calc");
+  add("¿El terreno es tuyo?",p.own?"Sí":"No","","Si es tuyo no se paga (modelo 1).");
+  add("Valor o precio del terreno",p.land,p.cur,"Pago del terreno y aporte para el banco.","money");
+  if(s.model===3)add("% del terreno pagado a la firma",p.ini/100,"%","El saldo se paga cuando la deuda con el banco es cero.","pct");
+  add("Alcabala y gastos de compra",p.alc/100,"%",`Se paga en el mes 0: ${n(alc)}.`,"pct");
+  add("Dinero propio",p.cap,p.cur,"Caja inicial del mes 0.","money");
+  q++;sh2("2 · PROYECTO Y COSTOS");
+  add("N.º de unidades",p.units,"und.","","int");add("Precio promedio por unidad",p.price,p.cur,"Con IGV.","money");
+  add("Ventas totales",R,p.cur,"Unidades × precio promedio.","calc");r2[q-1][2].s.fmt=curFmt;
+  add("Costo total de construcción",p.cons,p.cur,`Se reparte mes a mes con ${shapeName}.`,"money");
+  add("Proyecto, licencias y estudios",p.stud,p.cur,"Se paga antes de la obra.","money");
+  add("Gerencia, publicidad y comisiones",p.ind/100,"% ventas",`${n(R*p.ind/100)} repartidos hasta el cierre.`,"pct");
+  q++;sh2("3 · PLAZOS Y VENTAS");
+  add("Meses de preventa",P,"meses",`Meses 1 a ${P}.`,"int");add("Meses de construcción",C,"meses",`Meses ${P+1} a ${E}; la entrega es el mes ${E}.`,"int");
+  add("Coeficiente de absorción",aAbs,"% mensual",p.absBase==="B"?"Base B: % de las unidades que quedan por vender cada mes.":`Base A: % del total de unidades cada mes = ${u1(aAbs*U)} unidades por mes.`,"pct");
+  add("Vendido al fin de la preventa",s.soldPre/U,"%",`${u1(s.soldPre)} de ${U} unidades.`,"pct");
+  add("Meta de preventa del banco",p.metaP/100,"%",s.metaAt===null||s.metaAt>E?"No se alcanza antes de terminar la obra: el banco no desembolsaría.":`Se alcanza en el mes ${s.metaAt}; el banco puede desembolsar desde el mes ${s.ACT}.`,"pct");
+  add("Stock a la entrega",U-s.soldE,"und.",s.lastSale>E?`La última unidad se vende en el mes ${s.lastSale}.`:"Todo se vende antes de la entrega.","calc");r2[q-1][2].s.fmt="#,##0.0";
+  q++;sh2("4 · COBRANZA A LOS COMPRADORES");
+  add("Cuota inicial",pi,"%","Se cobra en el mes de la venta.","pct");add("Cuotas durante la obra",pcu,"%","En partes iguales hasta la entrega.","pct");
+  add("Saldo con crédito hipotecario",ps,"%",p.hip==="esc"?"Se cobra a la firma de la escritura.":"Se cobra después de la entrega.","pct");
+  add("Desembolso del banco del comprador",p.hip==="esc"?"A la firma de la escritura":"Al final (entrega)","","");
+  if(p.hip==="esc"){add("Días entre minuta y escritura",p.dias,"días","Parte entra en el mes de la venta y parte el siguiente.","int");add("Costo de la garantía",p.fz/100,"% anual","Carta fianza o fideicomiso que pide el banco del comprador.","pct")}
+  q++;sh2("5 · BANCO Y APORTE");
+  add("% de la obra que financia el banco",p.pb/100,"%",`Línea máxima: ${n(s.line)}.`,"pct");
+  add("Tasa del banco (TEA)",p.tea/100,"% anual",`Tasa mensual: ${pc(rTEA)}.`,"pct");
+  add("Aporte mínimo que exige el banco",p.pctAp/100,"% costo",`Exigido: ${n(ap.req)} · tu aporte: ${n(ap.total)} (${ap.ok?"cumple":"faltan "+n(ap.gap)}).`,"pct");
+  q++;sh2("6 · IMPUESTOS");
+  add("Impuesto a la renta",p.ir/100,"%","Sobre la utilidad antes de impuestos.","pct");
+  add("Pago del impuesto a la renta",p.irMode==="mon"?"Mes a mes (pagos a cuenta)":"Al final","",p.irMode==="mon"?`Se usa ${pc(s.irRate)} de los ingresos sin IGV: el mayor entre tu coeficiente (${p.coefIR} %) y 1.5 %.`:"Un solo pago en el último mes.","calc");
+  add("IGV en la venta","9 % efectivo","","Primera venta: el 50 % del precio corresponde al terreno, que no paga IGV.","calc");
+  add("IGV en las compras","18 %","","Se usa como crédito fiscal.","calc");
+  q++;sh2("7 · CURVA S DE OBRA");
+  add("Curva usada",s.curveOwn?"Importada":"Predeterminada","",s.curveOwn?(p.curveSrc||""):`Forma «${SHAPES[p.shape||"tipica"]}». Para el banco conviene el cronograma valorizado real.`,"calc");
+  r2[q]=[null,...["Mes de obra","% del costo","Mes del flujo","Monto"].map(x=>({v:x,s:{b:1,color:XC.muted,fill:XC.band,border:"b",h:"center"}}))];q++;
+  for(let k=0;k<C;k++){const m=P+1+k,f=k%2?null:XC.soft;r2[q]=[null,{v:k+1,s:{h:"center",fill:f,border:"b"}},{v:s.wPct[m],s:{fmt:"pct",h:"right",fill:f,border:"b"}},{v:m,s:{h:"center",fill:f,border:"b",color:XC.muted}},{v:s.cons[m],s:{fmt:curFmt,h:"right",fill:f,border:"b"}}];q++}
+  X.sheet("Supuestos",{rows:r2,cols:[2,40,32,14,74],merges:m2,heights:h2,freeze:[3,0],grid:false,tab:XC.accent});
+
+  /* ================= Hoja 4 (oculta) · Datos para el panel ================= */
+  const CONC=[["Dinero propio (caja inicial)",capIn],["Ventas firmadas",s.sales],["Ingresos",s.coll],["Terreno",neg(months.map(m=>s.land[m]+s.landEnd[m]))],["Construcción",neg(s.cons)],
+    ["Proyecto y licencias",neg(s.stud)],["Gerencia, publicidad y comisiones",neg(s.ind)],["Garantía por desembolso",neg(s.fz)],["IGV pagado a SUNAT",neg(s.igvP)],["Impuesto a la renta",neg(s.irP)],
+    ["Desembolso del banco",s.draw],["Pago al banco",neg(s.repay)],["Intereses del banco",neg(s.intr)],["Aporte adicional que falta",s.extra]];
+  const txtOf=(c,m)=>{
+    const v=c[1][m];if(Math.abs(v)<0.5)return "Sin movimiento este mes.";
+    switch(c[0]){
+      case "Dinero propio (caja inicial)":return "Tu dinero propio, que forma la caja inicial del proyecto.";
+      case "Ventas firmadas":return `${p.absBase==="B"?`${pc(aAbs)} × ${u1(leftAt(m))} unidades por vender`:`${pc(aAbs)} × ${U} unidades`} = ${u1(s.units[m])} unidades × ${n(p.price)}. Es un contrato: el dinero entra en «Ingresos».`;
+      case "Ingresos":{const pp=[];if(s.collIni[m]>=0.5)pp.push(`cuotas iniciales ${n(s.collIni[m])} (${pc(pi)} de lo vendido este mes)`);if(s.collCuo[m]>=0.5)pp.push(`cuotas en obra ${n(s.collCuo[m])} (${pc(pcu)} de cada venta anterior, repartido hasta la entrega)`);if(s.collSal[m]>=0.5)pp.push(`saldo hipotecario ${n(s.collSal[m])}`);return "Suma de "+pp.join(" + ")+"."}
+      case "Terreno":return s.land[m]>=0.5?(s.model===2?`Precio ${n(p.land)} + alcabala ${n(alc)}.`:`${p.ini} % de ${n(p.land)} + alcabala ${n(alc)}.`):`Saldo del ${100-p.ini} % al vendedor: se paga cuando la deuda con el banco ya es cero.`;
+      case "Construcción":return `${n(p.cons)} × ${pc(s.wPct[m])}: mes ${m-P} de ${C} de obra según ${shapeName}.`;
+      case "Proyecto y licencias":return `${n(p.stud)} ÷ ${P+1} meses (del 0 al ${P}).`;
+      case "Gerencia, publicidad y comisiones":return `${p.ind} % × ${n(R)} = ${n(R*p.ind/100)} ÷ ${s.indEnd+1} meses (del 0 al ${s.indEnd}).`;
+      case "Garantía por desembolso":return `Saldo hipotecario adelantado × ${p.fz} % anual × ${Math.max(0,E+1-m)} meses hasta la entrega ÷ 12.`;
+      case "IGV pagado a SUNAT":return `IGV de ventas ${n(s.igvD[m])} − crédito fiscal ${n(s.igvC[m])} − saldo a favor anterior ${n(m?s.igvS[m-1]:0)}.`;
+      case "Impuesto a la renta":return p.irMode==="mon"?(m===N-1?(s.irReg>=0?`Regularización: impuesto del año ${n(s.tax)} − pagos a cuenta ${n(s.irAcc)} (más el pago a cuenta de este mes, si hay).`:`Se pagó de más: pagos a cuenta ${n(s.irAcc)} frente a un impuesto de ${n(s.tax)}; la diferencia se recupera.`):`Pago a cuenta: ${pc(s.irRate)} × ingresos sin IGV del mes (${n(s.coll[m])} ÷ 1.09).`):`${p.ir} % × utilidad antes de impuestos ${n(s.pre)}.`;
+      case "Desembolso del banco":return `La caja del mes quedaba en ${n(s.cBefore[m])}; el banco presta lo necesario para dejarla en cero.`;
+      case "Pago al banco":return "Excedente de caja después de la entrega aplicado a la deuda.";
+      case "Intereses del banco":return `Deuda del mes anterior ${n(m?s.bank[m-1]:0)} × ${pc(rTEA)} mensual.`;
+      case "Aporte adicional que falta":return "La caja quedaba negativa y el banco no podía cubrirla este mes.";
+    }return "";};
+  const K=CONC.length,c0=2,cL=L(c0+N-1);
+  const rd=[["Mes","",...months],["Fase","",...months.map(fase)]];
+  CONC.forEach(c=>rd.push([c[0],"valor",...c[1]]));CONC.forEach(c=>rd.push([c[0],"texto",...months.map(m=>txtOf(c,m))]));
+  rd.push(["Entradas del mes","",...entradas],["Salidas del mes","",...salidas.map(v=>-v)],["Caja al cierre","",...s.cash],["Deuda con el banco","",...s.bank]);
+  const RE=2+2*K; // fila (0-based) de «Entradas»
+  const DR=i=>`Datos!$${L(c0)}$${i+1}:$${cL}$${i+1}`;
+
+  /* ================= Hoja 3 · Explicación por mes (panel) ================= */
+  const r3=[],h3={},m3=[];const COLS=[2,30,16,16,16,16,16,16,16];
+  const band=(r,t,st)=>{r3[r]=[null,{v:t,s:st},...Array(7).fill({s:{fill:st.fill}})];m3.push(`B${r+1}:I${r+1}`)};
+  band(0,`Panel del flujo de caja · ${p.pname||"Proyecto"}`,{b:1,sz:16,color:"FFFFFF",fill:XC.navy,indent:1});h3[0]=32;
+  band(1,`${mname} · cifras en ${p.cur} con IGV`,{i:1,color:"FFFFFF",fill:XC.navy,indent:1});
+  // tarjetas del proyecto
+  const tiles=(r,list)=>{r3[r]=[null];r3[r+1]=[null];r3[r+2]=[null];
+    list.forEach(([lab,val,fmt,note,tone],i)=>{const c=1+i*2,f=tone==="bad"?XC.badSoft:tone==="good"?XC.goodSoft:XC.soft,ink=tone==="bad"?XC.bad:tone==="good"?XC.good:XC.ink;
+      r3[r][c]={v:lab,s:{sz:9,color:XC.muted,fill:f,indent:1,border:"tlr",bc:XC.line}};r3[r][c+1]={s:{fill:f,border:"tr"}};
+      r3[r+1][c]=typeof val==="object"?{...val,s:{b:1,sz:15,color:ink,fill:f,indent:1,h:"left",fmt,border:"lr"}}:{v:val,s:{b:1,sz:15,color:ink,fill:f,indent:1,h:"left",fmt,border:"lr"}};r3[r+1][c+1]={s:{fill:f,border:"r"}};
+      r3[r+2][c]={v:note||"",s:{sz:9,color:XC.muted,fill:f,indent:1,border:"blr"}};r3[r+2][c+1]={s:{fill:f,border:"br"}};
+      m3.push(`${L(c)}${r+1}:${L(c+1)}${r+1}`,`${L(c)}${r+2}:${L(c+1)}${r+2}`,`${L(c)}${r+3}:${L(c+1)}${r+3}`)});h3[r+1]=26};
+  r3[3]=[null,{v:"RESUMEN DEL PROYECTO",s:{b:1,color:XC.navy}}];
+  tiles(4,[["Ventas totales",R,curFmt,`${p.units} unidades`],["Utilidad neta",s.net,curFmt,`Margen ${pc(s.margin)} sobre ventas sin IGV`,s.net>=0?"good":"bad"],
+    ["Deuda máxima con el banco",s.maxBal,curFmt,s.usedBank?`Entra en el mes ${s.firstDraw}`:"No se usa el banco"],["Dinero que falta",s.extraTot,curFmt,s.extraTot>1?"Socio o préstamo puente":"Las fuentes alcanzan",s.extraTot>1?"bad":"good"]]);
+  tiles(8,[["Caja al final",s.cash[N-1],curFmt,`Mes ${N-1}`],["IGV neto pagado",s.igvNet,curFmt,"A SUNAT"],["Impuesto a la renta",s.tax,curFmt,`${p.ir} % de la utilidad`],
+    ["Aporte para el banco",ap.ok?"Cumple":-ap.gap,ap.ok?undefined:curFmt,`Exigido ${n(ap.req)} (${p.pctAp} %)`,ap.ok?"good":"bad"]]);
+  // selector de mes
+  const selM=Math.min(N-1,Math.max(0,P+4));
+  r3[12]=[null,{v:"ELIGE UN MES  ▸",s:{b:1,color:"FFFFFF",fill:XC.accent,indent:1}},{v:selM,s:{b:1,sz:16,h:"center",fill:"FFF4D6",color:XC.navy,border:"tblr",bc:XC.accent}},
+    {f:`INDEX(Datos!$${L(c0)}$2:$${cL}$2,1,$C$13+1)`,v:fase(selM),s:{b:1,sz:12,h:"center",fill:XC.ph[fase(selM)],color:XC.phInk[fase(selM)]}},
+    {v:`Escribe un número del 0 al ${N-1} o elígelo en la lista: todo el bloque de abajo cambia a ese mes.`,s:{i:1,color:XC.muted,wrap:1}}];
+  m3.push("E13:I13");h3[12]=30;
+  const idx=i=>`INDEX(${DR(i)},1,$C$13+1)`;
+  r3[14]=[null,{v:"EL MES ELEGIDO EN CIFRAS",s:{b:1,color:XC.navy}}];
+  tiles(15,[["Entradas del mes",{f:idx(RE),v:entradas[selM]},curFmt,"Ingresos, banco y aportes"],["Salidas del mes",{f:idx(RE+1),v:-salidas[selM]},curFmt,"Pagos, banco e intereses"],
+    ["Caja al cierre",{f:idx(RE+2),v:s.cash[selM]},curFmt,"Lo que queda en la cuenta"],["Deuda con el banco",{f:idx(RE+3),v:s.bank[selM]},curFmt,"Saldo al cierre del mes"]]);
+  r3[19]=[null,{v:"Concepto",s:{b:1,color:"FFFFFF",fill:XC.navy,indent:1}},{v:`Monto (${p.cur})`,s:{b:1,color:"FFFFFF",fill:XC.navy,h:"center"}},{v:"¿De dónde sale?",s:{b:1,color:"FFFFFF",fill:XC.navy,indent:1}},...Array(5).fill({s:{fill:XC.navy}})];m3.push("D20:I20");h3[19]=20;
+  CONC.forEach((c,i)=>{const r=20+i,f=i%2?null:XC.soft;
+    r3[r]=[null,{v:c[0],s:{indent:1,fill:f,border:"b"}},{f:idx(2+i),v:c[1][selM],s:{fmt:"money",b:1,fill:f,border:"b"}},{f:idx(2+K+i),v:txtOf(c,selM),s:{wrap:1,color:XC.muted,fill:f,border:"b",v:"center"}},...Array(5).fill({s:{fill:f,border:"b"}})];
+    m3.push(`D${r+1}:I${r+1}`);h3[r]=30});
+  // gráfico
+  const gR=20+K+1;r3[gR]=[null,{v:"EL PROYECTO MES A MES",s:{b:1,color:XC.navy}}];
+  const chartTop=gR+1,chartRows=18;
+  // detalle completo
+  let dR=chartTop+chartRows+1;
+  band(dR,"DETALLE COMPLETO MES A MES",{b:1,color:"FFFFFF",fill:XC.navy,indent:1});h3[dR]=20;dR++;
+  for(const m of months){
+    const items=CONC.filter(c=>Math.abs(c[1][m])>=0.5);if(!items.length)continue;const ph=fase(m);
+    r3[dR]=[null,{v:`Mes ${m} · ${ph}`,s:{b:1,fill:XC.ph[ph],color:XC.phInk[ph],indent:1}},{v:s.cash[m],s:{fmt:curFmt,fill:XC.ph[ph],color:XC.phInk[ph],b:1}},{v:"← caja al cierre del mes",s:{i:1,sz:9,fill:XC.ph[ph],color:XC.phInk[ph]}},...Array(5).fill({s:{fill:XC.ph[ph]}})];m3.push(`D${dR+1}:I${dR+1}`);dR++;
+    items.forEach(c=>{r3[dR]=[null,{v:c[0],s:{indent:2,border:"b"}},{v:c[1][m],s:{fmt:"money",border:"b"}},{v:txtOf(c,m),s:{wrap:1,color:XC.muted,border:"b"}},...Array(5).fill({s:{border:"b"}})];m3.push(`D${dR+1}:I${dR+1}`);h3[dR]=30;dR++});
+  }
+  const fr=i=>`'Flujo de caja'!$${L(2)}$${rowOf[i]}:$${lastCol}$${rowOf[i]}`;
+  X.sheet("Explicación por mes",{rows:r3,cols:COLS,merges:m3,heights:h3,grid:false,tab:XC.good,
+    validations:[{sqref:"C13",list:`Datos!$${L(c0)}$1:$${cL}$1`,prompt:`Mes 0 a ${N-1}`}],
+    chart:{anchor:[1,chartTop,9,chartTop+chartRows],title:"Ingresos, egresos, caja y deuda por mes",
+      cats:{ref:`Datos!$${L(c0)}$1:$${cL}$1`,vals:months},
+      bars:[{name:"Ingresos",ref:fr("coll"),vals:s.coll,color:"2E8B57"},{name:"Egresos",ref:fr("egr"),vals:neg(egresos),color:"C0504D"}],
+      lines:[{name:"Caja al cierre",ref:fr("cash"),vals:s.cash,color:XC.navy},{name:"Deuda con el banco",ref:`'Flujo de caja'!$${L(2)}$${rowOf.bank}:$${lastCol}$${rowOf.bank}`,vals:s.bank,color:"2F6DB5",dash:1}]}});
+  X.sheet("Datos",{rows:rd,hidden:true});
+  downloadBlob(X.blob(),`Flujo_de_caja_${(p.pname||"proyecto").replace(/[^\wáéíóúñÁÉÍÓÚÑ-]+/g,"_")}.xlsx`);
+  toast("Excel descargado");
+}
+
+/* ================= Curva S propia ================= */
+const SHAPES={tipica:"Obra típica",pareja:"Pareja",inicio:"Más carga al inicio (con sótanos)",final:"Más carga al final (acabados)"};
+// pesos de cada forma: típica = seno + 0,25; pareja = igual cada mes; inicio/final = campana sesgada (pico al ~30 % o ~70 % de la obra) + piso
+function shapeCurve(shape,C){
+  const w=[];
+  for(let k=0;k<C;k++){const x=(k+.5)/C;let v;
+    if(shape==="pareja")v=1;
+    else if(shape==="inicio")v=Math.pow(x,1)*Math.pow(1-x,2.2)/0.1+.25;
+    else if(shape==="final")v=Math.pow(x,2.2)*Math.pow(1-x,1)/0.1+.25;
+    else v=Math.sin(Math.PI*x)+.25;
+    w.push(v)}
+  const s=w.reduce((a,b)=>a+b,0);return w.map(v=>v/s);
+}
+function defaultCurve(C){return shapeCurve($("shape").value||"tipica",C)}
+function setCurve(v){state.curveMode=v;$("curveAuto").setAttribute("aria-pressed",v==="auto");$("curveOwn").setAttribute("aria-pressed",v==="own");$("curveBox").hidden=v!=="own";$("presetBox").hidden=v==="own";curveStatus()}
+function curveStatus(){
+  const C=Math.round(parseFloat($("obra").value)||0), cv=state.curve, own=state.curveMode==="own";
+  const shp=$("shape").value||"tipica";
+  const hints={tipica:"Poco al inicio, más a mitad de obra y menos al final, de forma simétrica.",pareja:"El mismo % del costo de obra cada mes.",
+    inicio:"Gasto alto en los primeros meses (excavación, muros anclados, sótanos y cimentación) y menor al final.",final:"Gasto menor al inicio y alto al final (estructura de pisos altos, instalaciones y acabados)."};
+  $("curveHint").textContent=own?"El costo de obra se reparte con los % de tu curva, mes a mes.":hints[shp];
+  const msg=$("curveMsg"),fit=$("curveFit");fit.hidden=true;msg.classList.remove("bad");
+  if(!own){const css=getComputedStyle(document.documentElement),col=v=>css.getPropertyValue(v).trim();
+    const d=shapeCurve(shp,C||1),mx=Math.max(...d),bw=300/d.length;
+    $("curveMini").innerHTML=d.map((v,i)=>{const h=v/mx*52;return `<rect x="${i*bw+bw*.15}" y="${56-h}" width="${bw*.7}" height="${h}" fill="${col("--accent")}"><title>Mes ${i+1}: ${(v*100).toFixed(1)} %</title></rect>`}).join("")+`<line x1="0" x2="300" y1="56" y2="56" stroke="${col("--line")}"/>`;
+    $("curveLegend").textContent=`${SHAPES[shp]}: % del costo de obra en cada uno de los ${C} meses de obra.`;return}
+  $("curveLegend").textContent="Barras: tu curva. Línea punteada: la curva predeterminada elegida.";
+  if(!cv){msg.textContent="Aún no importaste una curva: mientras tanto se usa la predeterminada.";msg.classList.add("bad")}
+  else if(C&&cv.length!==C){msg.textContent=`Tu curva tiene ${cv.length} meses y la obra ${C}: mientras no coincidan se usa la curva predeterminada.`;msg.classList.add("bad");fit.hidden=false;fit.textContent=`Cambiar la obra a ${cv.length} meses`}
+  else msg.textContent=(state.curveSrc||"")+" Se está usando tu curva.";
+  // vista previa
+  const css=getComputedStyle(document.documentElement),col=v=>css.getPropertyValue(v).trim();
+  const ref=defaultCurve(cv?cv.length:(C||1)), vals=cv||[], n=Math.max(vals.length,ref.length,1), mx=Math.max(...vals,...ref,0.01);
+  const bw=300/n;let g="";
+  vals.forEach((v,i)=>{const h=v/mx*52;g+=`<rect x="${i*bw+bw*.15}" y="${56-h}" width="${bw*.7}" height="${h}" fill="${col("--accent")}"><title>Mes ${i+1}: ${(v*100).toFixed(1)} %</title></rect>`});
+  g+=`<path d="${ref.map((v,i)=>(i?"L":"M")+(i*bw+bw/2).toFixed(1)+","+(56-v/mx*52).toFixed(1)).join("")}" fill="none" stroke="${col("--muted")}" stroke-dasharray="3 3"/>`;
+  $("curveMini").innerHTML=g+`<line x1="0" x2="300" y1="56" y2="56" stroke="${col("--line")}"/>`;
+}
+// números escritos a la peruana o en inglés: 6,9 % · 309 919 · 309,919.50 · 0.069
+function parseNum(t){
+  if(typeof t==="number")return {v:t,pct:false};
+  t=String(t).trim().replace(/US\$|S\/|\$|\s| /g,"");const pct=t.endsWith("%");t=t.replace(/%/g,"");if(!t)return null;
+  if(t.includes(".")&&t.includes(",")){if(t.lastIndexOf(",")>t.lastIndexOf("."))t=t.replace(/\./g,"").replace(",",".");else t=t.replace(/,/g,"")}
+  else if(t.includes(",")){const pp=t.split(",");t=(pp.length===2&&pp[1].length!==3)?pp.join("."):pp.join("")}
+  else if((t.match(/\./g)||[]).length>1)t=t.replace(/\./g,"");
+  if(!/^-?\d*\.?\d+$/.test(t))return null;
+  const v=parseFloat(t);return {v:pct?v/100:v,pct};
+}
+function seriesFromGrid(grid){
+  const rows=grid.map(r=>r.map(c=>c==null||c===""?null:parseNum(c)));
+  const W=Math.max(0,...rows.map(r=>r.length)),cands=[];
+  rows.forEach(r=>cands.push(r.filter(Boolean)));
+  for(let c=0;c<W;c++)cands.push(rows.map(r=>r[c]).filter(Boolean));
+  const isSeq=a=>a.length>1&&a.every((x,i)=>x.v===a[0].v+i)&&(a[0].v===0||a[0].v===1);
+  let best=null;cands.forEach(a=>{if(a.length<2||isSeq(a))return;if(!best||a.length>=best.length)best=a});
+  if(!best)return null;
+  let vals=best.map(x=>x.v);const pct=best.some(x=>x.pct);
+  if(vals.length>=3){const last=vals[vals.length-1],rest=vals.slice(0,-1).reduce((a,b)=>a+b,0);if(Math.abs(last-rest)<=Math.abs(last)*0.005)vals=vals.slice(0,-1)}
+  return {vals,pct};
+}
+function applySeries(ser,src){
+  const msg=$("curveMsg");
+  if(!ser||!ser.vals.length){msg.textContent="No encontré una columna o fila con los valores de la curva. Revisa el archivo o usa la plantilla.";msg.classList.add("bad");return}
+  if(ser.vals.some(v=>v<0)){msg.textContent="La curva tiene valores negativos: corrígela.";msg.classList.add("bad");return}
+  const sum=ser.vals.reduce((a,b)=>a+b,0);if(sum<=0){msg.textContent="Los valores suman cero.";msg.classList.add("bad");return}
+  const cons=parseFloat($("cons").value)||0, N=ser.vals.length;
+  let info;
+  if(ser.pct||(sum>0.98&&sum<1.02)){const t=sum*100;info=`Se leyeron ${N} meses en %; suman ${t.toFixed(1)} %${Math.abs(t-100)>0.05?" y se ajustaron a 100 %":""}.`}
+  else if(sum>=98&&sum<=102){info=`Se leyeron ${N} meses en %; suman ${sum.toFixed(1)} %${Math.abs(sum-100)>0.05?" y se ajustaron a 100 %":""}.`}
+  else{info=`Se leyeron ${N} meses en montos que suman ${nf.format(Math.round(sum))}; se usan como proporción del costo de obra.`+(cons&&Math.abs(sum-cons)/cons>0.01?` Ojo: en la app el costo de obra es ${nf.format(Math.round(cons))}.`:"")}
+  state.curve=ser.vals.map(v=>v/sum);state.curveSrc=`${src}: ${info}`;render();toast("Curva S cargada");
+}
+function gridFromText(text,csv){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  const sepTabSemi=/\t|;/.test(text);
+  return lines.map(l=>sepTabSemi?l.split(/\t|;/):(csv?l.split(","):[l]));
+}
+async function gridFromXlsx(buf){
+  const u=new Uint8Array(buf),dv=new DataView(buf),td=new TextDecoder();
+  let e=-1;for(let i=u.length-22;i>=Math.max(0,u.length-70000);i--){if(dv.getUint32(i,true)===0x06054b50){e=i;break}}
+  if(e<0)throw new Error("zip");
+  const cnt=dv.getUint16(e+10,true);let o=dv.getUint32(e+16,true);const files={};
+  for(let i=0;i<cnt;i++){const method=dv.getUint16(o+10,true),cs=dv.getUint32(o+20,true),nl=dv.getUint16(o+28,true),xl=dv.getUint16(o+30,true),cl=dv.getUint16(o+32,true),lo=dv.getUint32(o+42,true);
+    files[td.decode(u.subarray(o+46,o+46+nl))]={method,cs,lo};o+=46+nl+xl+cl}
+  const get=async name=>{const f=files[name];if(!f)return null;const ln=dv.getUint16(f.lo+26,true),le=dv.getUint16(f.lo+28,true);
+    const data=u.subarray(f.lo+30+ln+le,f.lo+30+ln+le+f.cs);if(f.method===0)return td.decode(data);
+    if(typeof DecompressionStream==="undefined")throw new Error("inflate");
+    const out=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();return td.decode(out)};
+  const X=t=>new DOMParser().parseFromString(t,"application/xml");
+  let sheetPath=null;
+  try{const wb=X(await get("xl/workbook.xml")),rels=X(await get("xl/_rels/workbook.xml.rels"));const sh=wb.getElementsByTagName("sheet")[0];
+    const rid=sh.getAttribute("r:id")||sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
+    for(const r of rels.getElementsByTagName("Relationship"))if(r.getAttribute("Id")===rid){let t=r.getAttribute("Target");sheetPath=t.startsWith("/")?t.slice(1):"xl/"+t}}catch(err){}
+  if(!sheetPath||!files[sheetPath])sheetPath=Object.keys(files).filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n)).sort()[0];
+  const ssT=await get("xl/sharedStrings.xml"),ss=ssT?[...X(ssT).getElementsByTagName("si")].map(si=>si.textContent):[];
+  const doc=X(await get(sheetPath)),grid=[];
+  for(const c of doc.getElementsByTagName("c")){
+    const ref=c.getAttribute("r")||"",m=ref.match(/^([A-Z]+)(\d+)$/);if(!m)continue;
+    let ci=0;for(const ch of m[1])ci=ci*26+ch.charCodeAt(0)-64;ci--;const ri=+m[2]-1;
+    const t=c.getAttribute("t"),vEl=c.getElementsByTagName("v")[0];let v=null;
+    if(t==="s")v=vEl?ss[+vEl.textContent]:null;else if(t==="inlineStr")v=c.textContent;else if(t==="str")v=vEl?vEl.textContent:null;
+    else if(vEl&&t!=="b"&&t!=="e")v=parseFloat(vEl.textContent);
+    (grid[ri]=grid[ri]||[])[ci]=v;
+  }
+  for(let i=0;i<grid.length;i++)grid[i]=grid[i]||[];
+  return grid;
+}
+function curveTemplate(){
+  const C=Math.max(1,Math.round(parseFloat($("obra").value)||15)), d=state.curve&&state.curve.length===C?state.curve:defaultCurve(C);
+  const X=XLB(),hdr={b:1,color:"FFFFFF",fill:XC.navy,h:"center"},rows=[];
+  rows[0]=[{v:"Curva S de obra",s:{b:1,sz:14,color:"FFFFFF",fill:XC.navy,indent:1}},{s:{fill:XC.navy}},{s:{fill:XC.navy}}];
+  rows[1]=[{v:"Escribe el % de avance de cada mes de obra (deben sumar 100 %). También puedes poner montos: la app los convierte en %. No agregues una fila de total.",s:{wrap:1,i:1,color:XC.muted}}];
+  rows[3]=[{v:"Mes de obra",s:hdr},{v:"% de avance",s:hdr}];
+  d.forEach((v,i)=>{const f=i%2?null:XC.soft;rows[4+i]=[{v:i+1,s:{h:"center",fill:f,border:"b"}},{v,s:{fmt:"pct",b:1,color:XC.input,fill:f,border:"b",h:"right"}}]});
+  X.sheet("Curva S",{rows,cols:[16,16,40],merges:["A1:C1","A2:C2"],heights:{0:26,1:42},freeze:[4,0],grid:false,tab:XC.accent});
+  downloadBlob(X.blob(),`Plantilla_curva_S_${C}_meses.xlsx`);toast("Plantilla descargada");
+}
+$("curveAuto").onclick=()=>{setCurve("auto");render()};
+$("curveOwn").onclick=()=>{setCurve("own");render()};
+$("curveTpl").onclick=curveTemplate;
+$("curveFit").onclick=()=>{if(state.curve){$("obra").value=state.curve.length;render()}};
+$("curveApply").onclick=()=>applySeries(seriesFromGrid(gridFromText($("curvePaste").value,false)),"Valores pegados");
+$("curveFile").onchange=async ev=>{
+  const f=ev.target.files[0];if(!f)return;const msg=$("curveMsg");
+  try{
+    if(/\.xlsx$/i.test(f.name))applySeries(seriesFromGrid(await gridFromXlsx(await f.arrayBuffer())),`Archivo ${f.name}`);
+    else applySeries(seriesFromGrid(gridFromText(await f.text(),true)),`Archivo ${f.name}`);
+  }catch(err){msg.textContent=err.message==="inflate"?"Tu navegador no puede leer este .xlsx: guárdalo como CSV o pega los valores.":"No pude leer el archivo. Usa la plantilla, un CSV o pega los valores.";msg.classList.add("bad")}
+  ev.target.value="";
+};
+
+let lastTSV="";
+function table(s){
+  const rows=[
+    ["Unidades vendidas",s.units],["Ventas firmadas",s.sales],["Ingresos",s.coll],["Terreno",s.land.map((v,i)=>-(v+s.landEnd[i]))],["Construcción",s.cons.map(v=>-v)],
+    ["Proyecto y licencias",s.stud.map(v=>-v)],["Gerencia, publicidad y comisiones",s.ind.map(v=>-v)],["Garantía por desembolso anticipado",s.fz.map(v=>-v)],["IGV pagado a SUNAT",s.igvP.map(v=>-v)],["Impuesto a la renta",s.irP.map(v=>-v)],
+    ["Flujo operativo",s.op,1],["Desembolso del banco",s.draw],["Pago al banco",s.repay.map(v=>-v)],["Intereses",s.intr.map(v=>-v)],
+    ["Aporte adicional que falta",s.extra],["Deuda con el banco",s.bank],["Caja al cierre del mes",s.cash,1]];
+  const months=[...Array(s.N).keys()];
+  const cls=m=>m===0?"":m<=s.P?"ph-p":m<=s.E?"ph-c":"ph-f";
+  let h=`<thead><tr><th>Concepto</th><th>Total</th>${months.map(m=>`<th class="${cls(m)}">${m}<br><small>${phase(m,s)}</small></th>`).join("")}</tr></thead><tbody>`;
+  const noTotal={"Deuda con el banco":1,"Caja al cierre del mes":1};
+  rows.forEach(r=>{const t=r[1].reduce((a,b)=>a+b,0);h+=`<tr class="${r[2]?"total":""}"><td>${r[0]}</td><td>${noTotal[r[0]]?"":r[0]==="Unidades vendidas"?t.toFixed(1):k(t)}</td>${r[1].map(v=>`<td class="${v<-0.5?"neg":""}">${r[0]==="Unidades vendidas"?(v>0.005?v.toFixed(1):"–"):Math.abs(v)<0.5?"–":k(v)}</td>`).join("")}</tr>`});
+  $("table").innerHTML=h+"</tbody>";
+  lastTSV=["Concepto\t"+months.join("\t"),...rows.map(r=>r[0]+"\t"+r[1].map(v=>Math.round(v)).join("\t"))].join("\n");
+}
+
+function compare(p,d){
+  const ms=[1,2,3].filter(m=>(m===1)===(p.own===1));
+  const sims=ms.map(m=>[m,simulate(p,m)]);
+  const rows=[["Utilidad neta",s=>money(s.net)],["Dinero propio necesario",s=>money(s.invested)],["¿Usa el banco?",s=>s.usedBank?"Sí, desde el mes "+s.firstDraw:"No"],
+    ["Deuda máxima con el banco",s=>money(s.maxBal)],["Intereses",s=>money(s.interest)],["IGV neto",s=>money(s.igvNet)],["Impuesto a la renta",s=>money(s.tax)],["Falta conseguir (caja)",s=>money(s.extraTot)],["Aporte para el banco",s=>{const a=aporte(state,s.model);return a.ok?"Cumple":"Faltan "+money(a.gap)}],["TIR anual",s=>pct(s.irr)]];
+  let h=`<thead><tr><th>Indicador</th>${sims.map(([m])=>`<th>Modelo ${m}${m===d.model?" ★":""}</th>`).join("")}</tr></thead><tbody>`;
+  rows.forEach(r=>{h+=`<tr><td>${r[0]}</td>${sims.map(([,s])=>`<td>${r[1](s)}</td>`).join("")}</tr>`});
+  $("compare").innerHTML=h+"</tbody>";
+}
+
+/* ---------------- guardar ---------------- */
+function listSaved(){
+  const all=store("fi112_projects")||{};
+  const names=Object.keys(all);
+  $("saved").innerHTML=names.length?names.map(n=>`<div class="item"><span>${n.replace(/</g,"&lt;")}</span><div><button type="button" data-load="${encodeURIComponent(n)}">Abrir</button><button type="button" data-del="${encodeURIComponent(n)}">Borrar</button></div></div>`).join(""):`<p class="note">Aún no tienes proyectos guardados. Escribe un nombre y pulsa «Guardar proyecto».</p>`;
+  $("saved").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{const s=(store("fi112_projects")||{})[decodeURIComponent(b.dataset.load)];if(s){state=s;view=null;fill(s);render();toast("Proyecto abierto")}});
+  $("saved").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed){const all=store("fi112_projects")||{};delete all[decodeURIComponent(b.dataset.del)];store("fi112_projects",all);listSaved();toast("Proyecto borrado")}
+    else{b.dataset.armed=1;b.textContent="¿Seguro?";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Borrar"}},3000)}});
+}
+function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
+
+$("btnSave").onclick=()=>{const p=read();const name=(p.pname||"").trim()||"Proyecto sin nombre";const all=store("fi112_projects")||{};all[name]=p;store("fi112_projects",all);listSaved();toast("Guardado: "+name)};
+$("btnClear").onclick=()=>{const b=$("btnClear");
+  if(!b.dataset.armed){b.dataset.armed=1;b.textContent="¿Vaciar todo? Toca otra vez";setTimeout(()=>{delete b.dataset.armed;b.textContent="Vaciar datos"},3000);return}
+  delete b.dataset.armed;b.textContent="Vaciar datos";
+  FIELDS.forEach(f=>{const el=$(f);if(el&&el.tagName==="INPUT")el.value=""});
+  view=null;state.curve=null;state.curveSrc="";setCurve("auto");render();toast("Datos vaciados: escribe los tuyos")};
+$("btnExample").onclick=()=>{state={...EXAMPLE};view=null;fill(state);render();toast("Ejemplo cargado")};
+$("btnXlsx").onclick=exportXlsx;
+$("btnCopy").onclick=()=>{const done=()=>toast("Tabla copiada: pégala en Excel");
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lastTSV).then(done,fallback);else fallback();
+  function fallback(){const ta=document.createElement("textarea");ta.value=lastTSV;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){toast("Selecciona la tabla y copia con Ctrl+C")}ta.remove()}};
+$("ownYes").onclick=()=>{setOwn(1);view=null;render()};
+$("ownNo").onclick=()=>{setOwn(0);view=null;render()};
+$("hipEnd").onclick=()=>{setHip("end");render()};
+$("hipEsc").onclick=()=>{setHip("esc");render()};
+$("irEnd").onclick=()=>{setIR("end");render()};
+$("absA").onclick=()=>{setAbs("A");render()};
+$("absB").onclick=()=>{setAbs("B");render()};
+$("irMon").onclick=()=>{setIR("mon");render()};
+$("form").addEventListener("input",()=>{render();store("fi112_draft",read())});
+$("form").addEventListener("submit",e=>e.preventDefault());
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+
+// la versión 1.7 siempre se abre con los datos vacíos
+state={...EXAMPLE};fill(state);
+FIELDS.forEach(f=>{const el=$(f);if(el&&el.tagName==="INPUT")el.value=""});
+render();listSaved();
+})();
+</script>
+
+</body></html>

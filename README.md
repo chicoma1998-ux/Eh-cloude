@@ -114,4 +114,4 @@ estático (p. ej. GitHub Pages) y abra `index.html`.
 `flujo-inmobiliario.html` es el mismo contenido sin cabecera (versión para vista previa).
 
 Versión general en un solo archivo para descargar: `app/Flujo_Inmobiliario_General.html`.
-Versiones de la primera app (3 modelos): `app/v1/Flujo_Inmobiliario_v1.0.html` a `v1.11.html` (la v1.11 renombra «Cobranzas» a «Ingresos» y permite pagar el IR mes a mes; la v1.10 rediseña el Excel exportado con panel por mes; la v1.9 permite elegir o importar la curva S; desde la v1.7 se abre con los datos vacíos; la v1.8 exporta a Excel con supuestos y explicación por mes).
+Versiones de la primera app (3 modelos): `app/v1/Flujo_Inmobiliario_v1.0.html` a `v1.12.html` (la v1.12 agrega el coeficiente de absorción A/B y la meta de preventa; la v1.11 renombra «Cobranzas» a «Ingresos» y permite pagar el IR mes a mes; la v1.10 rediseña el Excel exportado con panel por mes; la v1.9 permite elegir o importar la curva S; desde la v1.7 se abre con los datos vacíos; la v1.8 exporta a Excel con supuestos y explicación por mes).
