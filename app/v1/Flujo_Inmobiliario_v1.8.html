@@ -1,0 +1,760 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Flujo Inmobiliario</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: plano de obra — formulario por etapas a la izquierda, tablero de resultados fijo a la derecha; una columna en celular */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#14263A; --muted:#5B6B7C; --line:#D9E0E7;
+  --navy:#1B3550; --accent:#C7862B; --accent-soft:#F6E9D5;
+  --good:#1E7A4F; --good-soft:#E2F2EA; --bad:#B23A2E; --bad-soft:#F8E3E0; --bank:#2F6DB5;
+  --f-display:"Sora",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-num:"IBM Plex Mono",ui-monospace,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1923; --surface:#16232F; --ink:#E6EDF3; --muted:#9AAABA; --line:#2A3A49;
+  --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
+  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1923; --surface:#16232F; --ink:#E6EDF3; --muted:#9AAABA; --line:#2A3A49;
+  --navy:#9CC2EA; --accent:#E3A651; --accent-soft:#3A2E1C;
+  --good:#5CC795; --good-soft:#163428; --bad:#EF7F72; --bad-soft:#3B1E1B; --bank:#7FB2EE; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;margin:0}
+.wrap{max-width:1280px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand h1{font-family:var(--f-display);font-size:26px;margin:0;letter-spacing:-.01em;color:var(--navy);text-wrap:balance}
+.brand p{margin:2px 0 0;color:var(--muted);max-width:62ch}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+button,.btn{font:600 13px var(--f-body);border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--navy)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--navy);color:var(--surface);border-color:var(--navy)}
+.grid{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:920px){.grid{grid-template-columns:minmax(0,1fr)}}
+/* formulario */
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.step h2{font-family:var(--f-display);font-size:15px;margin:0 0 2px;display:flex;align-items:center;gap:10px}
+.step h2 .n{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--surface);font-size:12px}
+.step .lead{color:var(--muted);margin:0 0 12px;font-size:13px}
+.field{display:grid;gap:4px;margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{font-weight:600;font-size:13px}
+.field .hint{color:var(--muted);font-size:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}
+input,select{font:500 14px var(--f-num);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+.sum{font:500 12px var(--f-num);color:var(--muted)}
+.sum.bad{color:var(--bad)}
+/* resultados */
+.results{display:flex;flex-direction:column;gap:14px;position:sticky;top:env(safe-area-inset-top,0px)}
+@media (max-width:920px){.results{position:static}}
+.verdict{background:var(--navy);color:var(--surface);border-radius:var(--r);padding:18px}
+.verdict .eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:11px;opacity:.8}
+.verdict h3{font-family:var(--f-display);font-size:20px;margin:4px 0 8px;text-wrap:balance}
+.verdict ul{margin:0;padding-left:18px}
+.verdict li{margin:2px 0}
+.alert{border-radius:8px;padding:10px 12px;font-size:13px;margin-top:10px;background:var(--bad-soft);color:var(--bad);font-weight:500}
+.alert.ok{background:var(--good-soft);color:var(--good)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:0;flex:1 1 150px;text-align:left}
+.tabs button small{font-weight:400;color:var(--muted);font-size:11px}
+.tabs button[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent)}
+.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.tag{font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;min-width:0}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.kpi .v{font:500 18px var(--f-num);margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .s{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.no{background:var(--bad-soft);color:var(--bad)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
+.panel h4{font-family:var(--f-display);font-size:14px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.chart{width:100%;height:auto;display:block}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;font:400 12px var(--f-num);font-variant-numeric:tabular-nums;white-space:nowrap}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);font-family:var(--f-body);font-weight:500;z-index:1}
+thead th{font-family:var(--f-body);font-weight:600;color:var(--muted)}
+tr.total td{font-weight:600;border-top:1px solid var(--ink)}
+td.neg{color:var(--bad)}
+.ph-p{color:var(--accent)} .ph-c{color:var(--bank)} .ph-f{color:var(--good)}
+.compare td,.compare th{font-size:12px}
+.saved{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.saved .item{display:flex;gap:6px;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.saved .item span{min-width:0;overflow-wrap:anywhere}
+.saved .item div{display:flex;gap:4px}
+.saved button{padding:4px 8px;font-size:12px}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:20}
+.note{font-size:12px;color:var(--muted);margin:6px 0 0}
+.mbar{display:none}
+@media (max-width:920px){
+  .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:15;gap:10px;align-items:center;justify-content:space-between;
+    background:var(--navy);color:var(--surface);padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .mbar b{font-family:var(--f-display);font-size:13px;display:block}
+  .mbar span{font:500 12px var(--f-num);opacity:.9}
+  .mbar a{color:var(--navy);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;font-size:13px;text-decoration:none;white-space:nowrap}
+  .wrap{padding-bottom:90px}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+}
+details.how summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion:no-preference){.kpi .v,.verdict{transition:background .2s}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Flujo Inmobiliario</h1>
+      <p>Responde las preguntas y el motor elige cuál de los tres modelos de flujo de caja se ajusta a tu proyecto. Todo se recalcula al instante.</p>
+      <p class="note">Versión 1.8 · Se abre con los datos vacíos; pulsa «Cargar ejemplo» para ver el Lote demo.</p>
+    </div>
+    <div class="toolbar">
+      <button id="btnClear" type="button">Vaciar datos</button>
+      <button id="btnExample" type="button">Cargar ejemplo</button>
+      <button id="btnSave" type="button" class="primary">Guardar proyecto</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- ============ FORMULARIO ============ -->
+    <form class="steps" id="form" autocomplete="off">
+      <section class="step">
+        <h2><span class="n">1</span>El terreno</h2>
+        <p class="lead">Esta respuesta decide el modelo de flujo de caja.</p>
+        <div class="field">
+          <label>¿El terreno ya es tuyo (inscrito a tu nombre)?</label>
+          <div class="seg" role="group" aria-label="Propiedad del terreno">
+            <button type="button" id="ownYes" data-own="1">Sí, es mío</button>
+            <button type="button" id="ownNo" data-own="0">No, debo comprarlo</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="land">Valor o precio del terreno</label>
+          <input id="land" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint" id="landHint">Si es tuyo, se usa para medir la rentabilidad real.</span>
+        </div>
+        <div class="field">
+          <label for="cap">¿Cuánto dinero propio tienes hoy para el proyecto?</label>
+          <input id="cap" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint">Efectivo disponible para terreno y gastos iniciales.</span>
+        </div>
+        <div class="field" id="iniBox">
+          <label for="ini">Modelo 3: % del precio del terreno que pagas a la firma</label>
+          <input id="ini" type="number" min="0" max="100" step="1" inputmode="numeric">
+          <span class="hint" id="iniHint"></span>
+        </div>
+        <div class="field">
+          <label for="alc">Alcabala y gastos de compra (% del precio)</label>
+          <input id="alc" type="number" min="0" max="20" step="0.1" inputmode="decimal">
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">2</span>El proyecto</h2>
+        <p class="lead">Ingresos y costos totales, con IGV incluido.</p>
+        <div class="row2">
+          <div class="field"><label for="units">N.º de unidades</label><input id="units" type="number" min="1" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="price">Precio promedio por unidad</label><input id="price" type="number" min="0" step="1000" inputmode="numeric"></div>
+        </div>
+        <div class="field">
+          <label for="cons">Costo total de construcción</label>
+          <input id="cons" type="number" min="0" step="1000" inputmode="numeric">
+          <span class="hint">Obra, sótanos, acabados y equipamiento.</span>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="stud">Proyecto, licencias y estudios</label><input id="stud" type="number" min="0" step="1000" inputmode="numeric"></div>
+          <div class="field"><label for="ind">Gerencia, publicidad y comisiones (% de ventas)</label><input id="ind" type="number" min="0" max="40" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="field">
+          <label for="cur">Moneda</label>
+          <select id="cur"><option value="US$">Dólares (US$)</option><option value="S/">Soles (S/)</option></select>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">3</span>Plazos y ventas</h2>
+        <p class="lead">Mes 0 es el inicio: compra del terreno o arranque del proyecto.</p>
+        <div class="row2">
+          <div class="field"><label for="pre">Meses de preventa</label><input id="pre" type="number" min="1" max="24" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="obra">Meses de construcción</label><input id="obra" type="number" min="3" max="48" step="1" inputmode="numeric"></div>
+        </div>
+        <div class="field">
+          <label for="sp">% de unidades vendidas en la preventa</label>
+          <input id="sp" type="number" min="0" max="100" step="1" inputmode="numeric">
+          <span class="hint">El resto se vende de forma pareja durante la construcción.</span>
+        </div>
+        <div class="field">
+          <label>¿Cómo pagan los compradores?</label>
+          <div class="row2">
+            <div class="field"><label for="pi" class="hint">Cuota inicial %</label><input id="pi" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+            <div class="field"><label for="pc" class="hint">Cuotas en obra %</label><input id="pc" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+          </div>
+          <span class="sum" id="psum"></span>
+        </div>
+        <div class="field">
+          <label>¿Cuándo desembolsa el banco del comprador su crédito hipotecario?</label>
+          <div class="seg" role="group" aria-label="Momento del desembolso hipotecario">
+            <button type="button" id="hipEnd">Al final (entrega)</button>
+            <button type="button" id="hipEsc">A la firma de la escritura</button>
+          </div>
+          <span class="hint" id="hipHint"></span>
+        </div>
+        <div class="row2" id="hipBox">
+          <div class="field"><label for="dias">Días entre la minuta y la escritura</label><input id="dias" type="number" min="0" max="120" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="fz">Costo de la garantía que pide el banco (% anual)</label><input id="fz" type="number" min="0" max="10" step="0.1" inputmode="decimal"></div>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2><span class="n">4</span>Banco</h2>
+        <p class="lead">Línea de crédito promotor. Solo se usa si la caja no alcanza, desde el fin de la preventa hasta la entrega.</p>
+        <div class="row2">
+          <div class="field"><label for="pb">% de la obra que financia</label><input id="pb" type="number" min="0" max="100" step="1" inputmode="numeric"></div>
+          <div class="field"><label for="tea">Tasa anual (TEA %)</label><input id="tea" type="number" min="0" max="60" step="0.1" inputmode="decimal"></div>
+        </div>
+        <div class="field">
+          <label for="pctAp">Aporte mínimo que exige el banco (% del costo total del proyecto)</label>
+          <input id="pctAp" type="number" min="0" max="100" step="1" inputmode="numeric">
+          <span class="hint">Suele estar entre 25 % y 35 %; 30 % es lo más común. Confírmalo con tu banco.</span>
+        </div>
+        <div class="field">
+          <label for="ir">Impuesto a la renta %</label>
+          <input id="ir" type="number" min="0" max="50" step="0.1" inputmode="decimal">
+        </div>
+      </section>
+
+      <section class="step">
+        <h2>Mis proyectos guardados</h2>
+        <p class="lead">Se guardan solo en este dispositivo.</p>
+        <div class="field"><label for="pname">Nombre del proyecto</label><input id="pname" type="text" style="font-family:var(--f-body)"></div>
+        <div class="saved" id="saved"></div>
+      </section>
+    </form>
+
+    <!-- ============ RESULTADOS ============ -->
+    <div class="results" id="resultado">
+      <div class="verdict" id="verdict"></div>
+      <div class="tabs" role="tablist" id="tabs"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="panel">
+        <h4>Flujo mes a mes
+          <span class="legend"><span><i style="background:var(--good)"></i>Entra más de lo que sale</span><span><i style="background:var(--bad)"></i>Sale más de lo que entra</span><span><i style="background:var(--bank)"></i>Deuda con el banco</span></span>
+        </h4>
+        <svg class="chart" id="chart" viewBox="0 0 800 260" role="img" aria-label="Gráfico del flujo mensual"></svg>
+      </div>
+      <div class="panel">
+        <h4>Tabla del flujo de caja <span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" id="btnXlsx" class="primary">Exportar a Excel</button><button type="button" id="btnCopy">Copiar tabla</button></span></h4>
+        <div class="scroll"><table id="table"></table></div>
+        <p class="note">Cobranzas y costos con IGV. El IGV neto (9 % en ventas, 18 % de crédito en compras) y el impuesto a la renta se pagan en sus filas. El dinero que falta se muestra sin costo financiero y la preventa se usa sin retención (escrow).</p>
+      </div>
+      <div class="panel">
+        <h4>Aporte del promotor para el banco</h4>
+        <div class="scroll"><table id="aporte"></table></div>
+        <p class="note">El banco compara tu aporte (terreno, expediente y efectivo) con un % del costo total. En los tres modelos el terreno cuenta completo; en el modelo 3 eso supone que el vendedor cobra después del banco. La preventa y el crédito no cuentan como aporte. El % exacto y si valoriza el terreno a precio de compra o de tasación lo define cada banco.</p>
+      </div>
+      <div class="panel">
+        <h4>Comparación de los tres modelos con tus datos</h4>
+        <div class="scroll"><table class="compare" id="compare"></table></div>
+      </div>
+      <div class="panel">
+        <details class="how"><summary>¿Cómo decide el motor?</summary>
+          <ul class="note">
+            <li><b>Modelo 1 · Terreno propio:</b> si el terreno ya es tuyo. La obra se paga con la preventa y las ventas; la línea del banco queda de respaldo.</li>
+            <li><b>Modelo 2 · Compra al contado + banco:</b> si tu dinero propio alcanza para pagar el terreno completo y la alcabala.</li>
+            <li><b>Modelo 3 · Parte ahora y saldo al final:</b> si tu dinero no alcanza para todo el terreno. Pagas a la firma el % que acuerdes con el propietario y el saldo cuando ya se vendió todo y se canceló el banco.</li>
+            <li><b>Aporte para el banco:</b> el banco suma el terreno, el expediente técnico y tu efectivo, y lo compara con el % mínimo del costo total del proyecto. La preventa no cuenta como aporte.</li>
+            <li>Si el dinero no alcanza ni para el 50 %, o la caja queda en rojo aun con el banco, el motor te dice cuánto falta conseguir (socio o préstamo puente).</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="mbar" id="mbar"><div><b id="mbarT"></b><span id="mbarS"></span></div><a href="#resultado">Ver resultado</a></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const MODELS={
+  1:{name:"Terreno propio",short:"Sin banco, salvo respaldo"},
+  2:{name:"Compra al contado + banco",short:"Pagas el terreno completo"},
+  3:{name:"50 % ahora · 50 % al final",short:"Saldo al vendedor al cierre"}
+};
+const EXAMPLE={pname:"Ejemplo · Lote demo (23 deptos)",own:0,land:950000,cap:1100000,alc:3,units:23,price:587700,cons:4490251,
+  stud:175120,ind:9.7,cur:"US$",pre:3,obra:15,sp:30,pi:10,pc:10,pb:60,tea:11,ir:29.5,hip:"end",dias:15,fz:0,ini:50,pctAp:30};
+const FIELDS=["land","cap","alc","units","price","cons","stud","ind","cur","pre","obra","sp","pi","pc","pb","tea","ir","dias","fz","ini","pctAp","pname"];
+const $=id=>document.getElementById(id);
+let state={...EXAMPLE}, view=null, lastRec=null;
+
+function store(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||"null");localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+
+function fill(s){FIELDS.forEach(f=>{$(f).value=s[f]??EXAMPLE[f]});setOwn(s.own);setHip(s.hip||"end")}
+function read(){const s={own:state.own,hip:state.hip||"end"};FIELDS.forEach(f=>{const el=$(f);s[f]=(el.type==="number")?(parseFloat(el.value)||0):el.value});return s}
+function setHip(v){state.hip=v;$("hipEnd").setAttribute("aria-pressed",v==="end");$("hipEsc").setAttribute("aria-pressed",v==="esc");$("hipBox").hidden=v!=="esc";
+  $("hipHint").textContent=v==="esc"?"El saldo hipotecario entra al firmar la escritura, unos días después de la minuta de cada venta. El banco del comprador suele pedir una garantía (carta fianza o fideicomiso) hasta la entrega.":"El saldo hipotecario entra cuando se entregan las unidades terminadas.";}
+function setOwn(v){state.own=+v;$("ownYes").setAttribute("aria-pressed",state.own===1);$("ownNo").setAttribute("aria-pressed",state.own===0);
+  $("landHint").textContent=state.own?"Si es tuyo, se usa para medir la rentabilidad real (no se paga).":"Precio acordado con el propietario."}
+
+/* ---------------- motor de simulación ---------------- */
+function simulate(p,model){
+  const P=Math.round(p.pre),C=Math.round(p.obra),E=P+C,N=E+4;
+  const R=p.units*p.price, sp=Math.min(1,p.sp/100), pi=Math.min(1,p.pi/100), pc=Math.min(1-pi,p.pc/100), ps=Math.max(0,1-pi-pc);
+  const z=()=>new Array(N).fill(0);
+  const collIni=z(),collCuo=z(),collSal=z(),wPct=z(),igvS=z(),cBefore=z(),sales=z(),fz=z(),coll=z(),land=z(),cons=z(),stud=z(),ind=z(),intr=z(),draw=z(),repay=z(),extra=z(),cash=z(),bank=z(),landEnd=z(),igvD=z(),igvC=z(),igvP=z(),irP=z();
+  for(let m=1;m<=P;m++)sales[m]=R*sp/P;
+  for(let m=P+1;m<=E;m++)sales[m]+=R*(1-sp)/C;
+  for(let m=0;m<N;m++){
+    if(!sales[m])continue;
+    coll[m]+=sales[m]*pi;collIni[m]+=sales[m]*pi;
+    if(m<E){const k=E-m;for(let j=m+1;j<=E;j++){coll[j]+=sales[m]*pc/k;collCuo[j]+=sales[m]*pc/k}}else{coll[m]+=sales[m]*pc;collCuo[m]+=sales[m]*pc}
+  }
+  if(p.hip==="esc"){
+    // desembolso hipotecario a la firma de la escritura: parte en el mes de la minuta y parte el mes siguiente según los días
+    const f=Math.min(1,Math.max(0,p.dias)/30);
+    for(let m=0;m<N;m++){const s=sales[m]*ps;if(!s)continue;
+      const m2=Math.min(N-1,m+1+Math.floor(Math.max(0,p.dias-30)/30));
+      coll[m]+=s*(1-f); coll[m2]+=s*f; collSal[m]+=s*(1-f); collSal[m2]+=s*f;
+      fz[m]+=s*(p.fz/100)*Math.max(0,E+1-m)/12;}
+  }else{coll[E+1]+=R*ps/2; coll[E+2]+=R*ps/2; collSal[E+1]+=R*ps/2; collSal[E+2]+=R*ps/2;}
+  let w=[],ws=0;for(let k=0;k<C;k++){const v=Math.sin(Math.PI*(k+.5)/C)+.25;w.push(v);ws+=v}
+  for(let k=0;k<C;k++){cons[P+1+k]=p.cons*w[k]/ws;wPct[P+1+k]=w[k]/ws}
+  for(let m=0;m<=P;m++)stud[m]=p.stud/(P+1);
+  const G=R*p.ind/100;for(let m=0;m<=E+2;m++)ind[m]=G/(E+3);
+  // IGV: 9 % efectivo en la primera venta (sobre lo cobrado) y 18 % de crédito fiscal en las compras
+  let saf=0;
+  for(let m=0;m<N;m++){igvD[m]=coll[m]*0.09/1.09;igvC[m]=(cons[m]+stud[m]+ind[m])*0.18/1.18;saf+=igvC[m]-igvD[m];if(saf<0){igvP[m]=-saf;saf=0}igvS[m]=saf}
+  const alc=p.land*p.alc/100;
+  let deferred=0;
+  if(model===2)land[0]=p.land+alc;
+  if(model===3){const a=Math.min(1,Math.max(0,p.ini/100));land[0]=p.land*a+alc;deferred=p.land*(1-a)}
+  const line=p.cons*p.pb/100, r=Math.pow(1+p.tea/100,1/12)-1;
+  let c=p.cap,bal=0,cum=0,firstDraw=null,landPaidAt=null,maxBal=0;
+  for(let m=0;m<N;m++){
+    intr[m]=bal*r;
+    c+=coll[m]-land[m]-cons[m]-stud[m]-ind[m]-fz[m]-igvP[m]-intr[m];cBefore[m]=c;
+    if(c<0&&m>P&&m<=E){const d=Math.min(-c,line-cum);if(d>0){draw[m]=d;bal+=d;cum+=d;c+=d;if(firstDraw===null)firstDraw=m}}
+    if(c>0&&bal>0&&m>E){const q=Math.min(c,bal);repay[m]=q;bal-=q;c-=q}
+    if(deferred>0&&bal<=0.5&&m>=E+2){landEnd[m]=deferred;c-=deferred;deferred=0;landPaidAt=m}
+    if(c<0){extra[m]=-c;c=0}
+    cash[m]=c;bank[m]=bal;maxBal=Math.max(maxBal,bal);
+  }
+  // si el saldo del terreno no se pudo pagar (el banco nunca quedó en cero), se paga en el último mes
+  if(deferred>0){landEnd[N-1]+=deferred;cash[N-1]-=deferred;landPaidAt=N-1;deferred=0;if(cash[N-1]<0){extra[N-1]+=-cash[N-1];cash[N-1]=0}}
+  const sum=a=>a.reduce((x,y)=>x+y,0);
+  const costLand=sum(land)+sum(landEnd), costs=costLand+sum(cons)+sum(stud)+sum(ind)+sum(fz), interest=sum(intr), igvNet=sum(igvP);
+  const pre=sum(coll)-igvNet-costs-interest, tax=Math.max(0,pre)*p.ir/100, net=pre-tax;
+  // el impuesto a la renta sale de la caja en el último mes (declaración tras la entrega)
+  irP[N-1]=tax; cash[N-1]-=tax; if(cash[N-1]<0){extra[N-1]+=-cash[N-1];cash[N-1]=0}
+  const salesNet=R/1.09;
+  const flowsEq=z();flowsEq[0]=-p.cap;for(let m=0;m<N;m++)flowsEq[m]-=extra[m];flowsEq[N-1]+=cash[N-1];
+  const extraTot=sum(extra), invested=p.cap+extraTot;
+  // exposición sin financiamiento
+  let acc=0,minAcc=0,op=z();for(let m=0;m<N;m++){op[m]=coll[m]-land[m]-landEnd[m]-cons[m]-stud[m]-ind[m]-fz[m]-igvP[m]-irP[m];acc+=op[m];minAcc=Math.min(minAcc,acc)}
+  const netLandAdj=model===1?net-p.land:net;
+  return {collIni,collCuo,collSal,wPct,igvS,cBefore,model,P,C,E,N,R,sales,fz,coll,land,landEnd,cons,stud,ind,intr,draw,repay,extra,cash,bank,op,igvD,igvC,igvP,irP,igvNet,
+    costs,interest,pre,tax,net,netLandAdj,margin:salesNet?net/salesNet:0,maxBal,firstDraw,line,extraTot,invested,
+    exposure:-minAcc,irr:irr(flowsEq),landPaidAt,usedBank:maxBal>0.5};
+}
+function irr(f){
+  if(!f.some(v=>v<0)||!f.some(v=>v>0))return null;
+  const npv=r=>f.reduce((s,v,i)=>s+v/Math.pow(1+r,i),0);
+  let lo=-0.99,hi=5;if(npv(lo)*npv(hi)>0)return null;
+  for(let i=0;i<200;i++){const mid=(lo+hi)/2;if(npv(lo)*npv(mid)<=0)hi=mid;else lo=mid}
+  return Math.pow(1+(lo+hi)/2,12)-1;
+}
+
+/* ---------------- aporte del promotor ---------------- */
+function aporte(p,model){
+  const R=p.units*p.price, alc=model===1?0:p.land*p.alc/100;
+  const base=p.land+alc+p.cons+p.stud+R*p.ind/100;
+  const req=base*p.pctAp/100;
+  // Premisa del modelo 3: el vendedor cobra el saldo después del banco (subordinado) y renuncia a la hipoteca legal,
+  // por eso el terreno cuenta completo como aporte en los tres modelos.
+  const landPart=p.land+alc;
+  const paidNow=model===1?0:model===2?p.land+alc:p.land*Math.min(1,p.ini/100)+alc;   // efectivo por terreno a la firma
+  const cashNeeded=paidNow+p.stud;                              // lo que se paga con dinero propio antes del banco
+  const extraCash=Math.max(0,p.cap-cashNeeded);
+  const third=Math.max(0,cashNeeded-p.cap);                    // parte que tendría que poner un socio
+  const total=landPart+p.stud+extraCash;
+  const gap=Math.max(0,req-total);
+  // dinero propio mínimo para cumplir
+  const capMin=cashNeeded+Math.max(0,req-landPart-p.stud);
+  const owed=model===3?p.land-(paidNow-alc):0;
+  return {base,req,landPart,paidNow,owed,stud:p.stud,extraCash,third,total,gap,ok:gap<1,capMin};
+}
+
+/* ---------------- motor de decisión ---------------- */
+function decide(p){
+  const alc=p.land*p.alc/100;
+  if(p.own===1)return{model:1,why:["El terreno ya es tuyo: no hay que pagarlo.","La obra se financia con la preventa y las ventas durante la construcción.","La línea del banco queda aprobada solo como respaldo."]};
+  const full=p.land+alc, a=Math.min(100,Math.max(0,p.ini)), half=p.land*a/100+alc;
+  if(p.cap>=full){
+    const a2=aporte(p,2), a3=aporte(p,3);
+    if(!a2.ok&&a3.ok)return{model:3,why:[`Tu dinero (${money(p.cap)}) alcanza para comprar al contado, pero así no llegas al aporte del banco (faltan ${money(a2.gap)}).`,`Pagando el ${a} % a la firma y el saldo después del banco, el terreno cuenta completo y el dinero que no gastas queda en la cuenta del proyecto: el aporte sí se cumple.`,`Con este modelo te basta con ${money(a3.capMin)} de dinero propio para cumplir el aporte.`]};
+  }
+  if(p.cap>=full)return{model:2,why:[`Tu dinero propio (${money(p.cap)}) alcanza para pagar el terreno completo y la alcabala (${money(full)}).`,"Pagas al contado: mejor precio y el banco ve el terreno libre de deudas.","El banco entra si la caja no alcanza durante la obra."]};
+  if(p.cap>=half)return{model:3,why:[`Tu dinero alcanza para pagar el ${a} % del terreno y la alcabala a la firma (${money(half)}), pero no para el total (${money(full)}).`,`El ${100-a} % restante se le paga al vendedor al final, después de cancelar el banco.`,"Premisa: el vendedor renuncia a la hipoteca legal y cobra después del banco, así el terreno cuenta completo como aporte."]};
+  return{model:3,short:half-p.cap,why:[`Tu dinero no alcanza para pagar el ${a} % del terreno a la firma (${money(half)}).`,`Con tu dinero podrías pagar hasta el ${Math.max(0,Math.floor((p.cap-p.land*p.alc/100)/p.land*100))} %: negocia ese porcentaje con el propietario.`,`Si mantienes el ${a} %, te faltan ${money(half-p.cap)} para la firma: busca un socio o un préstamo puente.`]};
+}
+
+/* ---------------- formato ---------------- */
+let CUR="US$";
+const nf=new Intl.NumberFormat("es-PE",{maximumFractionDigits:0});
+function money(v){return (v<0?"−":"")+CUR+" "+nf.format(Math.abs(Math.round(v)))}
+function k(v){const a=Math.abs(v);return (v<0?"−":"")+(a>=1e6?(a/1e6).toFixed(2)+" M":a>=1e3?Math.round(a/1e3)+" k":Math.round(a))}
+function pct(v){return v==null?"n.a.":(v*100).toFixed(1).replace(".",",")+" %"}
+function phase(m,s){return m===0?"Inicio":m<=s.P?"Preventa":m<=s.E?"Obra":"Cierre"}
+
+/* ---------------- render ---------------- */
+function render(){
+  const p=read();state={...p};CUR=p.cur;
+  // si faltan datos básicos (por ejemplo, después de «Vaciar datos») se muestra un aviso en lugar del flujo
+  const _miss=[["units","N.º de unidades"],["price","Precio promedio por unidad"],["cons","Costo total de construcción"],["pre","Meses de preventa"],["obra","Meses de construcción"]].filter(([f])=>!(p[f]>0)).map(x=>x[1]);
+  document.querySelectorAll("#resultado > :not(#verdict)").forEach(e=>e.hidden=_miss.length>0);
+  if(_miss.length){
+    lastSim=null;
+    $("verdict").innerHTML=`<div class="eyebrow">Datos vacíos</div><h3>Completa los datos para ver tu flujo de caja</h3><ul>${_miss.map(x=>`<li>Falta: ${x}</li>`).join("")}</ul><p class="note" style="color:inherit;opacity:.85">Puedes escribir tus propios datos o pulsar «Cargar ejemplo».</p>`;
+    $("mbarT").textContent="Completa los datos";$("mbarS").textContent=`Faltan ${_miss.length} dato${_miss.length>1?"s":""} básicos`;
+    return;
+  }
+  const tot=p.pi+p.pc;$("psum").textContent=tot>100?"La inicial y las cuotas suman más de 100 %.":`Saldo con crédito hipotecario ${p.hip==="esc"?"a la firma de la escritura":"a la entrega"}: ${100-tot} %`;
+  $("psum").classList.toggle("bad",tot>100);
+  MODELS[3].name=`${p.ini} % ahora · ${100-p.ini} % al final`;
+  $("iniBox").hidden=p.own===1;
+  $("iniHint").textContent=`El saldo (${100-p.ini} %) se paga al final. Con tu dinero alcanza para pagar hasta el ${Math.max(0,Math.min(100,Math.floor((p.cap-p.land*p.alc/100)/(p.land||1)*100)))} % a la firma.`;
+  const d=decide(p);
+  if(view===null||d.model!==lastRec||(view===1&&p.own!==1)||(view!==1&&p.own===1))view=d.model;
+  lastRec=d.model;
+  const s=simulate(p,view), sr=view===d.model?s:simulate(p,d.model);
+  // veredicto
+  // las alertas siguen al modelo que estás viendo (el que elegiste en las pestañas)
+  const alc0=p.land*p.alc/100, firma=view===2?p.land+alc0:view===3?p.land*Math.min(1,p.ini/100)+alc0:0, shortV=Math.max(0,firma-p.cap);
+  const bankMsg=s.usedBank?`Usarás el banco desde el mes ${s.firstDraw}: hasta ${money(s.maxBal)} de una línea de ${money(s.line)}.`:"No necesitas usar la línea del banco: la caja alcanza todo el proyecto.";
+  let alert="";
+  if(view!==d.model)alert+=`<div class="alert ok" style="background:rgba(255,255,255,.12);color:inherit">Estás viendo el modelo ${view} · ${MODELS[view].name}. Los avisos de abajo son de este modelo.</div>`;
+  if(shortV>1)alert+=`<div class="alert">Faltan ${money(shortV)} para el pago del terreno a la firma; en todo el proyecto faltan ${money(s.extraTot)} (socio o préstamo puente).</div>`;
+  else if(s.extraTot>1)alert+=`<div class="alert">Aun con el banco, la caja queda en rojo: necesitas ${money(s.extraTot)} adicionales a tu dinero (socio o préstamo puente).</div>`;
+  else alert+=`<div class="alert ok">${bankMsg}</div>`;
+  const ap=aporte(p,view);
+  alert+=ap.ok?`<div class="alert ok">Aporte para el banco: ${money(ap.total)}, cumple el mínimo de ${p.pctAp} % (${money(ap.req)}). Con este modelo te basta con ${money(ap.capMin)} de dinero propio.</div>`
+    :`<div class="alert">Aporte para el banco: ${money(ap.total)} de ${money(ap.req)} (${p.pctAp} % del costo total). Faltan ${money(ap.gap)} de aporte.</div>`;
+  $("verdict").innerHTML=`<div class="eyebrow">El modelo que se ajusta a tus datos</div><h3>Modelo ${d.model} · ${MODELS[d.model].name}</h3><ul>${d.why.map(x=>`<li>${x}</li>`).join("")}</ul>${alert}`;
+  // tabs
+  $("tabs").innerHTML=[1,2,3].map(m=>{const dis=(m===1)!==(p.own===1);return `<button type="button" role="tab" data-m="${m}" aria-selected="${m===view}" ${dis?"disabled":""}><span class="tag">${m===d.model?"Recomendado":"Modelo "+m}</span>${MODELS[m].name}<small>${dis?(m===1?"Solo si el terreno es tuyo":"Solo si debes comprar el terreno"):MODELS[m].short}</small></button>`}).join("");
+  $("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{view=+b.dataset.m;render()});
+  // kpis
+  const kp=[
+    ["Ventas totales",money(s.R),`${p.units} unidades`],
+    ["Utilidad neta",money(s.net),`Margen ${pct(s.margin)} sobre ventas sin IGV · después de IR`],
+    ["¿Usa el banco?",s.usedBank?`<span class="pill no">Sí, mes ${s.firstDraw}</span>`:`<span class="pill ok">No</span>`,s.usedBank?`Deuda máxima ${money(s.maxBal)}`:`Línea de respaldo ${money(s.line)}`],
+    ["Dinero propio necesario",money(s.invested),s.extraTot>1?`Incluye ${money(s.extraTot)} que faltan`:`Tienes ${money(p.cap)}`],
+    ["IGV neto pagado a SUNAT",money(s.igvNet),`Impuesto a la renta ${money(s.tax)}`],
+    (()=>{const a=aporte(p,view);return ["Aporte para el banco",a.ok?`<span class="pill ok">Cumple</span>`:`<span class="pill no">Faltan ${money(a.gap)}</span>`,`${money(a.total)} de ${money(a.req)} (${p.pctAp} %)`]})(),
+    ["TIR anual del accionista",pct(s.irr),"Sobre el dinero propio"],
+    view===1?["Utilidad restando el terreno",money(s.netLandAdj),"Mide si conviene más vender el terreno"]:
+     view===3?["Saldo del terreno al vendedor",money(p.land*(1-Math.min(1,p.ini/100))),s.landPaidAt!=null?`Se paga en el mes ${s.landPaidAt}`:"Pendiente"]:
+     ["Costo del terreno",money(p.land*(1+p.alc/100)),"Incluye alcabala"]
+  ];
+  $("kpis").innerHTML=kp.map(x=>`<div class="kpi"><div class="l">${x[0]}</div><div class="v">${x[1]}</div><div class="s">${x[2]}</div></div>`).join("");
+  chart(s);table(s);compare(p,d);aporteTable(p,view);lastSim=s;lastP={...p};
+  $("mbarT").textContent=`Modelo ${d.model} · ${MODELS[d.model].name}`;
+  $("mbarS").textContent=`Utilidad ${money(sr.net)} · ${sr.extraTot>1?"faltan "+money(sr.extraTot):sr.usedBank?"banco desde mes "+sr.firstDraw:"sin banco"}`;
+}
+
+function chart(s){
+  const W=800,H=260,L=56,Rm=10,T=14,B=34,n=s.N;
+  const vals=s.op, maxV=Math.max(1,...vals.map(Math.abs),...s.bank);
+  const rawMax=Math.max(...vals,...s.bank,0), rawMin=Math.min(...vals,0);
+  const raw=(rawMax-rawMin)||1, mag=Math.pow(10,Math.floor(Math.log10(raw/5))), st=[1,2,2.5,5,10].map(x=>x*mag).find(x=>raw/x<=6);
+  const yMax=Math.ceil(rawMax/st)*st, yMin=Math.floor(rawMin/st)*st;
+  const span=(yMax-yMin)||1, y=v=>T+(yMax-v)/span*(H-T-B);
+  const bw=(W-L-Rm)/n, x=i=>L+i*bw;
+  const css=getComputedStyle(document.documentElement), col=v=>css.getPropertyValue(v).trim();
+  let g="";
+  for(let v=yMin;v<=yMax+st/2;v+=st){g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(v)}" y2="${y(v)}" stroke="${col("--line")}" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="${col("--muted")}" font-family="IBM Plex Mono,monospace">${k(v)}</text>`}
+  // fases
+  const bands=[[1,s.P,"--accent-soft","Preventa"],[s.P+1,s.E,null,"Obra"]];
+  bands.forEach(b=>{if(b[2])g+=`<rect x="${x(b[0])}" y="${T}" width="${(b[1]-b[0]+1)*bw}" height="${H-T-B}" fill="${col(b[2])}" opacity=".6"/>`;g+=`<text x="${x(b[0])+4}" y="${T+11}" font-size="10" fill="${col("--muted")}">${b[3]}</text>`});
+  vals.forEach((v,i)=>{const y0=y(0),y1=y(v);g+=`<rect x="${x(i)+bw*.15}" y="${Math.min(y0,y1)}" width="${bw*.7}" height="${Math.max(1,Math.abs(y1-y0))}" fill="${col(v>=0?"--good":"--bad")}" rx="1.5"><title>Mes ${i}: ${money(v)}</title></rect>`});
+  if(s.usedBank){let d="";s.bank.forEach((v,i)=>{d+=(i?"L":"M")+(x(i)+bw/2).toFixed(1)+","+y(v).toFixed(1)});g+=`<path d="${d}" fill="none" stroke="${col("--bank")}" stroke-width="2.5"/>`}
+  g+=`<line x1="${L}" x2="${W-Rm}" y1="${y(0)}" y2="${y(0)}" stroke="${col("--ink")}" stroke-width="1"/>`;
+  for(let i=0;i<n;i+=Math.max(1,Math.ceil(n/12)))g+=`<text x="${x(i)+bw/2}" y="${H-B+16}" text-anchor="middle" font-size="10" fill="${col("--muted")}">${i}</text>`;
+  g+=`<text x="${(L+W)/2}" y="${H-4}" text-anchor="middle" font-size="10" fill="${col("--muted")}">Mes</text>`;
+  $("chart").innerHTML=g;
+}
+
+function aporteTable(p,model){
+  const a=aporte(p,model);
+  const rows=[
+    ["Costo total del proyecto",money(a.base),"Terreno, alcabala, construcción, expediente y gerencia/ventas."],
+    [`Aporte mínimo exigido (${p.pctAp} %)`,money(a.req),""],
+    [model===1?"Terreno aportado (valor)":"Terreno (valor completo + alcabala)",money(a.landPart),model===3?`Pagas el ${p.ini} % a la firma; el saldo (${money(a.owed)}) se le paga al vendedor después del banco.`:model===2?"Pagado al contado.":"Ya es tuyo."],
+    ["Expediente técnico (proyecto y licencias)",money(a.stud),"Pagado antes del crédito."],
+    ["Efectivo adicional en la cuenta del proyecto",money(a.extraCash),"Tu dinero que sobra después de terreno y expediente."],
+    ["Aporte total",money(a.total),a.third>1?`Incluye ${money(a.third)} que tendría que poner un socio.`:"Todo con tu dinero."],
+    [a.ok?"Cumple":"Falta de aporte",a.ok?"✓":money(a.gap),a.ok?"":"Súbelo con más dinero propio en la cuenta del proyecto o con un socio que entre como accionista."],
+    ["Dinero propio mínimo para cumplir",money(a.capMin),"Con el resto de supuestos igual."]
+  ];
+  if(model===3)rows.push(["Saldo del terreno subordinado al banco",money(a.owed),"El vendedor renuncia a la hipoteca legal y cobra después del banco; su garantía va por otra vía (por ejemplo, un fideicomiso)."]);
+  $("aporte").innerHTML=`<tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:left;font-family:var(--f-body);color:var(--muted);white-space:normal;min-width:220px">${r[2]}</td></tr>`).join("")}</tbody>`;
+}
+/* ================= Exportar a Excel (.xlsx sin librerías) ================= */
+let lastSim=null,lastP=null;
+const XL=(()=>{
+  const enc=new TextEncoder();
+  const crcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+  const crc=b=>{let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=crcT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0};
+  function zip(files){ // files: [{name,data:string}]
+    const parts=[],central=[];let off=0;
+    for(const f of files){
+      const name=enc.encode(f.name),data=enc.encode(f.data),c=crc(data);
+      const h=new DataView(new ArrayBuffer(30));
+      h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);
+      h.setUint16(10,0,true);h.setUint16(12,0x21,true);h.setUint32(14,c,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);
+      h.setUint16(26,name.length,true);h.setUint16(28,0,true);
+      parts.push(new Uint8Array(h.buffer),name,data);
+      const cd=new DataView(new ArrayBuffer(46));
+      cd.setUint32(0,0x02014b50,true);cd.setUint16(4,20,true);cd.setUint16(6,20,true);cd.setUint16(8,0x0800,true);cd.setUint16(10,0,true);
+      cd.setUint16(12,0,true);cd.setUint16(14,0x21,true);cd.setUint32(16,c,true);cd.setUint32(20,data.length,true);cd.setUint32(24,data.length,true);
+      cd.setUint16(28,name.length,true);cd.setUint32(42,off,true);
+      central.push(new Uint8Array(cd.buffer),name);
+      off+=30+name.length+data.length;
+    }
+    const cdSize=central.reduce((a,b)=>a+b.length,0);
+    const end=new DataView(new ArrayBuffer(22));
+    end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,cdSize,true);end.setUint32(16,off,true);
+    return new Blob([...parts,...central,new Uint8Array(end.buffer)],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  }
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const col=i=>{let s="";i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s};
+  // estilos: 0 normal, 1 negrita, 2 número, 3 número negrita, 4 porcentaje, 5 encabezado, 6 texto con ajuste, 7 título
+  const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0;(#,##0);&quot;-&quot;"/><numFmt numFmtId="165" formatCode="0.0%"/></numFmts>
+<fonts count="4"><font><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><name val="Arial"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Arial"/></font><font><b/><sz val="14"/><color rgb="FF1B3550"/><name val="Arial"/></font></fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1B3550"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="8">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+<xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1" applyFont="1"/>
+<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+<xf numFmtId="0" fontId="2" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  // celda: número, texto o {v,s}
+  function sheet(rows,widths,freeze){
+    let x=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">`;
+    if(freeze){const [r,c]=freeze;x+=`<sheetViews><sheetView workbookViewId="0"><pane xSplit="${c}" ySplit="${r}" topLeftCell="${col(c)}${r+1}" activePane="bottomRight" state="frozen"/></sheetView></sheetViews>`}
+    if(widths)x+=`<cols>${widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join("")}</cols>`;
+    x+="<sheetData>";
+    rows.forEach((row,ri)=>{x+=`<row r="${ri+1}">`;(row||[]).forEach((cell,ci)=>{
+      if(cell===null||cell===undefined||cell==="")return;
+      const o=typeof cell==="object"?cell:{v:cell};const ref=col(ci)+(ri+1);
+      const st=o.s!=null?o.s:(typeof o.v==="number"?2:0);
+      if(typeof o.v==="number")x+=`<c r="${ref}" s="${st}"><v>${Math.round(o.v*100)/100}</v></c>`;
+      else x+=`<c r="${ref}" s="${st}" t="inlineStr"><is><t xml:space="preserve">${esc(o.v)}</t></is></c>`;
+    });x+="</row>"});
+    return x+"</sheetData></worksheet>";
+  }
+  function book(sheets){ // [{name,xml}]
+    const files=[
+      {name:"[Content_Types].xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("")}</Types>`},
+      {name:"_rels/.rels",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+      {name:"xl/workbook.xml",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s,i)=>`<sheet name="${esc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join("")}</sheets></workbook>`},
+      {name:"xl/_rels/workbook.xml.rels",data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join("")}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+      {name:"xl/styles.xml",data:styles},
+      ...sheets.map((s,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:s.xml}))];
+    return zip(files);
+  }
+  return {sheet,book};
+})();
+
+function exportXlsx(){
+  const s=lastSim,p=lastP;
+  if(!s||!p){toast("Completa los datos antes de exportar");return}
+  const N=s.N,P=s.P,E=s.E,C=s.C,months=[...Array(N).keys()],S=a=>a.reduce((x,y)=>x+y,0);
+  const n=v=>nf.format(Math.round(v)), pc=v=>(Math.round(v*1000)/10).toString().replace(".",",")+" %";
+  const fase=m=>m===0?"Inicio":m<=P?"Preventa":m<=E?"Obra":"Cierre";
+  const R=s.R, sp=Math.min(1,p.sp/100), pi=Math.min(1,p.pi/100), pcu=Math.min(1-pi,p.pc/100), ps=Math.max(0,1-pi-pcu);
+  const mname=`Modelo ${s.model} · ${MODELS[s.model].name}`;
+  const rTEA=Math.pow(1+p.tea/100,1/12)-1, alc=p.land*p.alc/100;
+  // ---- hoja 1: flujo ----
+  const how={
+    "Ventas firmadas":`Ventas totales (${n(R)}) repartidas: ${pc(sp)} en ${P} meses de preventa y ${pc(1-sp)} en ${C} meses de obra, en partes iguales.`,
+    "Cobranzas":`Lo que pagan los compradores: cuota inicial ${pc(pi)} al firmar, cuotas ${pc(pcu)} durante la obra y saldo hipotecario ${pc(ps)} ${p.hip==="esc"?"a la firma de la escritura":"a la entrega"}.`,
+    "   Cuotas iniciales":`${pc(pi)} de las ventas firmadas en el mismo mes.`,
+    "   Cuotas durante la obra":`${pc(pcu)} de cada venta, repartido en partes iguales desde el mes siguiente a la venta hasta la entrega (mes ${E}).`,
+    "   Saldo hipotecario":p.hip==="esc"?`${pc(ps)} de cada venta: el banco del comprador desembolsa a la escritura, ${p.dias} días después de la minuta.`:`${pc(ps)} de todas las ventas: mitad en el mes ${E+1} y mitad en el mes ${E+2}, después de la entrega.`,
+    "Terreno":s.model===1?"Terreno propio: no se paga.":s.model===2?`Compra al contado en el mes 0: ${n(p.land)} + alcabala ${p.alc} % (${n(alc)}).`:`${p.ini} % del precio + alcabala en el mes 0; el saldo (${100-p.ini} %) se paga cuando el banco queda en cero.`,
+    "Construcción":`Costo de obra (${n(p.cons)}) repartido en ${C} meses según una curva S: poco al inicio, más a mitad de obra, menos al final.`,
+    "   % de avance de obra":"Porcentaje del costo de obra que se ejecuta en el mes.",
+    "Proyecto y licencias":`${n(p.stud)} repartido en partes iguales del mes 0 al ${P} (antes de iniciar obra).`,
+    "Gerencia, publicidad y comisiones":`${p.ind} % de las ventas (${n(R*p.ind/100)}) repartido en partes iguales del mes 0 al ${E+2}.`,
+    "Garantía por desembolso anticipado":`${p.fz} % anual sobre el saldo hipotecario adelantado, por los meses que faltan hasta la entrega.`,
+    "IGV pagado a SUNAT":"IGV de ventas (9/109 de lo cobrado) menos crédito fiscal (18/118 de obra, proyecto y gerencia), descontando el saldo a favor acumulado.",
+    "Impuesto a la renta":`${p.ir} % de la utilidad antes de impuestos (${n(s.pre)}), pagado en el último mes.`,
+    "Flujo operativo":"Cobranzas menos todos los pagos del mes, antes de banco y aportes.",
+    "Desembolso del banco":`Si la caja queda negativa entre los meses ${P+1} y ${E}, el banco presta lo necesario hasta su línea (${n(s.line)} = ${p.pb} % de la obra).`,
+    "Pago al banco":"Después de la entrega, todo excedente de caja paga la deuda con el banco.",
+    "Intereses":`Deuda del mes anterior × ${pc(rTEA)} mensual (TEA ${p.tea} %).`,
+    "Aporte adicional que falta":"Dinero que falta cuando la caja queda negativa y el banco no la cubre (socio o préstamo puente).",
+    "Deuda con el banco":"Saldo de la deuda al cierre del mes.",
+    "Caja al cierre del mes":`Caja inicial (${n(p.cap)} de dinero propio) más todos los movimientos acumulados.`
+  };
+  const rows=[
+    ["Ventas firmadas",s.sales],["Cobranzas",s.coll,1],["   Cuotas iniciales",s.collIni],["   Cuotas durante la obra",s.collCuo],["   Saldo hipotecario",s.collSal],
+    ["Terreno",s.land.map((v,i)=>-(v+s.landEnd[i]))],["Construcción",s.cons.map(v=>-v)],["   % de avance de obra",s.wPct,0,"pct"],
+    ["Proyecto y licencias",s.stud.map(v=>-v)],["Gerencia, publicidad y comisiones",s.ind.map(v=>-v)],["Garantía por desembolso anticipado",s.fz.map(v=>-v)],
+    ["IGV pagado a SUNAT",s.igvP.map(v=>-v)],["Impuesto a la renta",s.irP.map(v=>-v)],["Flujo operativo",s.op,1],
+    ["Desembolso del banco",s.draw],["Pago al banco",s.repay.map(v=>-v)],["Intereses",s.intr.map(v=>-v)],["Aporte adicional que falta",s.extra],
+    ["Deuda con el banco",s.bank,0,"bal"],["Caja al cierre del mes",s.cash,1,"bal"]];
+  const r1=[[{v:`Flujo de caja · ${p.pname||"Proyecto"}`,s:7}],[`${mname} · Cifras en ${p.cur} con IGV · Generado ${new Date().toLocaleDateString("es-PE")}`],[],
+    [{v:"Concepto",s:5},{v:"Total",s:5},...months.map(m=>({v:`Mes ${m}`,s:5})),{v:"Cómo se calcula",s:5}],
+    [{v:"Fase",s:1},"",...months.map(m=>({v:fase(m),s:1}))]];
+  rows.forEach(([lbl,arr,bold,kind])=>{
+    const tot=kind?(kind==="pct"?S(arr):""):S(arr);
+    r1.push([{v:lbl,s:bold?1:0},tot===""?"":{v:tot,s:kind==="pct"?4:bold?3:2},...arr.map(v=>({v,s:kind==="pct"?4:bold?3:2})),{v:how[lbl]||"",s:0}]);
+  });
+  r1.push([],[{v:"La hoja «Explicación por mes» detalla de dónde sale cada cifra. La hoja «Supuestos» lista todos los datos usados.",s:0}]);
+  // ---- hoja 2: supuestos ----
+  const sup=[[{v:"Supuestos del flujo de caja",s:7}],[],[{v:"Dato",s:5},{v:"Valor",s:5},{v:"Para qué se usa",s:5}]];
+  const add=(a,b,c)=>sup.push([a,b,{v:c,s:6}]);
+  add("Modelo",mname,"Define cómo y cuándo se paga el terreno.");
+  add("Moneda",p.cur,"");
+  add("¿El terreno es tuyo?",p.own?"Sí":"No","Si es tuyo no se paga (modelo 1).");
+  add("Valor o precio del terreno",p.land,"Pago del terreno y aporte para el banco.");
+  if(s.model===3)add("% del terreno pagado a la firma",p.ini/100,"El resto se paga cuando el banco queda en cero.");
+  add("Alcabala y gastos de compra",p.alc/100,"Se paga en el mes 0 junto con el terreno.");
+  add("Dinero propio",p.cap,"Caja inicial del mes 0.");
+  add("N.º de unidades",p.units,"");add("Precio promedio por unidad (con IGV)",p.price,"");
+  add("Ventas totales",R,"Unidades × precio promedio.");
+  add("Costo total de construcción",p.cons,"Se reparte con la curva S de obra.");
+  add("Proyecto, licencias y estudios",p.stud,"Se paga antes de la obra.");
+  add("Gerencia, publicidad y comisiones (% de ventas)",p.ind/100,"Se reparte en partes iguales hasta el cierre.");
+  add("Meses de preventa",P,`Meses 1 a ${P}.`);add("Meses de construcción",C,`Meses ${P+1} a ${E}; la entrega es el mes ${E}.`);
+  add("% vendido en la preventa",sp,"El resto se vende en partes iguales durante la obra.");
+  add("Cuota inicial",pi,"Se cobra en el mes de la venta.");add("Cuotas durante la obra",pcu,"Se cobran en partes iguales hasta la entrega.");
+  add("Saldo con crédito hipotecario",ps,p.hip==="esc"?"Se cobra a la firma de la escritura.":"Se cobra después de la entrega.");
+  add("Desembolso del banco del comprador",p.hip==="esc"?"A la firma de la escritura":"Al final (entrega)","");
+  if(p.hip==="esc"){add("Días entre minuta y escritura",p.dias,"Parte entra en el mes de la venta y parte el siguiente.");add("Costo de la garantía (% anual)",p.fz/100,"");}
+  add("% de la obra que financia el banco",p.pb/100,`Línea máxima: ${n(s.line)}.`);
+  add("Tasa del banco (TEA)",p.tea/100,`Tasa mensual: ${pc(rTEA)}.`);
+  add("Aporte mínimo que exige el banco",p.pctAp/100,"Terreno, expediente y efectivo frente al costo total.");
+  add("Impuesto a la renta",p.ir/100,"Sobre la utilidad antes de impuestos.");
+  add("IGV en la venta","9 % efectivo","Primera venta: el 50 % del precio corresponde al terreno, que no paga IGV.");
+  add("IGV en las compras","18 %","Se usa como crédito fiscal.");
+  sup.forEach(r=>{if(r[1]!=null&&typeof r[1]==="number"&&r[1]<=1&&r[1]>0&&!/N\.º|Meses|Días/.test(r[0]))r[1]={v:r[1],s:4}});
+  // ---- hoja 3: explicación por mes ----
+  const ex=[[{v:"Explicación por mes",s:7}],[],[{v:"Mes",s:5},{v:"Fase",s:5},{v:"Concepto",s:5},{v:p.cur,s:5},{v:"De dónde sale",s:5}]];
+  const line=(m,c,v,t)=>{if(Math.abs(v)>=0.5)ex.push([m,fase(m),c,{v,s:2},{v:t,s:6}])};
+  for(const m of months){
+    line(m,"Ventas firmadas",s.sales[m],m<=P?`${n(R)} × ${pc(sp)} vendido en preventa ÷ ${P} meses de preventa.`:`${n(R)} × ${pc(1-sp)} vendido durante la obra ÷ ${C} meses de obra.`);
+    if(Math.abs(s.coll[m])>=0.5){
+      const parts=[];
+      if(s.collIni[m]>=0.5)parts.push(`cuotas iniciales ${n(s.collIni[m])} (${pc(pi)} de lo vendido este mes)`);
+      if(s.collCuo[m]>=0.5)parts.push(`cuotas en obra ${n(s.collCuo[m])} (${pc(pcu)} de cada venta anterior, repartido hasta la entrega)`);
+      if(s.collSal[m]>=0.5)parts.push(`saldo hipotecario ${n(s.collSal[m])} (${p.hip==="esc"?`${pc(ps)} de las ventas que firman escritura este mes`:`mitad del ${pc(ps)} de todas las ventas`})`);
+      line(m,"Cobranzas",s.coll[m],"Suma de "+parts.join(" + ")+".");
+    }
+    if(s.land[m]>=0.5)line(m,"Terreno",-s.land[m],s.model===2?`Precio ${n(p.land)} + alcabala ${n(alc)}.`:`${p.ini} % de ${n(p.land)} + alcabala ${n(alc)}.`);
+    if(s.landEnd[m]>=0.5)line(m,"Terreno",-s.landEnd[m],`Saldo del ${100-p.ini} % al vendedor: se paga cuando la deuda con el banco ya es cero.`);
+    if(s.cons[m]>=0.5)line(m,"Construcción",-s.cons[m],`${n(p.cons)} × ${pc(s.wPct[m])}: mes ${m-P} de ${C} de obra según la curva S.`);
+    line(m,"Proyecto y licencias",-s.stud[m],`${n(p.stud)} ÷ ${P+1} meses (del 0 al ${P}).`);
+    line(m,"Gerencia, publicidad y comisiones",-s.ind[m],`${p.ind} % × ${n(R)} = ${n(R*p.ind/100)} ÷ ${E+3} meses (del 0 al ${E+2}).`);
+    line(m,"Garantía por desembolso anticipado",-s.fz[m],`Saldo hipotecario de las ventas del mes × ${p.fz} % anual × ${Math.max(0,E+1-m)} meses hasta la entrega ÷ 12.`);
+    line(m,"IGV pagado a SUNAT",-s.igvP[m],`IGV de ventas ${n(s.igvD[m])} − crédito fiscal ${n(s.igvC[m])} − saldo a favor anterior ${n(m?s.igvS[m-1]:0)}.`);
+    line(m,"Impuesto a la renta",-s.irP[m],`${p.ir} % × utilidad antes de impuestos ${n(s.pre)}.`);
+    line(m,"Desembolso del banco",s.draw[m],`La caja del mes quedaba en ${n(s.cBefore[m])}; el banco presta lo necesario para dejarla en cero.`);
+    line(m,"Pago al banco",-s.repay[m],"Excedente de caja después de la entrega aplicado a la deuda.");
+    line(m,"Intereses",-s.intr[m],`Deuda del mes anterior ${n(m?s.bank[m-1]:0)} × ${pc(rTEA)} mensual.`);
+    line(m,"Aporte adicional que falta",s.extra[m],"La caja quedaba negativa y el banco no podía cubrirla en este mes.");
+  }
+  const blob=XL.book([
+    {name:"Flujo de caja",xml:XL.sheet(r1,[34,13,...months.map(()=>11),90],[5,1])},
+    {name:"Supuestos",xml:XL.sheet(sup,[42,22,70],[3,0])},
+    {name:"Explicación por mes",xml:XL.sheet(ex,[7,11,34,14,100],[3,0])}]);
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download=`Flujo_de_caja_${(p.pname||"proyecto").replace(/[^\wáéíóúñÁÉÍÓÚÑ-]+/g,"_")}.xlsx`;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+  toast("Excel descargado");
+}
+
+let lastTSV="";
+function table(s){
+  const rows=[
+    ["Ventas firmadas",s.sales],["Cobranzas",s.coll],["Terreno",s.land.map((v,i)=>-(v+s.landEnd[i]))],["Construcción",s.cons.map(v=>-v)],
+    ["Proyecto y licencias",s.stud.map(v=>-v)],["Gerencia, publicidad y comisiones",s.ind.map(v=>-v)],["Garantía por desembolso anticipado",s.fz.map(v=>-v)],["IGV pagado a SUNAT",s.igvP.map(v=>-v)],["Impuesto a la renta",s.irP.map(v=>-v)],
+    ["Flujo operativo",s.op,1],["Desembolso del banco",s.draw],["Pago al banco",s.repay.map(v=>-v)],["Intereses",s.intr.map(v=>-v)],
+    ["Aporte adicional que falta",s.extra],["Deuda con el banco",s.bank],["Caja al cierre del mes",s.cash,1]];
+  const months=[...Array(s.N).keys()];
+  const cls=m=>m===0?"":m<=s.P?"ph-p":m<=s.E?"ph-c":"ph-f";
+  let h=`<thead><tr><th>Concepto</th><th>Total</th>${months.map(m=>`<th class="${cls(m)}">${m}<br><small>${phase(m,s)}</small></th>`).join("")}</tr></thead><tbody>`;
+  const noTotal={"Deuda con el banco":1,"Caja al cierre del mes":1};
+  rows.forEach(r=>{const t=r[1].reduce((a,b)=>a+b,0);h+=`<tr class="${r[2]?"total":""}"><td>${r[0]}</td><td>${noTotal[r[0]]?"":k(t)}</td>${r[1].map(v=>`<td class="${v<-0.5?"neg":""}">${Math.abs(v)<0.5?"–":k(v)}</td>`).join("")}</tr>`});
+  $("table").innerHTML=h+"</tbody>";
+  lastTSV=["Concepto\t"+months.join("\t"),...rows.map(r=>r[0]+"\t"+r[1].map(v=>Math.round(v)).join("\t"))].join("\n");
+}
+
+function compare(p,d){
+  const ms=[1,2,3].filter(m=>(m===1)===(p.own===1));
+  const sims=ms.map(m=>[m,simulate(p,m)]);
+  const rows=[["Utilidad neta",s=>money(s.net)],["Dinero propio necesario",s=>money(s.invested)],["¿Usa el banco?",s=>s.usedBank?"Sí, desde el mes "+s.firstDraw:"No"],
+    ["Deuda máxima con el banco",s=>money(s.maxBal)],["Intereses",s=>money(s.interest)],["IGV neto",s=>money(s.igvNet)],["Impuesto a la renta",s=>money(s.tax)],["Falta conseguir (caja)",s=>money(s.extraTot)],["Aporte para el banco",s=>{const a=aporte(state,s.model);return a.ok?"Cumple":"Faltan "+money(a.gap)}],["TIR anual",s=>pct(s.irr)]];
+  let h=`<thead><tr><th>Indicador</th>${sims.map(([m])=>`<th>Modelo ${m}${m===d.model?" ★":""}</th>`).join("")}</tr></thead><tbody>`;
+  rows.forEach(r=>{h+=`<tr><td>${r[0]}</td>${sims.map(([,s])=>`<td>${r[1](s)}</td>`).join("")}</tr>`});
+  $("compare").innerHTML=h+"</tbody>";
+}
+
+/* ---------------- guardar ---------------- */
+function listSaved(){
+  const all=store("fi18_projects")||{};
+  const names=Object.keys(all);
+  $("saved").innerHTML=names.length?names.map(n=>`<div class="item"><span>${n.replace(/</g,"&lt;")}</span><div><button type="button" data-load="${encodeURIComponent(n)}">Abrir</button><button type="button" data-del="${encodeURIComponent(n)}">Borrar</button></div></div>`).join(""):`<p class="note">Aún no tienes proyectos guardados. Escribe un nombre y pulsa «Guardar proyecto».</p>`;
+  $("saved").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{const s=(store("fi18_projects")||{})[decodeURIComponent(b.dataset.load)];if(s){state=s;view=null;fill(s);render();toast("Proyecto abierto")}});
+  $("saved").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(b.dataset.armed){const all=store("fi18_projects")||{};delete all[decodeURIComponent(b.dataset.del)];store("fi18_projects",all);listSaved();toast("Proyecto borrado")}
+    else{b.dataset.armed=1;b.textContent="¿Seguro?";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Borrar"}},3000)}});
+}
+function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
+
+$("btnSave").onclick=()=>{const p=read();const name=(p.pname||"").trim()||"Proyecto sin nombre";const all=store("fi18_projects")||{};all[name]=p;store("fi18_projects",all);listSaved();toast("Guardado: "+name)};
+$("btnClear").onclick=()=>{const b=$("btnClear");
+  if(!b.dataset.armed){b.dataset.armed=1;b.textContent="¿Vaciar todo? Toca otra vez";setTimeout(()=>{delete b.dataset.armed;b.textContent="Vaciar datos"},3000);return}
+  delete b.dataset.armed;b.textContent="Vaciar datos";
+  FIELDS.forEach(f=>{const el=$(f);if(el&&el.tagName==="INPUT")el.value=""});
+  view=null;render();toast("Datos vaciados: escribe los tuyos")};
+$("btnExample").onclick=()=>{state={...EXAMPLE};view=null;fill(state);render();toast("Ejemplo cargado")};
+$("btnXlsx").onclick=exportXlsx;
+$("btnCopy").onclick=()=>{const done=()=>toast("Tabla copiada: pégala en Excel");
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lastTSV).then(done,fallback);else fallback();
+  function fallback(){const ta=document.createElement("textarea");ta.value=lastTSV;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){toast("Selecciona la tabla y copia con Ctrl+C")}ta.remove()}};
+$("ownYes").onclick=()=>{setOwn(1);view=null;render()};
+$("ownNo").onclick=()=>{setOwn(0);view=null;render()};
+$("hipEnd").onclick=()=>{setHip("end");render()};
+$("hipEsc").onclick=()=>{setHip("esc");render()};
+$("form").addEventListener("input",()=>{render();store("fi18_draft",read())});
+$("form").addEventListener("submit",e=>e.preventDefault());
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",render);
+
+// la versión 1.7 siempre se abre con los datos vacíos
+state={...EXAMPLE};fill(state);
+FIELDS.forEach(f=>{const el=$(f);if(el&&el.tagName==="INPUT")el.value=""});
+render();listSaved();
+})();
+</script>
+
+</body></html>
